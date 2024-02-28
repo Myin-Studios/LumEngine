@@ -1,0 +1,6 @@
+.vs/
+x64/
+*.qtvscr
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
