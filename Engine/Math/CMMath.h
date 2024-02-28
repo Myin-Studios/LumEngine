@@ -363,7 +363,7 @@ public:
 private:
 	double m_X = 0, m_Y = 0, m_Z = 0;
 
-	float length() const {
+	double length() const {
 		return std::sqrt(x * x + y * y + z * z);
 	}
 };

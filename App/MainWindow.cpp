@@ -6,8 +6,6 @@ MainWin* pMainScene = nullptr;
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    HWND child;
-
     switch (msg)
     {
     case WM_CREATE:
