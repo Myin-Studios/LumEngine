@@ -1,5 +1,7 @@
 .vs/
 x64/
+cmake-build-debug/
+.idea/
 *.qtvscr
 *.vcxproj
 *.vcxproj.filters

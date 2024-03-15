@@ -29,10 +29,19 @@ public:
 		return CMQuat(_x, _y, _z, _w);
 	}
 
-	CMQuat& operator*(CMQuat q)
+	CMQuat operator*(CMQuat q) const
 	{
-		CMQuat temp(m_X * q.m_X, m_Y * q.m_Y, m_Z * q.m_Z, m_W * q.m_W);
-		return temp;
+		double _x = 0;
+		double _y = 0;
+		double _z = 0;
+		double _w = 0;
+
+		_w = (this->m_W * q.m_W - this->m_X * q.m_X - this->m_Y * q.m_Y - this->m_Z * q.m_Z);
+		_x = (this->m_W * q.m_X + q.m_W * this->m_X + this->m_Y * q.m_Z - q.m_Y * this->m_Z);
+		_y = (this->m_W * q.m_Y + q.m_W * this->m_Y + this->m_Z * q.m_X - q.m_Z * this->m_X);
+		_z = (this->m_W * q.m_Z + q.m_W * this->m_Z + this->m_X * q.m_Y - q.m_X * this->m_Y);
+
+		return CMQuat(_x, _y, _z, _w);
 	}
 	CMQuat& operator=(CMQuat q)
 	{
@@ -179,7 +188,7 @@ public:
 	CMVec3(long xVal, long yVal, long zVal);
 	~CMVec3();
 
-	//------------------{ Coordinate (readonly) definitions }------------------
+	//------------------{ Coordinates (readonly) definitions }------------------
 
 	const double& x = 0; //x coordinate (readonly).
 	const double& y = 0; //y coordinate (readonly).
@@ -268,10 +277,16 @@ public:
 	{
 		CMVec3 v_norm = v.normalize(); // Normalizza il vettore di input
 
-		float angle = v.length(); // Calcola la lunghezza del vettore
+		float angle = *this * v / this->length() * v.length(); // Calcola la lunghezza del vettore
+		
+		cout << angle << endl;
+
+		//cout << angle << endl;
 
 		// Converti l'angolo da gradi a radianti
-		float ang_rad = angle * 3.14 / 180.0;
+		float ang_rad = angle * 3.14159265358979323846 / 180.0;
+
+		//cout << sin(ang_rad / 2) << endl;
 
 		// Costruisci il quaternione di rotazione
 		CMQuat rot_quat(
@@ -282,18 +297,49 @@ public:
 		);
 
 		// Normalizza il quaternione di rotazione
-		rot_quat = rot_quat.normalize();
+		rot_quat = rot_quat.normalize(); 
 
 		// Costruisci il quaternione coniugato
 		CMQuat rot_quat_con(rot_quat.x * -1, rot_quat.y * -1, rot_quat.z * -1, rot_quat.w);
 
 		// Esegui la rotazione
-		CMQuat in_v_quat(x, y, z, 0);
+		CMQuat in_v_quat(this->m_X, this->m_Y, this->m_Z, 0);
 		CMQuat out_quat = rot_quat * in_v_quat * rot_quat_con;
-
+		//cout << out_quat.y << endl;
 		return CMVec3(out_quat.x, out_quat.y, out_quat.z);
 	}
 
+	CMVec3 rotate(double xDeg, double yDeg, double zDeg)
+	{
+		//Deg to rad
+		double xRad = xDeg * 3.14159265358979323846 / 180.0;
+		double yRad = yDeg * 3.14159265358979323846 / 180.0;
+		double zRad = zDeg * 3.14159265358979323846 / 180.0;
+
+		// Costruisci il quaternione di rotazione
+		CMQuat rot_quat(
+			sin(xRad / 2),
+			sin(yRad / 2),
+			sin(zRad / 2),
+			1
+		);
+
+		// Normalizza il quaternione di rotazione
+		//rot_quat = rot_quat.normalize();
+
+		// Costruisci il quaternione coniugato
+		CMQuat rot_quat_con(rot_quat.x * -1, rot_quat.y * -1, rot_quat.z * -1, rot_quat.w);
+
+		// Esegui la rotazione
+		CMQuat in_v_quat(this->m_X, this->m_Y, this->m_Z, 0);
+		CMQuat out_quat = rot_quat * in_v_quat;
+		out_quat = out_quat * rot_quat_con;
+
+		out_quat = out_quat.normalize();
+
+		//cout << out_quat.y << endl;
+		return CMVec3(out_quat.x, out_quat.y, out_quat.z);
+	}
 
 	//if (out_quat.x != 0 || out_quat.y != 0 || out_quat.z != 0)
 	//	out_quat = out_quat.normalize();
