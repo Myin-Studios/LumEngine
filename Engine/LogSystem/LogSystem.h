@@ -9,7 +9,8 @@ using namespace std;
 class CMLog
 {
 public:
-	static void Debug(const string& msg)
+    template <typename _T>
+	static void Debug(const _T& msg)
 	{
 		// current date and time on the current system
 		time_t now = time(0);
@@ -18,8 +19,19 @@ public:
 
 		t = localtime(&now);
 
-		cout << "[" << t->tm_mday << "-" << 1 + t->tm_mon << "-" << 1900 + t->tm_year << " | " << t->tm_hour << ":" << t->tm_min << ":" << t->tm_sec << "] " << msg.c_str() << endl;
+		cout << "[" << t->tm_mday << "-" << 1 + t->tm_mon << "-" << 1900 + t->tm_year << " | " << t->tm_hour << ":" << t->tm_min << ":" << t->tm_sec << "] " << msg << endl;
 	}
+    static void Debug(const string& msg)
+    {
+        // current date and time on the current system
+        time_t now = time(0);
+
+        tm* t = new tm;
+
+        t = localtime(&now);
+
+        cout << "[" << t->tm_mday << "-" << 1 + t->tm_mon << "-" << 1900 + t->tm_year << " | " << t->tm_hour << ":" << t->tm_min << ":" << t->tm_sec << "] " << msg.c_str() << endl;
+    }
 
     static void Warning(const string& msg)
     {
@@ -36,7 +48,8 @@ public:
         SetConsoleTextAttribute(hConsole, 15);
     }
 
-    static void Error(const string& msg)
+    template <typename _T>
+    static void Error(const _T& msg)
     {
         time_t now = time(0);
 
@@ -47,7 +60,7 @@ public:
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         // you can loop k higher to see more color choices
         SetConsoleTextAttribute(hConsole, 12);
-        cout << "[" << t->tm_mday << "-" << 1 + t->tm_mon << "-" << 1900 + t->tm_year << " | " << t->tm_hour << ":" << t->tm_min << ":" << t->tm_sec << "] " << msg.c_str() << endl;
+        cout << "[" << t->tm_mday << "-" << 1 + t->tm_mon << "-" << 1900 + t->tm_year << " | " << t->tm_hour << ":" << t->tm_min << ":" << t->tm_sec << "] " << msg << endl;
         SetConsoleTextAttribute(hConsole, 15);
     }
 

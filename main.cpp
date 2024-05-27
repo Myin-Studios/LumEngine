@@ -1,47 +1,85 @@
 #include "Engine/LogSystem/LogSystem.h"
-#include "GUI/CMWindow.h"
-#include "GUI/CMSlider.h"
+#include "Math/CMMath.h"
+#include "GameBehaviour/CMGameBehaviour.h"
+#include <thread>
+#include <chrono>
+
+class MovingObject : public GameBehaviour
+{
+    CMVec3 v;
+public:
+    void onStart() override
+    {
+        CMLog::Debug("Hello from MovingObject!");
+        v = CMVec3(2, 1, 5);
+
+        //v.rotate(90.0, 0.0, 0.0);
+
+        CMVec3 orth = CMVec3::orthogonalize(v);
+
+        CMLog::Debug(orth);
+        CMLog::Debug(CMVec3::dot(v, orth));
+    }
+
+    void onRun() override
+    {
+
+    }
+};
+
+class Ciao : public GameBehaviour
+{
+public:
+    void onStart() override
+    {
+        CMLog::Debug("Hello from Ciao!");
+    }
+
+    void onRun() override {}
+};
+
+class GameCore : public CMTime
+{
+private:
+    static std::chrono::steady_clock::time_point prevTime;
+
+public:
+    static void update()
+    {
+        std::chrono::steady_clock::time_point currTime = std::chrono::steady_clock::now();
+
+        auto _dt = std::chrono::duration_cast<std::chrono::duration<double>>(currTime - prevTime);
+
+        CMTime::_dt = _dt.count();
+
+        prevTime = currTime;
+    }
+};
+
+std::chrono::steady_clock::time_point GameCore::prevTime = std::chrono::steady_clock::now();
 
 int main()
 {
-	//CMVec2 v(2, 1);
-	//CMVec2 v2(1, -2);
-	//CMVec3 v3(1, 0, 1);
-	//CMVec3 v4(0, 1, 0);
-	//
-	//v3 = v3.rotate(180, 0, 0);
-	//cout << "Vettore ruotato: " << v3 << endl;
-	
-	//cout << CMVec2::dot(v2, v) << endl;
-	//cout << "Prodotto per scalare: " << v3 * 3 << endl;
-	//cout << "Prodotto scalare: " << v3 * v4 << endl;
-	//	
-	//cout << CMVec3::cross(v3, v4) << endl;
-	//
-	//cout << v3.normalize() << endl;
+    MovingObject mo;
+    Ciao c;
 
-	//CMQuat q(3, 2, 1, 1);
+    mo.getClassName();
+    c.getClassName();
 
-	CMLog::Debug("Debug");
-	CMLog::Warning("Warning");
-	CMLog::Error("Error");
-	CMLog::Succeed("Succeed");
+    for (const auto& vec : *ScriptCore<GameBehaviour*>::gameScripts)
+        vec->onStart();
 
-	cout << endl;
+    while (true)
+    {
+        //mo.onRun();
 
-	//MainWin* app = new MainWin();
-	//Style s;
-	//
-	//s.setStyle(app->getItem());
+        GameCore::update();
 
-	//app->broadcast();
+        //CMLog::Debug(CMTime::dt());
 
-	CMWindow w;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+    }
 
-    CMSlider s1(w);
-    s1.show();
-
-    w.run();
 
 	return 0;
 }
