@@ -1,3 +1,33 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+///                                                                                                   ///
+///                                      THIS CODE IS PART OF:                                        ///
+///                                       CryoMoon Engine (C)                                         ///
+///                                                                                                   ///
+///                                     WHICH IS LICENSED UNDER                                       ///
+///                                          MIT License                                              ///
+///                                      All Right Reserved.                                          ///
+///                                                                                                   ///
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+///                                                                                                   ///
+///   Copyright (c) 2024 Myin Studios                                                                 ///
+///                                                                                                   ///
+///   Permission is hereby granted, free of charge,  to any person obtaining a copy of this software  ///
+///   and associated documentation files (the "Software"), to deal in the Software without            ///
+///   restriction, including without limitation the rights to use, copy, modify, merge, publish,      ///
+///   distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the   ///
+///   Software is furnished to do so, subject to the following conditions:                            ///
+///                                                                                                   ///
+///   The above copyright notice and this permission notice shall be included in all copies or        ///
+///   substantial portions of the Software.                                                           ///
+///                                                                                                   ///
+///   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING   ///
+///   BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND      ///
+///   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,    ///
+///   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  ///
+///   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.         ///
+///                                                                                                   ///
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <iostream>
@@ -5,7 +35,7 @@
 
 using namespace std;
 
-class CMMat3x3
+class Mat3x3
 {
 private:
     double _m00 = 0;
@@ -19,9 +49,9 @@ private:
     double _m22 = 0;
 
 public:
-    CMMat3x3();
-    explicit CMMat3x3(double val);
-    explicit CMMat3x3(double m00 = 0, double m01 = 0, double m02 = 0, double m10 = 0, double m11 = 0, double m12 = 0, double m20 = 0, double m21 = 0, double m22 = 0);
+    Mat3x3();
+    explicit Mat3x3(double val);
+    explicit Mat3x3(double m00 = 0, double m01 = 0, double m02 = 0, double m10 = 0, double m11 = 0, double m12 = 0, double m20 = 0, double m21 = 0, double m22 = 0);
 
     [[nodiscard]] double m00() const { return this->_m00; }
     [[nodiscard]] double m01() const { return this->_m01; }
@@ -34,8 +64,8 @@ public:
     [[nodiscard]] double m22() const { return this->_m22; }
 };
 
-CMMat3x3::CMMat3x3() = default;
-CMMat3x3::CMMat3x3(double val)
+Mat3x3::Mat3x3() = default;
+Mat3x3::Mat3x3(double val)
 {
     this->_m00 = val;
     this->_m01 = val;
@@ -47,8 +77,8 @@ CMMat3x3::CMMat3x3(double val)
     this->_m21 = val;
     this->_m22 = val;
 }
-CMMat3x3::CMMat3x3(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21,
-                   double m22) {
+Mat3x3::Mat3x3(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21,
+               double m22) {
     this->_m00 = m00;
     this->_m01 = m01;
     this->_m02 = m02;
@@ -60,226 +90,228 @@ CMMat3x3::CMMat3x3(double m00, double m01, double m02, double m10, double m11, d
     this->_m22 = m22;
 }
 
-class CMQuat
+class Quat
 {
 public:
-	CMQuat();
-	CMQuat(double, double, double, double);
-	~CMQuat();
+	Quat();
+	Quat(double, double, double, double);
+	~Quat();
 
 	const double& x = 0;
 	const double& y = 0;
 	const double& z = 0;
 	const double& w = 1;
 
-	CMQuat normalize()
+	Quat normalize()
 	{
-		double _x = 0, _y = 0, _z = 0, _w = 0;
-		float _len = sqrt(pow(m_X, 2) + pow(m_Y, 2) + pow(m_Z, 2) + pow(m_W, 2));
-		_x = m_X / _len;
-		_y = m_Y / _len;
-		_z = m_Z / _len;
-		_w = m_W / _len;
+		double _tx = 0, _ty = 0, _tz = 0, _tw = 0;
+		float _len = sqrt(pow(_x, 2) + pow(_y, 2) + pow(_z, 2) + pow(_w, 2));
+		_tx = _x / _len;
+		_ty = _y / _len;
+		_tz = _z / _len;
+		_tw = _w / _len;
 
-		return CMQuat(_x, _y, _z, _w);
+		return Quat(_x, _y, _z, _w);
 	}
 
-	CMQuat operator*(const CMQuat& q) const
+	Quat operator*(const Quat& q) const
 	{
-		double _x = 0;
-		double _y = 0;
-		double _z = 0;
-		double _w = 0;
+		double _tx = 0;
+		double _ty = 0;
+		double _tz = 0;
+		double _tw = 0;
 
-		_w = (this->m_W * q.m_W - this->m_X * q.m_X - this->m_Y * q.m_Y - this->m_Z * q.m_Z);
-		_x = (this->m_W * q.m_X + q.m_W * this->m_X + this->m_Y * q.m_Z - q.m_Y * this->m_Z);
-		_y = (this->m_W * q.m_Y + q.m_W * this->m_Y + this->m_Z * q.m_X - q.m_Z * this->m_X);
-		_z = (this->m_W * q.m_Z + q.m_W * this->m_Z + this->m_X * q.m_Y - q.m_X * this->m_Y);
+		_tw = (this->_w * q._w - this->_x * q._x - this->_y * q._y - this->_z * q._z);
+		_tx = (this->_w * q._x + q._w * this->_x + this->_y * q._z - q._y * this->_z);
+		_ty = (this->_w * q._y + q._w * this->_y + this->_z * q._x - q._z * this->_x);
+		_tz = (this->_w * q._z + q._w * this->_z + this->_x * q._y - q._x * this->_y);
 
-		return {_x, _y, _z, _w};
+		return {_tx, _ty, _tz, _tw};
 	}
 
-    CMQuat operator*=(const CMQuat& q)
+    Quat operator*=(const Quat& q)
     {
-        double _x = 0;
-        double _y = 0;
-        double _z = 0;
-        double _w = 0;
+        double _tx = 0;
+        double _ty = 0;
+        double _tz = 0;
+        double _tw = 0;
 
-        _w = (this->m_W * q.m_W - this->m_X * q.m_X - this->m_Y * q.m_Y - this->m_Z * q.m_Z);
-        _x = (this->m_W * q.m_X + q.m_W * this->m_X + this->m_Y * q.m_Z - q.m_Y * this->m_Z);
-        _y = (this->m_W * q.m_Y + q.m_W * this->m_Y + this->m_Z * q.m_X - q.m_Z * this->m_X);
-        _z = (this->m_W * q.m_Z + q.m_W * this->m_Z + this->m_X * q.m_Y - q.m_X * this->m_Y);
+        _tw = (this->_w * q._w - this->_x * q._x - this->_y * q._y - this->_z * q._z);
+        _tx = (this->_w * q._x + q._w * this->_x + this->_y * q._z - q._y * this->_z);
+        _ty = (this->_w * q._y + q._w * this->_y + this->_z * q._x - q._z * this->_x);
+        _tz = (this->_w * q._z + q._w * this->_z + this->_x * q._y - q._x * this->_y);
 
-        this->m_X = _x;
-        this->m_Y = _y;
-        this->m_Z = _z;
-        this->m_W = _w;
-        return {this->m_X, this->m_Y, this->m_Z, this->m_W};
+        this->_x = _tx;
+        this->_y = _ty;
+        this->_z = _tz;
+        this->_w = _tw;
+        return {this->_x, this->_y, this->_z, this->_w};
     }
 
-	CMQuat operator=(const CMQuat& q)
+	Quat operator=(const Quat& q)
 	{
-		return {m_X = q.m_X,
-                m_Y = q.m_Y,
-                m_Z = q.m_Z,
-                m_W = q.m_W};
+		return {_x = q._x,
+                _y = q._y,
+                _z = q._z,
+                _w = q._w};
 	}
 private:
-	double m_X = 0;
-	double m_Y = 0;
-	double m_Z = 0;
-	double m_W = 1;
+	double _x = 0;
+	double _y = 0;
+	double _z = 0;
+	double _w = 1;
 };
 
-CMQuat::CMQuat() : x(m_X), y(m_Y), z(m_Z), w(m_W)
+Quat::Quat() : x(_x), y(_y), z(_z), w(_w)
 {
-    this->m_X = 0;
-    this->m_Y = 0;
-    this->m_Z = 0;
-    this->m_W = 1;
+    this->_x = 0;
+    this->_y = 0;
+    this->_z = 0;
+    this->_w = 1;
 }
 
-CMQuat::CMQuat(double xVal, double yVal, double zVal, double wVal) : x(m_X), y(m_Y), z(m_Z), w(m_W)
+Quat::Quat(double xVal, double yVal, double zVal, double wVal) : x(_x), y(_y), z(_z), w(_w)
 {
-	m_X = xVal;
-	m_Y = yVal;
-	m_Z = zVal;
-	m_W = wVal;
+    this->_x = xVal;
+    this->_y = yVal;
+    this->_z = zVal;
+    this->_w = wVal;
 }
 
-CMQuat::~CMQuat()
+Quat::~Quat()
 {
 }
 
 /// <summary>
 /// CryoMoon 2D Vector
 /// </summary>
-class CMVec2
+class Vec2
 {
 public:
 	const double& x = 0;
 	const double& y = 0;
 
 private:
-	double m_X = 0, m_Y = 0;
+	double _x = 0, _y = 0;
 
 public:
-	CMVec2();
-	CMVec2(const int xVal, const int yVal);
-	CMVec2(const float xVal, const float yVal);
-	CMVec2(const double xVal, const double yVal);
-	CMVec2(const long xVal, const long yVal);
-	~CMVec2();
+	Vec2();
+	Vec2(const int xVal, const int yVal);
+	Vec2(const float xVal, const float yVal);
+	Vec2(const double xVal, const double yVal);
+	Vec2(const long xVal, const long yVal);
+	~Vec2();
 
-	static constexpr auto dot(const CMVec2& v1, const CMVec2& v2)
+	static constexpr auto dot(const Vec2& v1, const Vec2& v2)
 	{
-		return (v1.m_X * v2.m_X + v1.m_Y * v2.m_Y);
+		return (v1._x * v2._x + v1._y * v2._y);
 	}
-	static constexpr auto dot(const CMVec2& v1, auto scalar) { return v1.m_X * scalar + v1.m_Y * scalar; }
+	static constexpr double dot(const Vec2& v1, double scalar) { return v1._x * scalar + v1._y * scalar; }
 
-	CMVec2 right() { return CMVec2(1, 0); }
-	CMVec2 left() { return CMVec2(-1, 0); }
-	CMVec2 up() { return CMVec2(0, 1); }
-	CMVec2 down() { return CMVec2(0, -1); }
+	Vec2 right() { return Vec2(1, 0); }
+	Vec2 left() { return Vec2(-1, 0); }
+	Vec2 up() { return Vec2(0, 1); }
+	Vec2 down() { return Vec2(0, -1); }
 
-	CMVec2 normalize()
+	Vec2 normalize()
 	{
-		double _x = 0, _y = 0;
+		double _tx = 0, _ty = 0;
 
-		_x = m_X / (sqrt(pow(m_X, 2) + pow(m_Y, 2)));
-		_y = m_Y / (sqrt(pow(m_X, 2) + pow(m_Y, 2)));
+		_tx = _x / (sqrt(pow(_x, 2) + pow(_y, 2)));
+		_ty = _y / (sqrt(pow(_x, 2) + pow(_y, 2)));
 		
-		return CMVec2(_x, _y);
+		return Vec2(_tx, _ty);
 	}
 
 	//Operators overloading.
 
-	CMVec2& operator+(const CMVec2& v)
+	Vec2& operator+(const Vec2& v)
 	{
-		CMVec2 temp(m_X += v.m_X, m_Y += v.m_Y);
+		Vec2 temp(_x += v._x, _y += v._y);
 
 		return temp;
 	}
-	CMVec2& operator+(const auto s)
+	Vec2& operator+(const double s)
 	{
-		CMVec2 temp(m_X += s, m_Y += s);
+		Vec2 temp(_x += s, _y += s);
 		return temp;
 	}
-    CMVec2 operator+=(const CMVec2& v)
+    Vec2 operator+=(const Vec2& v)
     {
-        return CMVec2(this->m_X += v.x, this->m_Y += v.y);;
+        return Vec2(this->_x += v.x, this->_y += v.y);;
     }
-	CMVec2& operator=(const CMVec2& v)
+	Vec2 operator=(const Vec2& v)
 	{
-		CMVec2 temp(m_X = v.m_X, m_Y = v.m_Y);
+		Vec2 temp(_x = v._x, _y = v._y);
 		return temp;
 	};
-	bool& operator==(const CMVec2& v)
+	bool operator==(const Vec2& v)
 	{
-		bool val = m_X == v.m_X && m_Y == v.m_Y;
+		bool val = _x == v._x && _y == v._y;
 		return val;
 	}
 };
 
-ostream& operator<<(ostream& dest, const CMVec2& v) { return dest << "(" << v.x << ", " << v.y << ")"; }
+ostream& operator<<(ostream& dest, const Vec2& v) { return dest << "(" << v.x << ", " << v.y << ")"; }
 
-CMVec2::CMVec2() : x(m_X), y(m_Y)
+Vec2::Vec2() : x(_x), y(_y)
 {
+    _x = 0;
+    _y = 0;
 }
 
-inline CMVec2::CMVec2(int xVal, int yVal) : x(m_X), y(m_Y)
+inline Vec2::Vec2(int xVal, int yVal) : x(_x), y(_y)
 {
-	m_X = xVal;
-	m_Y = yVal;
+    _x = xVal;
+    _y = yVal;
 }
 
-inline CMVec2::CMVec2(float xVal, float yVal) : x(m_X), y(m_Y)
+inline Vec2::Vec2(float xVal, float yVal) : x(_x), y(_y)
 {
-	m_X = xVal;
-	m_Y = yVal;
+    _x = xVal;
+    _y = yVal;
 }
 
-inline CMVec2::CMVec2(double xVal, double yVal) : x(m_X), y(m_Y)
+inline Vec2::Vec2(double xVal, double yVal) : x(_x), y(_y)
 {
-	m_X = xVal;
-	m_Y = yVal;
+    _x = xVal;
+    _y = yVal;
 }
 
-inline CMVec2::CMVec2(long xVal, long yVal) : x(m_X), y(m_Y)
+inline Vec2::Vec2(long xVal, long yVal) : x(_x), y(_y)
 {
-	m_X = xVal;
-	m_Y = yVal;
+    _x = xVal;
+    _y = yVal;
 }
 
-CMVec2::~CMVec2()
+Vec2::~Vec2()
 = default;
 
 /// <summary>
 /// CryoMoon 3D Vector
 /// </summary>
-class CMVec3
+class Vec3
 {
 public:
-	CMVec3();
-	explicit CMVec3(double v);
-	CMVec3(int xVal, int yVal, int zVal);
-	CMVec3(float xVal, float yVal, float zVal);
-	CMVec3(double xVal, double yVal, double zVal);
-	CMVec3(long xVal, long yVal, long zVal);
-	~CMVec3() = default;
+	Vec3();
+	explicit Vec3(double v);
+	Vec3(int xVal, int yVal, int zVal);
+	Vec3(float xVal, float yVal, float zVal);
+	Vec3(double xVal, double yVal, double zVal);
+	Vec3(long xVal, long yVal, long zVal);
+	~Vec3() = default;
 
 	//------------------{ Coordinates (readonly) definitions }------------------
 
-	[[nodiscard]] double x() const { return m_X; };
-	[[nodiscard]] double y() const { return m_Y; };
-	[[nodiscard]] double z() const { return m_Z; };
+	[[nodiscard]] double x() const { return _x; };
+	[[nodiscard]] double y() const { return _y; };
+	[[nodiscard]] double z() const { return _z; };
 
 	//------------------{ Vectors multiplications }------------------
 	
-	static constexpr auto dot(const CMVec3& v1, const CMVec3& v2) { return (v1.m_X * v2.m_X + v1.m_Y * v2.m_Y + v1.m_Z * v2.m_Z); }
+	static constexpr auto dot(const Vec3& v1, const Vec3& v2) { return (v1._x * v2._x + v1._y * v2._y + v1._z * v2._z); }
 	
-	static CMVec3 cross(const CMVec3& v1, const CMVec3& v2)
+	static Vec3 cross(const Vec3& v1, const Vec3& v2)
 	{
 		return {v1.y() * v2.z() - v1.z() * v2.y(), v2.z() * v1.x() - v2.x() * v1.z(), v1.x() * v2.y() - v1.y() * v2.x()};
 	}
@@ -289,67 +321,60 @@ public:
 	/// <summary>
 	/// Right direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 right() { return {1, 0, 0}; }
+	/// <returns>Vec3</returns>
+	static Vec3 right() { return {1, 0, 0}; }
 	
 	/// <summary>
 	/// Left direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 left() { return {-1, 0, 0}; }
+	/// <returns>Vec3</returns>
+	static Vec3 left() { return {-1, 0, 0}; }
 	
 	/// <summary>
 	/// Up direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 up() { return {0, 1, 0}; }
+	/// <returns>Vec3</returns>
+	static Vec3 up() { return {0, 1, 0}; }
 	
 	/// <summary>
 	/// Down direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 down() { return {0, -1, 0}; }
+	/// <returns>Vec3</returns>
+	static Vec3 down() { return {0, -1, 0}; }
 	
 	/// <summary>
 	/// Forward direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 forward() { return {0, 0, 1}; }
+	/// <returns>Vec3</returns>
+	static Vec3 forward() { return {0, 0, 1}; }
 	
 	/// <summary>
 	/// Backward direction.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-	static CMVec3 backward() { return {0, 0, -1}; }
+	/// <returns>Vec3</returns>
+	static Vec3 backward() { return {0, 0, -1}; }
 
 	//------------------{ Vectors normalization }------------------
 
 	/// <summary>
 	/// Vector normalization.
 	/// </summary>
-	/// <returns>CMVec3</returns>
-    CMVec3& normalize() {
+	/// <returns>Vec3</returns>
+    Vec3& normalize() {
         if (this->length() != 0.0f) {
-            m_X /= this->length();
-            m_Y /= this->length();
-            m_Z /= this->length();
+            _x /= this->length();
+            _y /= this->length();
+            _z /= this->length();
         }
         return *this;
     }
 
-    //------------------{ Orthogonality }---------------------
-
-    [[deprecated("Don't use this method since is not implemented.")]] static CMVec3 orthogonalize(const CMVec3& v)
-    {
-        return {1, 1, 1};
-    }
-
 	//------------------{ Vectors rotation }------------------
 
-	CMVec3 rotate(const CMQuat& q)
+	/*Vec3 rotate(const Quat& q)
 	{
-        CMVec3 v_norm = this->normalize();
-        CMVec3 v_angle = CMVec3(q.x, q.y, q.z);
+        Vec3 v_norm = this->normalize();
+        Vec3 v_angle = Vec3(q.x, q.y, q.z);
 
         v_angle = v_angle.normalize();
 
@@ -357,32 +382,32 @@ public:
 
         double angle_rad = acos(cos_theta);
 
-        CMQuat rot = CMQuat(v_norm.m_X * sin(angle_rad / 2.0),
-                            v_norm.m_Y * sin(angle_rad / 2.0),
-                            v_norm.m_Z * sin(angle_rad / 2.0),
-                            cos(angle_rad / 2));
+        Quat rot = Quat(v_norm._x * sin(angle_rad / 2.0),
+                            v_norm._y * sin(angle_rad / 2.0),
+                            v_norm._z * sin(angle_rad / 2.0),
+                        cos(angle_rad / 2));
 
         rot.normalize();
 
-        CMQuat rot_conJ = CMQuat(-rot.x, -rot.y, -rot.z, rot.w);
+        Quat rot_conJ = Quat(-rot.x, -rot.y, -rot.z, rot.w);
 
-        CMQuat inVtoQ(v_norm.x(), v_norm.y(), v_norm.z(), 1);
+        Quat inVtoQ(v_norm.x(), v_norm.y(), v_norm.z(), 1);
 
-        CMQuat out = rot * inVtoQ;
+        Quat out = rot * inVtoQ;
 
         out *= rot_conJ;
 
         cout << out.x << endl;
 
-        CMVec3 outV(out.x, out.y, out.z);
+        Vec3 outV(out.x, out.y, out.z);
 
         return outV;
 
-	}
+	}*/
 
-    //CMVec3 rotate(CMQuat v)
+    //Vec3 rotate(Quat v)
     //{
-    //	CMVec3 v_norm = v.normalize(); // Normalizza il vettore di input
+    //	Vec3 v_norm = v.normalize(); // Normalizza il vettore di input
 
     //	double angle = *this * v / this->length() * v.length(); // Calcola la lunghezza del vettore
     //
@@ -396,7 +421,7 @@ public:
     //	//cout << sin(ang_rad / 2) << endl;
 
     //	// Costruisci il quaternione di rotazione
-    //	CMQuat rot_quat(
+    //	Quat rot_quat(
     //		v_norm.x * sin(ang_rad / 2),
     //		v_norm.y * sin(ang_rad / 2),
     //		v_norm.z * sin(ang_rad / 2),
@@ -407,188 +432,201 @@ public:
     //	rot_quat = rot_quat.normalize();
 
     //	// Costruisci il quaternione coniugato
-    //	CMQuat rot_quat_con(rot_quat.x * -1, rot_quat.y * -1, rot_quat.z * -1, rot_quat.w);
+    //	Quat rot_quat_con(rot_quat.x * -1, rot_quat.y * -1, rot_quat.z * -1, rot_quat.w);
 
     //	// Esegui la rotazione
-    //	CMQuat in_v_quat(this->m_X, this->m_Y, this->m_Z, 0);
-    //	CMQuat out_quat = rot_quat * in_v_quat * rot_quat_con;
+    //	Quat in_v_quat(this->_x, this->_y, this->_z, 0);
+    //	Quat out_quat = rot_quat * in_v_quat * rot_quat_con;
     //	//cout << out_quat.y << endl;
     //	return {out_quat.x, out_quat.y, out_quat.z};
     //}
 
-	void rotate(double angleX, double angleY, double angleZ)
+	/*void rotate(double angleX, double angleY, double angleZ)
 	{
 		//Deg to rad
 		//angleX = angleX * 3.14159265358979323846 / 180.0;
 		//angleY = angleY * 3.14159265358979323846 / 180.0;
 		//angleZ = angleZ * 3.14159265358979323846 / 180.0;
 
-        CMMat3x3 rotX = CMMat3x3(1,             0,               0,
-                                 0, cos(angleX), -sin(angleX),
-                                 0, sin(angleX), cos(angleX));
+        Mat3x3 rotX = Mat3x3(1, 0, 0,
+                             0, cos(angleX), -sin(angleX),
+                             0, sin(angleX), cos(angleX));
 
-        CMMat3x3 rotY = CMMat3x3(cos(angleY), 0, -sin(angleY),
-                                 0,              1,                0,
-                                 sin(angleY), 0, cos(angleY));
+        Mat3x3 rotY = Mat3x3(cos(angleY), 0, -sin(angleY),
+                             0, 1, 0,
+                             sin(angleY), 0, cos(angleY));
 
-        CMMat3x3 rotZ = CMMat3x3(cos(angleZ), -sin(angleZ), 0,
-                                 sin(angleZ), cos(angleZ),   0,
-                                 0,                            0, 1);
+        Mat3x3 rotZ = Mat3x3(cos(angleZ), -sin(angleZ), 0,
+                             sin(angleZ), cos(angleZ), 0,
+                             0, 0, 1);
 
         this->normalize();
 
-        CMMat3x3 _yz(this->m_X * 1, this->m_X * 0, this->m_X * 0,
-                     this->m_Y * 0, this->m_Y * 1, this->m_Y * -1,
-                     this->m_X * 0, this->m_X * 1, this->m_X * 1);
+        Mat3x3 _yz(this->_x * 1, this->_x * 0, this->_x * 0,
+                     this->_y * 0, this->_y * 1, this->_y * -1,
+                     this->_x * 0, this->_x * 1, this->_x * 1);
 
-        CMMat3x3 _xz(this->m_X * 1, this->m_X * 0, this->m_X * -1,
-                     this->m_Y * 0, this->m_Y * 1, this->m_Y * 0,
-                     this->m_X * 1, this->m_X * 0, this->m_X * 1);
+        Mat3x3 _xz(this->_x * 1, this->_x * 0, this->_x * -1,
+                     this->_y * 0, this->_y * 1, this->_y * 0,
+                     this->_x * 1, this->_x * 0, this->_x * 1);
 
-        CMMat3x3 _xy(this->m_X * 1, this->m_X * -1, this->m_X * 0,
-                     this->m_Y * 1, this->m_Y * 1, this->m_Y * 0,
-                     this->m_X * 0, this->m_X * 0, this->m_X * 1);
+        Mat3x3 _xy(this->_x * 1, this->_x * -1, this->_x * 0,
+                     this->_y * 1, this->_y * 1, this->_y * 0,
+                     this->_x * 0, this->_x * 0, this->_x * 1);
 
         
 
-        cout << "(" << this->m_X << ", " << this->m_Y << ", " << this->m_Z << ")" << endl;
+        cout << "(" << this->_x << ", " << this->_y << ", " << this->_z << ")" << endl;
 
         if (angleX > 0)
            *this = *this * rotX;
 
-        cout << "(" << this->m_X << ", " << this->m_Y << ", " << this->m_Z << ")" << endl;
+        cout << "(" << this->_x << ", " << this->_y << ", " << this->_z << ")" << endl;
 
         if (angleY > 0)
             *this = *this * rotY;
 
-        cout << "(" << this->m_X << ", " << this->m_Y << ", " << this->m_Z << ")" << endl;
+        cout << "(" << this->_x << ", " << this->_y << ", " << this->_z << ")" << endl;
 
         if (angleZ > 0)
             *this = *this * rotZ;
 
-        cout << "(" << this->m_X << ", " << this->m_Y << ", " << this->m_Z << ")" << endl;
-    }
+        cout << "(" << this->_x << ", " << this->_y << ", " << this->_z << ")" << endl;
+    }*/
 
 	//if (out_quat.x != 0 || out_quat.y != 0 || out_quat.z != 0)
 	//	out_quat = out_quat.normalize();
 
-	//in_v_quat = CMQuat(in_v_quat.x != 0 ? in_v_quat.x : 0, in_v_quat.y != 0 ? in_v_quat.y : 0, in_v_quat.z != 0 ? in_v_quat.z : 0, in_v_quat.w);
+	//in_v_quat = Quat(in_v_quat.x != 0 ? in_v_quat.x : 0, in_v_quat.y != 0 ? in_v_quat.y : 0, in_v_quat.z != 0 ? in_v_quat.z : 0, in_v_quat.w);
 
+
+    //---------------------{ Interpolations }----------------------
+
+    static Vec3& lerp(const Vec3& v1, const Vec3& v2, double t)
+    {
+        return {v1 + (v2 - v1) * t};
+    }
 
 	//------------------{ Operators overloading }------------------
+
+    Vec3& operator=(const Vec3 v)
+    {
+        this->_x = v._x;
+        this->_y = v._y;
+        this->_z = v._z;
+        return *this;
+    }
 
 	/// <summary>
 	/// Dot product of a vector and a scalar constant.
 	/// </summary>
-	/// <param name="v1">(CMVec3)</param>
+	/// <param name="v1">(Vec3)</param>
 	/// <param name="scalar">(int, float, double or long)</param>
-	/// <returns>CMVec3</returns>
-	CMVec3 operator*(const double scalar) const
+	/// <returns>Vec3</returns>
+	Vec3 operator*(const double scalar) const
 	{
-		return {this->m_X * scalar, this->m_Y * scalar, this->m_Z * scalar};
+		return {this->_x * scalar, this->_y * scalar, this->_z * scalar};
 	}
 	
 	/// <summary>
 	/// Dot product of two vectors.
 	/// </summary>
-	/// <param name="v1">(CMVec3)</param>
-	/// <param name="v2">(CMVec3)</param>
+	/// <param name="v1">(Vec3)</param>
+	/// <param name="v2">(Vec3)</param>
 	/// <returns>int, float, double or long</returns>
-	double operator*(const CMVec3& v) const
+    const double operator*(const Vec3& v) const
 	{
-		return this->m_X * v.m_X + this->m_Y * v.m_Y + this->m_Z * v.m_Z;
+		return this->_x * v._x + this->_y * v._y + this->_z * v._z;
 	}
 
     /// <summary>
     /// Product between a vector and a matrix (3x3).
     /// </summary>
-    /// <param name="m">(CMMat3x3)</param>
-    /// <returns>CMVec3</returns>
-    CMVec3 operator*(const CMMat3x3& m) const
+    /// <param name="m">(Mat3x3)</param>
+    /// <returns>Vec3</returns>
+    Vec3 operator*(const Mat3x3& m) const
     {
-        double _x = this->m_X * m.m00() + this->m_X * m.m01() + this->m_X * m.m02();
-        double _y = this->m_X * m.m00() + this->m_X * m.m01() + this->m_X * m.m02();
-        double _z = this->m_X * m.m00() + this->m_X * m.m01() + this->m_X * m.m02();
+        double _x = this->_x * m.m00() + this->_x * m.m01() + this->_x * m.m02();
+        double _y = this->_x * m.m00() + this->_x * m.m01() + this->_x * m.m02();
+        double _z = this->_x * m.m00() + this->_x * m.m01() + this->_x * m.m02();
 
         return {_x, _y, _z};
     }
 
-	CMVec3& operator+(const CMVec3& v)
+	Vec3& operator+(const Vec3& v) const
 	{
-		CMVec3 temp(m_X += v.m_X, m_Y += v.m_Y, m_Z += v.m_Z);
+		Vec3 temp(_x + v._x, _y + v._y, _z + v._z);
 
 		return temp;
 	}
-	CMVec3 operator+(const auto s) const
+
+	Vec3 operator+(const double s) const
 	{
-		return {m_X + s, m_Y + s, m_Z + s};
+		return {_x + s, _y + s, _z + s};
 	}
-	CMVec3 operator-(const CMVec3& v) const
+	Vec3 operator-(const Vec3& v) const
 	{
-		return {m_X - v.m_X, m_Y - v.m_Y, m_Z - v.m_Z};
+		return {_x - v._x, _y - v._y, _z - v._z};
 	}
-	CMVec3 operator-(const auto s)
+	Vec3 operator-(const double s)
 	{
-        return {m_X - s, m_Y - s, m_Z - s};
+        return {_x - s, _y - s, _z - s};
 	}
 
-	CMVec3& operator=(const CMVec3& v)
-	= default;
-
-	bool operator==(const CMVec3& v) const
+	bool operator==(const Vec3& v) const
 	{
-		return (m_X == v.m_X && m_Y == v.m_Y && m_Z == v.m_Z);
+		return (_x == v._x && _y == v._y && _z == v._z);
 	}
 
 private:
-	double m_X = 0, m_Y = 0, m_Z = 0;
+	double _x = 0, _y = 0, _z = 0;
 
 	[[nodiscard]] double length() const {
 		return std::sqrt(x() * x() + y() * y() + z() * z());
 	}
 };
 
-ostream& operator<<(ostream& dest, const CMVec3& v) { return dest << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")"; }
+ostream& operator<<(ostream& dest, const Vec3& v) { return dest << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")"; }
 
-CMVec3::CMVec3()
+Vec3::Vec3()
 {
-    m_X = 0;
-    m_Y = 0;
-    m_Z = 0;
+    _x = 0;
+    _y = 0;
+    _z = 0;
 }
 
-inline CMVec3::CMVec3(const double v)
+inline Vec3::Vec3(const double v)
 {
-    m_X = v;
-    m_Y = v;
-    m_Z = v;
+    _x = v;
+    _y = v;
+    _z = v;
 }
 
-inline CMVec3::CMVec3(int xVal, int yVal, int zVal)
+inline Vec3::Vec3(int xVal, int yVal, int zVal)
 {
-	m_X = xVal;
-	m_Y = yVal;
-	m_Z = zVal;
+    _x = xVal;
+    _y = yVal;
+    _z = zVal;
 }
 
-inline CMVec3::CMVec3(float xVal, float yVal, float zVal)
+inline Vec3::Vec3(float xVal, float yVal, float zVal)
 {
-	m_X = xVal;
-	m_Y = yVal;
-	m_Z = zVal;
+    _x = xVal;
+    _y = yVal;
+    _z = zVal;
 }
 
-inline CMVec3::CMVec3(double xVal, double yVal, double zVal)
+inline Vec3::Vec3(double xVal, double yVal, double zVal)
 {
-	m_X = xVal;
-	m_Y = yVal;
-	m_Z = zVal;
+    _x = xVal;
+    _y = yVal;
+    _z = zVal;
 }
 
-inline CMVec3::CMVec3(long xVal, long yVal, long zVal)
+inline Vec3::Vec3(long xVal, long yVal, long zVal)
 {
-	m_X = xVal;
-	m_Y = yVal;
-	m_Z = zVal;
+    _x = xVal;
+    _y = yVal;
+    _z = zVal;
 }
 

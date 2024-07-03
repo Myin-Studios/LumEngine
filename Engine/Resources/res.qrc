@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Assets/CryoMoonLogo.ico</file>
+        <file>Assets/Buttons/PlayButton.png</file>
+    </qresource>
+</RCC>

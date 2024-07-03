@@ -28,82 +28,103 @@
 ///                                                                                                   ///
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
-#include "CMTypes.h"
-#include <Windows.h>
+#include <iostream>
+#include <unordered_map>
+#include <typeindex>
 
-//mouse events
+using namespace std;
 
-static constexpr CMUInt CMMouseMove = 0x0001;
+class BaseProperty;
 
-CMUInt CMMouseLButtonDown = GetKeyState(VK_LBUTTON) & 0x8000;
-static constexpr CMUInt CMMouseRButtonDown = 0x0003;
-
-static constexpr CMUInt CMMouseLButtonUp = 0x0004;
-static constexpr CMUInt CMMouseRButtonUp = 0x0005;
-
-static constexpr CMUInt CMMouseLButtonDoubleClick = 0x0006;
-static constexpr CMUInt CMMouseRButtonDoubleClick = 0x0007;
-
-CMUInt getKey(CMUInt key)
+class PropertyManager
 {
-	if (key > 0 && key < 256)
-		if (GetKeyState(key) & 0x8001)
-			return key;
+public:
+    PropertyManager()
+    {
+        if (properties == nullptr)
+        {
+            properties = new unordered_map<type_index, shared_ptr<BaseProperty>>();
+        }
+    }
+    ~PropertyManager() = default;
+
+    template<typename T>
+    void addProperty();
+
+    template<typename T>
+    shared_ptr<T> getProperty();
+
+    void getPropertyList();
+
+    unordered_map<type_index, shared_ptr<BaseProperty>>* properties = nullptr;
+private:
+};
+
+class BaseProperty
+{
+public:
+    BaseProperty() = default;
+    virtual ~BaseProperty() = default;
+
+    string getClassName() const { return typeid(*this).name(); }
+};
+
+//-----------------------{ Methods definitions }-----------------------
+
+template<typename T>
+void PropertyManager::addProperty()
+{
+    if (properties == nullptr)
+        properties = new unordered_map<type_index, shared_ptr<BaseProperty>>();
+
+    static_assert(is_base_of<BaseProperty, T>::value, "The property must derive from BaseProperty");
+    auto ty = type_index(typeid(T));
+    if (properties->find(ty) == properties->end())
+    {
+        properties->emplace(ty, make_shared<T>());
+    }
 }
 
-struct CMKeyboardEvent
+template<typename T>
+shared_ptr<T> PropertyManager::getProperty()
 {
-	static CMUInt A;
-	static CMUInt B;
-	static CMUInt C;
-	static CMUInt D;
-	static CMUInt E;
-	static CMUInt F;
-	static CMUInt G;
-	static CMUInt H;
-	static CMUInt I;
-	static CMUInt J;
-	static CMUInt K;
-	static CMUInt L;
-	static CMUInt M;
-	static CMUInt N;
-	static CMUInt O;
-	static CMUInt P;
-	static CMUInt Q;
-	static CMUInt R;
-	static CMUInt S;
-	static CMUInt T;
-	static CMUInt U;
-	static CMUInt V;
-	static CMUInt W;
-	static CMUInt X;
-	static CMUInt Y;
-	static CMUInt Z;
-	
-	static CMUInt Space;
-	static CMUInt Esc;
-	static CMUInt BackSpace;
-	
-	static CMUInt Num1;
-	static CMUInt Num2;
-	static CMUInt Num3;
-	static CMUInt Num4;
-	static CMUInt Num5;
-	static CMUInt Num6;
-	static CMUInt Num7;
-	static CMUInt Num8;
-	static CMUInt Num9;
-	static CMUInt Num0;
+    if (properties == nullptr)
+    {
+        Log::Error("Property list is null! Add some property to make it non-null.");
+        throw runtime_error("Property list is null! Add some property to make it non-null.");
+    }
 
-	static CMUInt NumPad1;
-	static CMUInt NumPad2;
-	static CMUInt NumPad3;
-	static CMUInt NumPad4;
-	static CMUInt NumPad5;
-	static CMUInt NumPad6;
-	static CMUInt NumPad7;
-	static CMUInt NumPad8;
-	static CMUInt NumPad9;
-	static CMUInt NumPad0;
-};
+    if (properties->empty())
+    {
+        Log::Error("Property list is empty!");
+        throw runtime_error("Property list is empty!");
+    }
+
+    auto ty = type_index(typeid(T));
+
+    if (properties->find(ty) != properties->end())
+        return dynamic_pointer_cast<T>(properties->at(ty));
+
+    Log::Error("Property not found!");
+    return nullptr;
+}
+
+void PropertyManager::getPropertyList()
+{
+    if (properties == nullptr)
+    {
+        Log::Error("Property list is null! Add some property to make it non-null.");
+        return;
+    }
+
+    if (properties->empty())
+    {
+        Log::Error("Property list is empty!");
+        return;
+    }
+
+    for (auto& it : *properties)
+    {
+        Log::Debug(it.second.get()->getClassName());
+    }
+}
