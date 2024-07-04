@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30.0)
+cmake_minimum_required(VERSION 3.25.0)
 project(CMEngine)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,18 +14,10 @@ include_directories(Engine/LogSystem)
 include_directories(Engine/Math)
 include_directories(Engine/Types)
 include_directories(GUI)
-include_directories($ENV{GLFW_PATH}) # <<< you should setup your env var to be able to build this project.
-# If you can't include GLFW headers, just reload CMake (on CLion).
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${Qt6Widgets_INCLUDE_DIRS} ${Qt6OpenGL_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS})
 
 find_package(OpenGL REQUIRED)
-
-# ensure you have all the dependencies below in your device before building project! :)
-#file(TO_CMAKE_PATH "$ENV{GLFW_LIB_PATH}" GLFW_LIB_PATH) # <<< you should setup your env var to be able to build this project.
-#set(GLFW_LIBS "${GLFW_LIB_PATH}/glfw3.lib")
-
-#set(CMAKE_PREFIX_PATH "C:/Qt/6.6.0/msvc2019_64/lib/cmake/")
 
 # Function to find the latest Qt version
 function(find_latest_qt)
