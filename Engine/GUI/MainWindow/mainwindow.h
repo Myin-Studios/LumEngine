@@ -28,8 +28,8 @@
 ///                                                                                                   ///
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CMAKECACHE_TXT_MAINWINDOW_H
-#define CMAKECACHE_TXT_MAINWINDOW_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
 
@@ -182,4 +182,4 @@ private:
 };
 
 
-#endif //CMAKECACHE_TXT_MAINWINDOW_H
+#endif //MAINWINDOW_H
