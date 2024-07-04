@@ -82,7 +82,6 @@ add_executable(CMEngine
         Engine/GameBehaviour/CMTime.h
         Engine/GameBehaviour/CMTime.h Engine/Core/CMCore.h
         Engine/Math/Transforms.h
-        Engine/GUI/MainWindow/MainWindow.h
         Engine/BaseObject/PropertyManager.h
         Engine/GUI/MainWindow/mainwindow.cpp
         Engine/GUI/MainWindow/mainwindow.h
