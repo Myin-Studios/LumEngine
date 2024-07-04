@@ -40,6 +40,12 @@ Renderer::Renderer(QWidget *parent)
     format.setVersion(4, 5);
     format.setProfile(QSurfaceFormat::CoreProfile);
     setFormat(format);
+
+    Vertex v;
+    v.Normal = QVector3D(0, 0, 0);
+    v.Position = QVector3D(0, 0, 0);
+
+    vertices.push_back(v);
 }
 
 Renderer::~Renderer()
@@ -47,6 +53,7 @@ Renderer::~Renderer()
     makeCurrent();
     m_vbo.destroy();
     m_vao.destroy();
+    ebo.destroy();
     delete m_program;
     doneCurrent();
 }
@@ -208,27 +215,28 @@ void Renderer::initializeGL()
 
     initShaders();
 
-    m_camera.setPosition(QVector3D(0.0f, 0.0f, 3.0f));
+    m_camera.setPosition(QVector3D(0.0f, 0.0f, 10.0f));
     m_camera.setRotation(-90.0f, 0.0f, 0.0f);
 
     m_vao.create();
-    QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
+    m_vao.bind();
 
     m_vbo.create();
     m_vbo.bind();
-
-    m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(vertices.data(), vertices.size() * sizeof(GLfloat));
+    m_vbo.allocate(vertices.data(), vertices.size() * sizeof(Vertex));
 
     ebo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
     ebo.create();
     ebo.bind();
-    ebo.allocate(indices.data(), indices.size() * sizeof(GLuint));
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+                 &indices[0], GL_STATIC_DRAW);
 
     setupVertexAttribs();
     initShadowMap();
 
     m_vbo.release();
+    m_vao.release();
+    ebo.release();
     m_program->release();
 }
 
@@ -299,8 +307,8 @@ void Renderer::updateTimeOfDay()
         timeOfDay = 0.0f;
 
     // Aggiorna la posizione della luce solare
-    sunPosition = QVector3D(sin(timeOfDay * 2.0 * M_PI) * 50.0,
-                            cos(timeOfDay * 2.0 * M_PI) * 50.0,
+    sunPosition = QVector3D(sin(timeOfDay * 2.0f * M_PI) * 50.0f,
+                            cos(timeOfDay * 2.0f * M_PI) * 50.0f,
                             0.0);
 
     update();
@@ -345,11 +353,17 @@ void Renderer::paintGL()
     glBindTexture(GL_TEXTURE_2D, depthMap);
     m_program->setUniformValue("shadowMap", 1);
 
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-    renderScene(*m_program);
+    if (!vertices.empty())
+    {
+        m_vbo.bind();
+        renderScene(*m_program);
+    }
 
-    ebo.bind();
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    if (!indices.empty())
+    {
+        ebo.bind();
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    }
 
     if (m_mouseRightPressed)
     {
@@ -365,7 +379,6 @@ void Renderer::shadowPass()
 {
     glViewport(0, 0, 1920, 1080);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glClear(GL_DEPTH_BUFFER_BIT);
 
     shadowShader->bind();
     shadowShader->setUniformValue("lightSpaceMatrix", lightSpaceMatrix);
@@ -377,15 +390,8 @@ void Renderer::renderScene(QOpenGLShaderProgram &shader)
 {
     QMatrix4x4 model;
 
-    // Renderizza il cubo
-    model.translate(QVector3D(0.0f, 0.5f, 0.0f));
     shader.setUniformValue("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size());
-
-    // Renderizza il piano
-    model.setToIdentity();
-    shader.setUniformValue("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, planeVertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
 
 void Renderer::dragEnterEvent(QDragEnterEvent* event)
@@ -405,12 +411,14 @@ void Renderer::dropEvent(QDropEvent* event)
         if (urlList.size() > 0)
         {
             QString fileName = urlList.at(0).toLocalFile();
-            if (fileName.contains(".gltf"))
-                loadGLTF(fileName);
-            if (fileName.contains(".obj"))
-                loadOBJ(fileName);
 
-            setScale(0.0000000000001f);
+            qDebug() << fileName;
+
+            if (fileName.contains(".obj"))
+            {
+                qDebug() << "Adding an obj file...";
+                loadOBJ(fileName);
+            }
         }
     }
 }
@@ -418,16 +426,20 @@ void Renderer::dropEvent(QDropEvent* event)
 void Renderer::setupVertexAttribs()
 {
     m_vbo.bind();
+    ebo.bind();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Position));
     f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Normal));
     m_vbo.release();
+    ebo.release();
 }
 
 void Renderer::updateVertices()
 {
+    qDebug() << "Updating vertices...";
+
     makeCurrent();
 
     if (vertices.empty()) {
@@ -436,140 +448,147 @@ void Renderer::updateVertices()
     }
 
     m_vbo.bind();
-    m_vbo.allocate(vertices.data(), vertices.size() * sizeof(float));
+    m_vbo.allocate(vertices.data(), vertices.size() * sizeof(Vertex));
 
-    setupVertexAttribs(); // Configura gli attributi dei vertici
+    ebo.bind();
+    ebo.allocate(indices.data(), indices.size() * sizeof(GLuint));
+
+    setupVertexAttribs(); // Configure the vertex attributes
 
     m_vbo.release();
+    ebo.release();
 
     // Print vertices values
-//    qDebug() << "Updated vertices:";
-//    for (size_t i = 0; i < vertices.size(); i += 3) {
-//        qDebug() << "Vertex" << i / 3 << ":" << vertices[i] << vertices[i + 1] << vertices[i + 2];
-//    }
+    qDebug() << "Updated vertices:";
+    for (size_t i = 0; i < vertices.size(); i += 3) {
+        qDebug() << "Position" << i << ":" << vertices[i].Position;
+    }
+    for (size_t i = 0; i < vertices.size(); i += 3) {
+        qDebug() << "Normal" << i << ":" << vertices[i].Normal;
+    }
 
     update();
 }
 
-void Renderer::loadGLTF(const QString &filePath)
-{
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Unable to open the file" << filePath;
-        return;
-    }
-
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    if (document.isNull() || !document.isObject()) {
-        qWarning() << "Invalid JSON file" << filePath;
-        return;
-    }
-
-    QJsonObject gltf = document.object();
-
-    if (!gltf.contains("buffers") || !gltf["buffers"].isArray()) {
-        qWarning() << "No buffers found in the file" << filePath;
-        return;
-    }
-    QJsonArray buffers = gltf["buffers"].toArray();
-
-    if (!gltf.contains("bufferViews") || !gltf["bufferViews"].isArray()) {
-        qWarning() << "No bufferViews found in the file" << filePath;
-        return;
-    }
-    QJsonArray bufferViews = gltf["bufferViews"].toArray();
-
-    if (!gltf.contains("accessors") || !gltf["accessors"].isArray()) {
-        qWarning() << "No accessors found in the file" << filePath;
-        return;
-    }
-    QJsonArray accessors = gltf["accessors"].toArray();
-
-    if (gltf.contains("meshes") && gltf["meshes"].isArray()) {
-        QJsonArray meshes = gltf["meshes"].toArray();
-        if (meshes.isEmpty()) {
-            qWarning() << "No meshes found in the file" << filePath;
-            return;
-        }
-
-        for (const QJsonValue &meshValue : meshes) {
-            if (meshValue.isObject()) {
-                QJsonObject meshObject = meshValue.toObject();
-                QJsonArray primitives = meshObject["primitives"].toArray();
-                if (primitives.isEmpty()) {
-                    qWarning() << "No primitives found in the mesh" << filePath;
-                    return;
-                }
-
-                for (const QJsonValue &primitiveValue : primitives) {
-                    if (primitiveValue.isObject()) {
-                        QJsonObject primitiveObject = primitiveValue.toObject();
-                        QJsonObject attributes = primitiveObject["attributes"].toObject();
-
-                        // Caricamento delle posizioni
-                        if (!attributes.contains("POSITION")) {
-                            qWarning() << "Attribute POSITION not found in primitives" << filePath;
-                            return;
-                        }
-
-                        int positionAccessorIndex = attributes["POSITION"].toInt();
-                        QJsonObject positionAccessor = accessors[positionAccessorIndex].toObject();
-                        int positionBufferViewIndex = positionAccessor["bufferView"].toInt();
-                        QJsonObject positionBufferView = bufferViews[positionBufferViewIndex].toObject();
-                        int positionByteOffset = positionBufferView["byteOffset"].toInt();
-                        int positionByteLength = positionBufferView["byteLength"].toInt();
-                        QByteArray bufferData = data.mid(positionByteOffset, positionByteLength);
-                        const float *positions = reinterpret_cast<const float*>(bufferData.constData());
-                        int positionCount = positionAccessor["count"].toInt();
-
-                        const float *normals = nullptr;
-                        if (attributes.contains("NORMAL")) {
-                            int normalAccessorIndex = attributes["NORMAL"].toInt();
-                            QJsonObject normalAccessor = accessors[normalAccessorIndex].toObject();
-                            int normalBufferViewIndex = normalAccessor["bufferView"].toInt();
-                            QJsonObject normalBufferView = bufferViews[normalBufferViewIndex].toObject();
-                            int normalByteOffset = normalBufferView["byteOffset"].toInt();
-                            int normalByteLength = normalBufferView["byteLength"].toInt();
-                            bufferData = data.mid(normalByteOffset, normalByteLength);
-                            normals = reinterpret_cast<const float*>(bufferData.constData());
-                        } else {
-                            qWarning() << "Attribute NORMAL not found" << filePath;
-                        }
-
-                        // Popola il vettore dei vertici e delle normali
-                        vertices.clear();
-                        for (int i = 0; i < positionCount; ++i) {
-                            vertices.push_back(positions[i * 3]);
-                            vertices.push_back(positions[i * 3 + 1]);
-                            vertices.push_back(positions[i * 3 + 2]);
-
-                            qDebug() << "Position[" << i << "]: (" << positions[i * 3] << ", " << positions[i * 3 + 1] << ", " << positions[i * 3 + 2] << ")";
-
-                            if (normals) {
-                                vertices.push_back(normals[i * 3]);
-                                vertices.push_back(normals[i * 3 + 1]);
-                                vertices.push_back(normals[i * 3 + 2]);
-
-                                qDebug() << "Normal[" << i << "]: (" << normals[i * 3] << ", " << normals[i * 3 + 1] << ", " << normals[i * 3 + 2] << ")";
-                            } else {
-                                qDebug() << "There aren't normals.";
-                                // Se non ci sono normali, aggiungi valori di default
-                                vertices.push_back(0.0f);
-                                vertices.push_back(0.0f);
-                                vertices.push_back(0.0f);
-                            }
-                        }
-
-                        updateVertices(); // Aggiorna il VBO con le nuove posizioni e normali
-                    }
-                }
-            }
-        }
-    } else {
-        qWarning() << "No meshes found in the file" << filePath;
-    }
-}
+//void Renderer::loadGLTF(const QString &filePath)
+//{
+//    QFile file(filePath);
+//    if (!file.open(QIODevice::ReadOnly)) {
+//        qWarning() << "Unable to open the file" << filePath;
+//        return;
+//    }
+//
+//    QByteArray data = file.readAll();
+//    QJsonDocument document = QJsonDocument::fromJson(data);
+//    if (document.isNull() || !document.isObject()) {
+//        qWarning() << "Invalid JSON file" << filePath;
+//        return;
+//    }
+//
+//    QJsonObject gltf = document.object();
+//
+//    if (!gltf.contains("buffers") || !gltf["buffers"].isArray()) {
+//        qWarning() << "No buffers found in the file" << filePath;
+//        return;
+//    }
+//    QJsonArray buffers = gltf["buffers"].toArray();
+//
+//    if (!gltf.contains("bufferViews") || !gltf["bufferViews"].isArray()) {
+//        qWarning() << "No bufferViews found in the file" << filePath;
+//        return;
+//    }
+//    QJsonArray bufferViews = gltf["bufferViews"].toArray();
+//
+//    if (!gltf.contains("accessors") || !gltf["accessors"].isArray()) {
+//        qWarning() << "No accessors found in the file" << filePath;
+//        return;
+//    }
+//    QJsonArray accessors = gltf["accessors"].toArray();
+//
+//    if (gltf.contains("meshes") && gltf["meshes"].isArray()) {
+//        QJsonArray meshes = gltf["meshes"].toArray();
+//        if (meshes.isEmpty()) {
+//            qWarning() << "No meshes found in the file" << filePath;
+//            return;
+//        }
+//
+//        for (const QJsonValue &meshValue : meshes) {
+//            if (meshValue.isObject()) {
+//                QJsonObject meshObject = meshValue.toObject();
+//                QJsonArray primitives = meshObject["primitives"].toArray();
+//                if (primitives.isEmpty()) {
+//                    qWarning() << "No primitives found in the mesh" << filePath;
+//                    return;
+//                }
+//
+//                for (const QJsonValue &primitiveValue : primitives) {
+//                    if (primitiveValue.isObject()) {
+//                        QJsonObject primitiveObject = primitiveValue.toObject();
+//                        QJsonObject attributes = primitiveObject["attributes"].toObject();
+//
+//                        // Caricamento delle posizioni
+//                        if (!attributes.contains("POSITION")) {
+//                            qWarning() << "Attribute POSITION not found in primitives" << filePath;
+//                            return;
+//                        }
+//
+//                        int positionAccessorIndex = attributes["POSITION"].toInt();
+//                        QJsonObject positionAccessor = accessors[positionAccessorIndex].toObject();
+//                        int positionBufferViewIndex = positionAccessor["bufferView"].toInt();
+//                        QJsonObject positionBufferView = bufferViews[positionBufferViewIndex].toObject();
+//                        int positionByteOffset = positionBufferView["byteOffset"].toInt();
+//                        int positionByteLength = positionBufferView["byteLength"].toInt();
+//                        QByteArray bufferData = data.mid(positionByteOffset, positionByteLength);
+//                        const float *positions = reinterpret_cast<const float*>(bufferData.constData());
+//                        int positionCount = positionAccessor["count"].toInt();
+//
+//                        const float *normals = nullptr;
+//                        if (attributes.contains("NORMAL")) {
+//                            int normalAccessorIndex = attributes["NORMAL"].toInt();
+//                            QJsonObject normalAccessor = accessors[normalAccessorIndex].toObject();
+//                            int normalBufferViewIndex = normalAccessor["bufferView"].toInt();
+//                            QJsonObject normalBufferView = bufferViews[normalBufferViewIndex].toObject();
+//                            int normalByteOffset = normalBufferView["byteOffset"].toInt();
+//                            int normalByteLength = normalBufferView["byteLength"].toInt();
+//                            bufferData = data.mid(normalByteOffset, normalByteLength);
+//                            normals = reinterpret_cast<const float*>(bufferData.constData());
+//                        } else {
+//                            qWarning() << "Attribute NORMAL not found" << filePath;
+//                        }
+//
+//                        // Popola il vettore dei vertici e delle normali
+//                        vertices.clear();
+//                        for (int i = 0; i < positionCount; ++i) {
+//                            vertices.push_back(positions[i * 3]);
+//                            vertices.push_back(positions[i * 3 + 1]);
+//                            vertices.push_back(positions[i * 3 + 2]);
+//
+//                            qDebug() << "Position[" << i << "]: (" << positions[i * 3] << ", " << positions[i * 3 + 1] << ", " << positions[i * 3 + 2] << ")";
+//
+//                            if (normals) {
+//                                vertices.push_back(normals[i * 3]);
+//                                vertices.push_back(normals[i * 3 + 1]);
+//                                vertices.push_back(normals[i * 3 + 2]);
+//
+//                                qDebug() << "Normal[" << i << "]: (" << normals[i * 3] << ", " << normals[i * 3 + 1] << ", " << normals[i * 3 + 2] << ")";
+//                            } else {
+//                                qDebug() << "There aren't normals.";
+//                                // Se non ci sono normali, aggiungi valori di default
+//                                vertices.push_back(0.0f);
+//                                vertices.push_back(0.0f);
+//                                vertices.push_back(0.0f);
+//                            }
+//                        }
+//
+//                        updateVertices(); // Aggiorna il VBO con le nuove posizioni e normali
+//                    }
+//                }
+//            }
+//        }
+//    } else {
+//        qWarning() << "No meshes found in the file" << filePath;
+//    }
+//}
 
 void Renderer::loadOBJ(const QString &filePath) {
     QFile file(filePath);
@@ -580,6 +599,9 @@ void Renderer::loadOBJ(const QString &filePath) {
 
     QString line;
     vertices.clear();
+    indices.clear();
+
+    qDebug() << "Adding vertex infos...";
 
     do
     {
@@ -587,25 +609,29 @@ void Renderer::loadOBJ(const QString &filePath) {
 
         if (line.contains("v "))
         {
+            Vertex v;
+
             QStringList vData = line.split(" ");
             vData.removeAll("v");
 
-            vertices.push_back(vData[0].toFloat());
-            vertices.push_back(vData[1].toFloat());
-            vertices.push_back(vData[2].toFloat());
+            v.Position = QVector3D(vData[0].toFloat(), vData[1].toFloat(), vData[2].toFloat());
+
+            vertices.push_back(v);
         }
 
         if (line.contains("vn "))
         {
+            Vertex v;
+
             QStringList nData = line.split(" ");
             nData.removeAll("vn");
 
-            vertices.push_back(nData[0].toFloat());
-            vertices.push_back(nData[1].toFloat());
-            vertices.push_back(nData[2].toFloat());
+            v.Normal = QVector3D(nData[0].toFloat(), nData[1].toFloat(), nData[2].toFloat());
+
+            vertices.push_back(v);
         }
 
-        if (line.contains("f "))
+        else if (line.contains("f "))
         {
             QStringList fData = line.split(" ");
             fData.removeAll("f");
@@ -614,8 +640,6 @@ void Renderer::loadOBJ(const QString &filePath) {
             {
                 QStringList unpackedData = s.split("/");
 
-                qDebug() << unpackedData;
-
                 indices.push_back(unpackedData[0].toInt());
                 indices.push_back(unpackedData[1].toInt());
                 indices.push_back(unpackedData[2].toInt());
@@ -623,12 +647,7 @@ void Renderer::loadOBJ(const QString &filePath) {
         }
     } while (!line.isNull());
 
-    do
-    {
-        line = file.readLine();
-
-
-    } while (!line.isNull());
+    file.close();
 
     updateVertices();
 }

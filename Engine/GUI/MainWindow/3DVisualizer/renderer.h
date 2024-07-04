@@ -53,6 +53,12 @@
 #include <QApplication>
 #include <QMainWindow>
 
+struct Vertex
+{
+    QVector3D Position;
+    QVector3D Normal;
+};
+
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions
 {
 Q_OBJECT
@@ -103,55 +109,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
-    std::vector<GLfloat> vertices{
-            // Front face
-            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Bottom-left
-            1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Bottom-right
-            1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Top-right
-            1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Top-right
-            -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Top-left
-            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, // Bottom-left
-
-            // Back face
-            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Bottom-left
-            -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Top-left
-            1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Top-right
-            1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Top-right
-            1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Bottom-right
-            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, // Bottom-left
-
-            // Left face
-            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, // Top-right
-            -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, // Top-left
-            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, // Bottom-left
-            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, // Bottom-left
-            -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, // Bottom-right
-            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, // Top-right
-
-            // Right face
-            1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, // Top-left
-            1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, // Bottom-right
-            1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, // Top-right
-            1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, // Bottom-right
-            1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, // Top-left
-            1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, // Bottom-left
-
-            // Top face
-            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, // Top-left
-            -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, // Bottom-left
-            1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, // Bottom-right
-            1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, // Bottom-right
-            1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, // Top-right
-            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, // Top-left
-
-            // Bottom face
-            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, // Top-right
-            1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, // Bottom-left
-            -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, // Top-left
-            1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, // Bottom-left
-            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, // Top-right
-            1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f  // Bottom-right
-    };
+    std::vector<Vertex> vertices{};
     std::vector<GLint> indices {1, 1, 1};
 
     float _x = 0.0;
