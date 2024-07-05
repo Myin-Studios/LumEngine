@@ -56,6 +56,7 @@
 struct Vertex
 {
     QVector3D Position;
+    QVector2D TexCoords;
     QVector3D Normal;
 };
 
@@ -191,9 +192,14 @@ private:
     GLuint depthMap;
     QMatrix4x4 lightSpaceMatrix;
     QVector3D sunPosition;
+    QVector3D lightPosition1;
     float timeOfDay = 0.0f;
     QSet<int> m_KeyPressed;
-    QPoint lastPos{0, 0};
+    QPointF currentPos{0, 0};
+    QPointF lastPos{0, 0};
+    QPointF lastScreenPos{0, 0};
+    float sensitivity = 0.1f;
+    float deltaX = 0, deltaY = 0;
     QRect mainWindowRect;
     QVector2D smoothDelta;
     std::vector<QVector2D> smoothDeltas;

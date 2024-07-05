@@ -44,6 +44,7 @@ Renderer::Renderer(QWidget *parent)
 
     Vertex v;
     v.Normal = QVector3D(0, 0, 0);
+    v.TexCoords = QVector2D(1, 1);
     v.Position = QVector3D(0, 0, 0);
 
     vertices.push_back(v);
@@ -64,7 +65,8 @@ void Renderer::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) {
         m_mouseRightPressed = true;
 //        QCursor::setPos(mapToGlobal(rect().center()));
-        lastPos = event->pos();
+        currentPos = event->globalPosition();
+        lastPos = event->globalPosition();
 //        QCursor cur(Qt::BlankCursor);
 //        QApplication::setOverrideCursor(cur);
 //        QApplication::changeOverrideCursor(cur);
@@ -89,12 +91,29 @@ void Renderer::mouseMoveEvent(QMouseEvent *event)
 {
     if (m_mouseRightPressed) {
 
-        QPoint currentPos = event->pos();
+        currentPos = event->globalPosition();
 
-        float deltaX = currentPos.x() - lastPos.x();
-        float deltaY = currentPos.y() - lastPos.y();
+        deltaX = currentPos.x() - lastPos.x();
+        deltaY = currentPos.y() - lastPos.y();
 
-        float sensitivity = 0.1f;
+        sensitivity = 0.1f;
+
+//        if (QCursor::pos().x() >= mapToGlobal(rect().center()).x() + width() / 2)
+//        {
+//            QCursor::setPos(mapToGlobal(rect().center()).x() - width() / 2, QCursor::pos().y());
+//        }
+//        else if (QCursor::pos().x() <= mapToGlobal(rect().center()).x() - width() / 2)
+//        {
+//            QCursor::setPos(mapToGlobal(rect().center()).x() + width() / 2, QCursor::pos().y());
+//        }
+//        if (QCursor::pos().y() >= mapToGlobal(rect().center()).y() + height() / 2)
+//        {
+//            QCursor::setPos(QCursor::pos().x(), mapToGlobal(rect().center()).y() - height() / 2);
+//        }
+//        else if (QCursor::pos().y() <= mapToGlobal(rect().center()).y() - height() / 2)
+//        {
+//            QCursor::setPos(QCursor::pos().x(), mapToGlobal(rect().center()).y() + height() / 2);
+//        }
 
         m_camera.rotate(deltaX * sensitivity, -deltaY * sensitivity, 0.0f);
 
@@ -173,35 +192,6 @@ void Renderer::updateCameraPos()
         float zoomSpeed = 0.1f;
         m_camera.move(-m_camera.up() * zoomSpeed);
     }
-
-    if (QCursor::pos().x() >= mapToGlobal(rect().center()).x() + width() / 2)
-    {
-        m_mouseRightPressed = false;
-        QCursor::setPos(mapToGlobal(rect().center()).x() - width() / 2, QCursor::pos().y());
-        lastPos = QPoint(mapToGlobal(rect().center()).x() - width() / 2, lastPos.y());
-        m_mouseRightPressed = true;
-    }
-    else if (QCursor::pos().x() <= mapToGlobal(rect().center()).x() - width() / 2)
-    {
-        m_mouseRightPressed = false;
-        QCursor::setPos(mapToGlobal(rect().center()).x() + width() / 2, QCursor::pos().y());
-        lastPos = QPoint(mapToGlobal(rect().center()).x() + width() / 2, lastPos.y());
-        m_mouseRightPressed = true;
-    }
-    if (QCursor::pos().y() >= mapToGlobal(rect().center()).y() + height() / 2)
-    {
-        m_mouseRightPressed = false;
-        QCursor::setPos(QCursor::pos().x(), mapToGlobal(rect().center()).y() - height() / 2);
-        lastPos = QPoint(lastPos.x(), QCursor::pos().y());
-        m_mouseRightPressed = true;
-    }
-    else if (QCursor::pos().y() <= mapToGlobal(rect().center()).y() - height() / 2)
-    {
-        m_mouseRightPressed = false;
-        QCursor::setPos(QCursor::pos().x(), mapToGlobal(rect().center()).y() + height() / 2);
-        lastPos = QPoint(lastPos.x(), QCursor::pos().y());
-        m_mouseRightPressed = true;
-    }
 }
 
 void Renderer::initializeGL()
@@ -246,10 +236,10 @@ void Renderer::initShaders()
     m_program = new QOpenGLShaderProgram();
     shadowShader = new QOpenGLShaderProgram();
 
-    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "../../Engine/Shaders/vertex_shader.glsl")) {
+    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "../../Engine/Shaders/sss_vertex.glsl")) {
         qDebug() << "Vertex Shader Error:" << m_program->log();
     }
-    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "../../Engine/Shaders/fragment_shader.glsl")) {
+    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "../../Engine/Shaders/sss_fragment.glsl")) {
         qDebug() << "Fragment Shader Error:" << m_program->log();
     }
     if (!m_program->link()) {
@@ -312,6 +302,10 @@ void Renderer::updateTimeOfDay()
                             cos(timeOfDay * 2.0f * M_PI) * 50.0f,
                             0.0);
 
+    lightPosition1 = QVector3D(sin(timeOfDay * 2.0f * M_PI) * 50.0f,
+                               sin(timeOfDay * 2.0f * M_PI) * 50.0f,
+                               cos(timeOfDay * 2.0f * M_PI) * 50.0f);
+
     update();
 }
 
@@ -340,17 +334,16 @@ void Renderer::paintGL()
 
     m_program->setUniformValue("roughness", 1.0f);
     m_program->setUniformValue("lightPos", sunPosition);
+    m_program->setUniformValue("lightPos1", lightPosition1);
     m_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));
     m_program->setUniformValue("objectColor", QVector3D(_r, _g, _b));
 
-    m_program->setUniformValue("ambientStrength", 0.1f);
+    m_program->setUniformValue("ambientStrength", .1f);
     m_program->setUniformValue("specularStrength", 0.5f);
     m_program->setUniformValue("shininess", 32.0f);
     m_program->setUniformValue("scatteringFactor", 0.2f);
 
-
-    // Passa la shadow map
-    glActiveTexture(GL_TEXTURE1);
+   glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthMap);
     m_program->setUniformValue("shadowMap", 1);
 
@@ -603,10 +596,10 @@ void Renderer::loadOBJ(const QString &filePath) {
     indices.clear();
 
     std::vector<QVector3D> positions;
+    std::vector<QVector2D> texcoords;
     std::vector<QVector3D> normals;
-    std::vector<Vertex> vertData;
 
-    int posD = 0, norD = 0;
+    int posD = 0, texD = 0, norD = 0;
 
     qDebug() << "Adding vertex infos...";
 
@@ -623,7 +616,7 @@ void Renderer::loadOBJ(const QString &filePath) {
             QStringList vData = line.split(" ");
             vData.removeAll("v");
 
-            v.Position = QVector3D(vData[0].toFloat(), vData[1].toFloat(), vData[2].toFloat());
+            v.Position = QVector3D(vData[0].toFloat() + this->_x, vData[1].toFloat() + this->_y, vData[2].toFloat() + this->_z);
 
             positions.push_back(v.Position);
         }
@@ -640,7 +633,19 @@ void Renderer::loadOBJ(const QString &filePath) {
             normals.push_back(v.Normal);
         }
 
-        else if (line.contains("f "))
+        if (line.contains("vt "))
+        {
+            Vertex v;
+
+            QStringList tData = line.split(" ");
+            tData.removeAll("vt");
+
+            v.TexCoords = QVector2D(tData[0].toFloat(), 1 - tData[1].toFloat());
+
+            texcoords.push_back(v.TexCoords);
+        }
+
+        if (line.contains("f "))
         {
             QStringList fData = line.split(" ");
             fData.removeAll("f");
@@ -656,11 +661,13 @@ void Renderer::loadOBJ(const QString &filePath) {
                 QStringList unpackedData = s.split("/");
 
                 posD = unpackedData[0].toInt();
+                texD = unpackedData[1].toInt();
                 norD = unpackedData[2].toInt();
 
                 Vertex v;
-                v.Position = positions[posD - 1];
-                v.Normal = normals[norD - 1];
+                if (!positions.empty()) v.Position = positions[posD - 1];
+                if (!texcoords.empty()) v.TexCoords = texcoords[texD - 1];
+                if (!normals.empty()) v.Normal = normals[norD - 1];
 
                 vertices.push_back(v);
             }
@@ -668,21 +675,6 @@ void Renderer::loadOBJ(const QString &filePath) {
     } while (!line.isNull());
 
     file.close();
-
-//    for (int i = 0; i < indices.size(); i++)
-//    {
-//        if (i % 2 != 0)
-//        {
-//            Vertex v;
-//            v.Normal = normals[indices[i] - 1];
-//            vertices.push_back(v);
-//
-//            qDebug() << normals[indices[i] - 1];
-//        }
-//
-//    }
-
-    qDebug() << "Normals size: " << normals.size();
 
     updateVertices();
 }
