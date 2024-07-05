@@ -236,10 +236,10 @@ void Renderer::initShaders()
     m_program = new QOpenGLShaderProgram();
     shadowShader = new QOpenGLShaderProgram();
 
-    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "../../Engine/Shaders/sss_vertex.glsl")) {
+    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "../../Engine/Shaders/vertex_shader.glsl")) {
         qDebug() << "Vertex Shader Error:" << m_program->log();
     }
-    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "../../Engine/Shaders/sss_fragment.glsl")) {
+    if (!m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "../../Engine/Shaders/fragment_shader.glsl")) {
         qDebug() << "Fragment Shader Error:" << m_program->log();
     }
     if (!m_program->link()) {
