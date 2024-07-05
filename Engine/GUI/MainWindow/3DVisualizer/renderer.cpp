@@ -29,6 +29,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "renderer.h"
+#include "LogSystem.h"
 
 Renderer::Renderer(QWidget *parent)
         : QOpenGLWidget(parent),
@@ -301,12 +302,12 @@ void Renderer::resizeGL(int w, int h)
 
 void Renderer::updateTimeOfDay()
 {
-    // Incrementa il tempo del giorno
+    // Increase the timer of the day
     timeOfDay += 0.001f;
     if (timeOfDay > 1.0f)
         timeOfDay = 0.0f;
 
-    // Aggiorna la posizione della luce solare
+    // Add sunlight position
     sunPosition = QVector3D(sin(timeOfDay * 2.0f * M_PI) * 50.0f,
                             cos(timeOfDay * 2.0f * M_PI) * 50.0f,
                             0.0);
@@ -459,13 +460,13 @@ void Renderer::updateVertices()
     ebo.release();
 
     // Print vertices values
-    qDebug() << "Updated vertices:";
-    for (size_t i = 0; i < vertices.size(); i += 3) {
-        qDebug() << "Position" << i << ":" << vertices[i].Position;
-    }
-    for (size_t i = 0; i < vertices.size(); i += 3) {
-        qDebug() << "Normal" << i << ":" << vertices[i].Normal;
-    }
+//    qDebug() << "Updated vertices:";
+//    for (size_t i = 0; i < vertices.size(); i += 3) {
+//        qDebug() << "Position" << i << ":" << vertices[i].Position;
+//    }
+//    for (size_t i = 0; i < vertices.size(); i += 3) {
+//        qDebug() << "Normal" << i << ":" << vertices[i].Normal;
+//    }
 
     update();
 }
@@ -601,7 +602,15 @@ void Renderer::loadOBJ(const QString &filePath) {
     vertices.clear();
     indices.clear();
 
+    std::vector<QVector3D> positions;
+    std::vector<QVector3D> normals;
+    std::vector<Vertex> vertData;
+
+    int posD = 0, norD = 0;
+
     qDebug() << "Adding vertex infos...";
+
+    int index = 0;
 
     do
     {
@@ -616,7 +625,7 @@ void Renderer::loadOBJ(const QString &filePath) {
 
             v.Position = QVector3D(vData[0].toFloat(), vData[1].toFloat(), vData[2].toFloat());
 
-            vertices.push_back(v);
+            positions.push_back(v.Position);
         }
 
         if (line.contains("vn "))
@@ -628,7 +637,7 @@ void Renderer::loadOBJ(const QString &filePath) {
 
             v.Normal = QVector3D(nData[0].toFloat(), nData[1].toFloat(), nData[2].toFloat());
 
-            vertices.push_back(v);
+            normals.push_back(v.Normal);
         }
 
         else if (line.contains("f "))
@@ -636,18 +645,44 @@ void Renderer::loadOBJ(const QString &filePath) {
             QStringList fData = line.split(" ");
             fData.removeAll("f");
 
-            for (QString s : fData)
+            if (fData.size() > 3)
+            {
+                Log::Error("The mesh isn't triangulated. Make sure it is!");
+                return;
+            }
+
+            for (const QString& s : fData)
             {
                 QStringList unpackedData = s.split("/");
 
-                indices.push_back(unpackedData[0].toInt());
-                indices.push_back(unpackedData[1].toInt());
-                indices.push_back(unpackedData[2].toInt());
+                posD = unpackedData[0].toInt();
+                norD = unpackedData[2].toInt();
+
+                Vertex v;
+                v.Position = positions[posD - 1];
+                v.Normal = normals[norD - 1];
+
+                vertices.push_back(v);
             }
         }
     } while (!line.isNull());
 
     file.close();
+
+//    for (int i = 0; i < indices.size(); i++)
+//    {
+//        if (i % 2 != 0)
+//        {
+//            Vertex v;
+//            v.Normal = normals[indices[i] - 1];
+//            vertices.push_back(v);
+//
+//            qDebug() << normals[indices[i] - 1];
+//        }
+//
+//    }
+
+    qDebug() << "Normals size: " << normals.size();
 
     updateVertices();
 }

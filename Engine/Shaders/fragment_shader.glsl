@@ -51,11 +51,11 @@ void main()
     // Fresnel effect
     float cosTheta = dot(norm, viewDir);
 
-    float fresnel = 0.1 + (1.0 - 0.1) * pow(1.0 - cosTheta, 5.0);
+    float fresnel = 2.0 + (1.0 - 2.0) * pow(1.0 - cosTheta, 5.0);
 
-    vec3 col = objectColor * 1.0 - fresnel;
+    vec3 col = objectColor * fresnel;
 
-    vec3 result = (ambient + shadow + diffuse) * objectColor + specular;
+    vec3 result = (ambient + diffuse) * objectColor + specular;
 
     FragColor = vec4(result, 1.0);
 }
