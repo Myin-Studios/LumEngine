@@ -28,6 +28,9 @@
 ///                                                                                                   ///
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifndef CM_TIME_H
+#define CM_TIME_H
+
 #include <iostream>
 
 class CMTime
@@ -44,3 +47,25 @@ public:
 
 double CMTime::_dt = 0.0167;
 double CMTime::scaleFactor = 1.0;
+
+class GameCore : public CMTime
+{
+private:
+    static std::chrono::steady_clock::time_point prevTime;
+
+public:
+    static void update()
+    {
+        std::chrono::steady_clock::time_point currTime = std::chrono::steady_clock::now();
+
+        auto _dt = std::chrono::duration_cast<std::chrono::duration<double>>(currTime - prevTime);
+
+        CMTime::_dt = _dt.count();
+
+        prevTime = currTime;
+    }
+};
+
+std::chrono::steady_clock::time_point GameCore::prevTime = std::chrono::steady_clock::now();
+
+#endif // CM_TIME_H

@@ -32,10 +32,9 @@
 #include "GameBehaviour/CMGameBehaviour.h"
 #include <thread>
 #include <chrono>
-#include <QApplication>
 #include "Transforms.h"
 #include "GameBehaviour/CMTime.h"
-#include "GUI/MainWindow/mainwindow.h"
+#include "GUI/MainWindow/renderer.h"
 
 class Ciao : public BaseProperty
 {
@@ -91,44 +90,29 @@ class SecondScript : public GameBehaviour
     }
 };
 
-class GameCore : public CMTime
-{
-private:
-    static std::chrono::steady_clock::time_point prevTime;
-
-public:
-    static void update()
-    {
-        std::chrono::steady_clock::time_point currTime = std::chrono::steady_clock::now();
-
-        auto _dt = std::chrono::duration_cast<std::chrono::duration<double>>(currTime - prevTime);
-
-        CMTime::_dt = _dt.count();
-
-        prevTime = currTime;
-    }
-};
-
-std::chrono::steady_clock::time_point GameCore::prevTime = std::chrono::steady_clock::now();
-
 int main(int argc, char ** argv)
 {
 //    MainWindow engineMainWin(800, 600, "CryoMoon Engine");
 //    engineMainWin.Run();
 
-    QApplication app(argc, argv);
+//    QApplication app(argc, argv);
+//
+//    MainWindow mw;
+//
+//    app.setStyle("Fusion");
+//
+//    mw.init();
+//
+//    app.setWindowIcon(QIcon(":/Assets/CryoMoonLogo.ico"));
+//
+//    mw.show();
+//
+//    return app.exec();
 
-    MainWindow mw;
+    wxApp::SetInstance(new App());
+    wxEntry(argc, argv);
 
-    app.setStyle("Fusion");
-
-    mw.init();
-
-    app.setWindowIcon(QIcon(":/Assets/CryoMoonLogo.ico"));
-
-    mw.show();
-
-    return app.exec();
+    return 0;
 
     BaseScript mo;
     SecondScript sc;
