@@ -113,5 +113,6 @@ void main()
 
     vec3 result = (ambient + diffuse) * objectColor + (specular * (1.0 - smoothstep(fresnel * 15.0, .1, 1.0)));
 
-    FragColor = vec4(result, fresnel);
+    vec3 finalCol = vec3(fresnel) * vec3(1.0, 0.0, 0.0);
+    FragColor = vec4(finalCol, fresnel);
 }

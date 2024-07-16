@@ -54,6 +54,10 @@ public:
         return glm::lookAt(_position, _position + _front, _up);
     }
 
+    glm::vec3 front() const { return _front; }
+    glm::vec3 right() const { return _right; }
+    glm::vec3 up() const { return _up; }
+
 private:
     glm::vec3 _position;
 

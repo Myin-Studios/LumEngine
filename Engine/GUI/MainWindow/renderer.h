@@ -130,6 +130,7 @@ private:
     GLuint generateSkyboxTexture();
     void renderSkybox();
     void renderModel(GLuint& vao, GLuint& VBO, GLuint& shaderProgram, const vector<Vertex>& mesh);
+    void setupBuffers();
 
     wxGLContext* m_context;
     bool glewInitialized = false;
@@ -157,7 +158,9 @@ private:
     };
 
     vector<vector<Vertex>> meshes;
-    vector<GLuint> _meshesVAO, _meshesVBO, _shaderPrograms;
+    vector<GLuint> VAOs, _shaderPrograms;
+    std::vector<GLint> firsts;
+    std::vector<GLsizei> counts;
 
     vector<GLfloat> skyboxVertices = {
             // Front face
@@ -310,16 +313,16 @@ void Renderer::update() {
         glm::vec3 targetVel = glm::vec3(0.0f); // Reset target velocity
 
         // Update target velocity based on pressed keys
-        if (keyPressedV.count('W') > 0) targetVel.z -= moveSpeed;
-        if (keyPressedV.count('S') > 0) targetVel.z += moveSpeed;
-        if (keyPressedV.count('A') > 0) targetVel.x -= moveSpeed;
-        if (keyPressedV.count('D') > 0) targetVel.x += moveSpeed;
-        if (keyPressedV.count('Q') > 0) targetVel.y -= moveSpeed / 3.0f;
-        if (keyPressedV.count('E') > 0) targetVel.y += moveSpeed / 3.0f;
-
-        // Smoothly interpolate the camera velocity
-        camVel = glm::mix(camVel, targetVel, .1f); // Use a smoother factor here
-        m_cam.move(camVel);
+        if (keyPressedV.count('W') > 0) m_cam.move(m_cam.front() * moveSpeed);
+        if (keyPressedV.count('S') > 0) m_cam.move(-m_cam.front() * moveSpeed);
+        if (keyPressedV.count('A') > 0) m_cam.move(-m_cam.right() * moveSpeed);
+        if (keyPressedV.count('D') > 0) m_cam.move(m_cam.right() * moveSpeed);
+        if (keyPressedV.count('Q') > 0) m_cam.move(-m_cam.up() * moveSpeed / 3.0f);
+        if (keyPressedV.count('E') > 0) m_cam.move(m_cam.up() * moveSpeed / 3.0f);
+//
+//        // Smoothly interpolate the camera velocity
+//        camVel = glm::mix(camVel, targetVel, .1f); // Use a smoother factor here
+//        m_cam.move(camVel);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -327,6 +330,9 @@ void Renderer::update() {
 
     // Rendering Skybox
     renderSkybox();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     // Use the shader program
     glUseProgram(m_shaderProgram);
@@ -339,18 +345,29 @@ void Renderer::update() {
 
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = m_cam.getViewMat();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 20000.0f);
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projection[0][0]);
     glUniform3fv(colLoc, 1, &glm::vec3(0.0f, 1.0f, 0.0f)[0]);
 
-    // Render the triangle
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
+
+    CHECK_GL_ERROR();
+
+
+    if (!VAOs.empty() && !firsts.empty() && !counts.empty())
+    {
+        if (!meshes.empty())
+        {
+            glBindVertexArray(VAOs.back());
+            glDrawArrays(GL_TRIANGLES, 0, meshes.back().size());
+            glBindVertexArray(0); // Unbind VAO
+        }
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
     SwapBuffers();
     Refresh();
@@ -559,12 +576,12 @@ void Renderer::renderSkybox() {
     GLint modelLoc = glGetUniformLocation(m_skyboxShaderProgram, "model");
     GLint viewLoc = glGetUniformLocation(m_skyboxShaderProgram, "view");
     GLint projLoc = glGetUniformLocation(m_skyboxShaderProgram, "projection");
-    GLint colLoc = glGetUniformLocation(m_skyboxShaderProgram, "col");
+    GLint viewPosLoc = glGetUniformLocation(m_skyboxShaderProgram, "viewPos");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projection[0][0]);
-    glUniform3fv(colLoc, 1, &glm::vec3(1.0f, 0.0f, 0.0f)[0]);
+    glUniform3fv(viewPosLoc, 1, &m_cam.getPos()[0]);
 
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
@@ -574,6 +591,49 @@ void Renderer::renderSkybox() {
 
     glDepthFunc(GL_LESS);
 }
+
+void Renderer::setupBuffers() {
+    // Flatten the mesh data and setup individual VAOs
+    std::vector<Vertex> allVertices;
+    GLint startIndex = 0;
+
+    // Generate VAOs
+    VAOs.resize(meshes.size());
+    glGenVertexArrays(meshes.size(), VAOs.data());
+
+    // Create and bind the VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    for (size_t i = 0; i < meshes.size(); ++i) {
+        const auto& mesh = meshes[i];
+
+        // Accumulate vertices
+        allVertices.insert(allVertices.end(), mesh.begin(), mesh.end());
+
+        // Bind the VAO for this mesh
+        glBindVertexArray(VAOs[i]);
+
+        // Set vertex attribute pointers
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, Position) + startIndex * sizeof(Vertex)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, Normal) + startIndex * sizeof(Vertex)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, TexCoord) + startIndex * sizeof(Vertex)));
+
+        firsts.push_back(startIndex);
+        counts.push_back(mesh.size());
+        startIndex += mesh.size();
+    }
+
+    // Upload the vertex data to the GPU after setting up all VAOs
+    glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(Vertex), allVertices.data(), GL_STATIC_DRAW);
+
+    // Unbind VAO
+    glBindVertexArray(0);
+}
+
 
 void Renderer::renderModel(GLuint &vao, GLuint &vbo, GLuint& shaderProgram, const vector<Vertex> &mesh) {
 
@@ -588,55 +648,34 @@ void Renderer::renderModel(GLuint &vao, GLuint &vbo, GLuint& shaderProgram, cons
     // Pulizia del buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Generazione e binding del VAO e VBO
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh.size() * sizeof(Vertex), mesh.data(), GL_STATIC_DRAW);
-
-
-    // Abilita e specifica i puntatori agli attributi dei vertici
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Position));
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoord));
+    setupBuffers();
 
     // Carica e usa lo shader program
-    LoadShader("../../Engine/Shaders/base_vert.glsl", "../../Engine/Shaders/base_frag.glsl", shaderProgram);
-    glUseProgram(shaderProgram);
-    cout << shaderProgram << endl;
-
-    // Set uniform matrices and vectors
-    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
-
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = m_cam.getViewMat();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projection[0][0]);
-
-    // Abilita depth test e face culling
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-    // Chiamata a glDrawArrays
-    glDrawArrays(GL_TRIANGLES, 0, mesh.size());
-
-    // Unbind VAO
-    glBindVertexArray(0);
-
-    // Controllo errori
-    CHECK_GL_ERROR();
+    LoadShader("../../Engine/Shaders/base_vert.glsl", "../../Engine/Shaders/frag.glsl", m_shaderProgram);
+//    glUseProgram(m_shaderProgram);
+//    cout << m_shaderProgram << endl;
+//
+//    // Set uniform matrices and vectors
+//    GLint modelLoc = glGetUniformLocation(m_shaderProgram, "model");
+//    GLint viewLoc = glGetUniformLocation(m_shaderProgram, "view");
+//    GLint projLoc = glGetUniformLocation(m_shaderProgram, "projection");
+//    GLint viewPosLoc = glGetUniformLocation(m_shaderProgram, "viewLoc");
+//    glm::mat4 model = glm::mat4(1.0f);
+//    glm::mat4 view = m_cam.getViewMat();
+//    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+//
+//    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+//    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+//    glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projection[0][0]);
+//
+//    CHECK_GL_ERROR();
+//
+//    // Abilita depth test e face culling
+//    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_CULL_FACE);
+//
+//    // Unbind VAO
+//    glBindVertexArray(0);
 
     // Aggiornamento
     update();
@@ -657,7 +696,7 @@ void Renderer::modelImporter(const std::string &fileName) {
 
     vector<glm::vec3> indices;
 
-    bool beginPos = false, beginNor = false, beginTex = false, beginIdx = false;
+    bool beginPos = false, beginNor = false, beginTex = false, beginIdx = false, beginNam = false;
 
     bool hasTexCoordInfo = false;
 
@@ -670,6 +709,7 @@ void Renderer::modelImporter(const std::string &fileName) {
         if (token == "v")
         {
             beginPos = true;
+            beginNam = false;
             continue;
         }
         else if (token == "vn")
@@ -690,6 +730,12 @@ void Renderer::modelImporter(const std::string &fileName) {
             line >> token;
             continue;
         }
+        else if (token == "o")
+        {
+            line >> token;
+            beginNam = true;
+            continue;
+        }
         else if (token == "f")
         {
             beginIdx = true;
@@ -697,7 +743,7 @@ void Renderer::modelImporter(const std::string &fileName) {
             continue;
         }
 
-        if (beginPos)
+        if (beginPos && !beginNam)
         {
             v.Position[vecPos++] = stof(token);
 
@@ -706,7 +752,6 @@ void Renderer::modelImporter(const std::string &fileName) {
                 positions.push_back(v.Position);
                 vecPos = 0;
             }
-
         }
         else if (beginNor && !beginTex && !beginIdx)
         {
@@ -749,7 +794,10 @@ void Renderer::modelImporter(const std::string &fileName) {
                 {
                     indexData[vecPos++] = stoi(valToken);
 
-                    if (vecPos > 2) vecPos = 0;
+                    if (vecPos > 2)
+                    {
+                        vecPos = 0;
+                    }
                 }
                 else
                 {
@@ -765,6 +813,7 @@ void Renderer::modelImporter(const std::string &fileName) {
 
             if (hasTexCoordInfo)
             {
+
                 fixedVert.Position = glm::vec3(positions[indexData[0] - 1]);
                 fixedVert.TexCoord = glm::vec2(texcoords[indexData[1] - 1]);
                 fixedVert.Normal = glm::vec3(normals[indexData[2] - 1]);
