@@ -1,8 +1,9 @@
-.vs/
-x64/
-cmake-build-debug/
-.idea/
-*.qtvscr
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+/Testing
+/CMEngine_autogen
+/cmake-build-debug
+/cmake-build-debug_win
+.idea
+.cmake
+cmake_install.cmake
+Makefile
+qrc_res.cpp
