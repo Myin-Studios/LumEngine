@@ -4,7 +4,7 @@ This is a Myin Studios open source project.
 
 ### **Make sure you have all the dependencies below in your device before building project! :)**
 - OpenGL
-- GLFW3
+- Qt 6.6.0 or later
 
 # Avvertenza (ITA)
 Questo è un progetto open source di Myin Studios.
@@ -12,7 +12,7 @@ Questo è un progetto open source di Myin Studios.
 
 ### **Assicurati di avere tutte le dipendenze qui sotto nel tuo dispositivo prima di fare una build del progetto! :)**
 - OpenGL
-- GLFW3
+- Qt 6.6.0 o successivo
 
 # Advertencia (ESP)
 Este es un proyecto de còdigo abierto de Myin Studios.
@@ -20,5 +20,4 @@ Este es un proyecto de còdigo abierto de Myin Studios.
 
 ### **Asegùrase de tener todas las dependecias siguintes en su dispositivo antes de realizar una compilaciòn del proyecto! :)**
 - OpenGL
-- GLFW3
-
+- Qt 6.6.0 o más tarde
