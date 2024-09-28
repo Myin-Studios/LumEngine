@@ -79,15 +79,36 @@ void Shader::use() const
 
 void Shader::setBool(const std::string &name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform1i(loc, (int)value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
 }
 
 void Shader::setInt(const std::string &name, int value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform1i(loc, value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
 }
 
 void Shader::setFloat(const std::string &name, float value) const
 {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform1f(loc, value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+}
+
+void Shader::setMat4x4(const std::string &name, const float* value) const
+{
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniformMatrix4fv(loc, 1, GL_FALSE, value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
 }

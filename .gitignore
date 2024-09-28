@@ -5,5 +5,4 @@
 .idea
 .cmake
 cmake_install.cmake
-Makefile
 qrc_res.cpp

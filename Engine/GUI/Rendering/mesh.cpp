@@ -25,13 +25,30 @@ void Mesh::setupMesh()
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+    RendererDebugger::checkOpenGLError("glEnableVertexAttribArray: 0");
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+
+    RendererDebugger::checkOpenGLError("glVertexAttribPointer: 0");
+
     // vertex normals
     glEnableVertexAttribArray(1);
+
+    RendererDebugger::checkOpenGLError("glEnableVertexAttribArray: 1");
+
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+
+    RendererDebugger::checkOpenGLError("glVertexAttribPointer: 1");
+
     // vertex texture coords
     glEnableVertexAttribArray(2);
+
+    RendererDebugger::checkOpenGLError("glEnableVertexAttribArray: 2");
+
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+    RendererDebugger::checkOpenGLError("glVertexAttribPointer: 2");
 
     glBindVertexArray(0);
 
@@ -58,14 +75,17 @@ void Mesh::Draw(Shader &shader) const
 //    }
 //    glActiveTexture(GL_TEXTURE0);
 
-    shader.use();
-
     // draw mesh
 
     RendererDebugger::checkOpenGLError("shader usage");
 
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    if (currentProgram != shader.ID) {
+        std::cerr << "Shader program not active!" << std::endl;
+    }
 
     RendererDebugger::checkOpenGLError("mesh VAO binding");
 

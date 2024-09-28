@@ -3,6 +3,8 @@
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
 #include "glm/vec2.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QOpenGLFramebufferObject>
@@ -38,6 +40,8 @@ protected:
     void dropEvent(QDropEvent *event) override;
 
 private:
+    void checkFrameBufferError();
+    void setupFrameBuffer();
     void cleanup();
     void loadModel(const QString& path);
     bool loadOBJ(const QString& path);
@@ -45,4 +49,21 @@ private:
     Mesh* model = nullptr;
     vector<Mesh> models;
     Shader* s = nullptr;
+
+    unsigned int FBO;
+    unsigned int fboTexture;
+    unsigned int RBO;
+    unsigned int screenVAO;
+    unsigned int screenVBO;
+    vector<GLfloat> screenQuad = {
+            // Coords    // texCoords
+            1.0f, -1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f,  0.0f, 0.0f,
+            -1.0f,  1.0f,  0.0f, 1.0f,
+
+            1.0f,  1.0f,  1.0f, 1.0f,
+            1.0f, -1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f,  0.0f, 1.0f
+    };
+    Shader* fboShader = nullptr;
 };

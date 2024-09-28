@@ -42,7 +42,6 @@ GuiBuilder::GuiBuilder()
 GuiBuilder::~GuiBuilder()
 {
     delete scene;
-
     delete topPanel;
     delete mainWindow;
 }
