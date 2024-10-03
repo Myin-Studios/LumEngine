@@ -12,6 +12,7 @@
 
 #include "shader.h"
 #include "rendererDebugger.h"
+#include "Engine/Math/Transforms.h"
 
 using namespace std;
 
@@ -29,7 +30,8 @@ struct Texture {
 class Mesh
 {
 public:
-    vector<Vertex>       vertices;
+    vector<Vertex> vertices;
+    Transform3D* transform = nullptr;
 
     Mesh() = default;
     ~Mesh();

@@ -2,6 +2,13 @@
 
 Mesh::Mesh(vector<Vertex> vertices)
         : vertices(std::move(vertices)) {
+
+    transform = new Transform3D();
+
+    transform->position = {0.0f, 0.0f, 0.0f};
+    transform->rotation = {0.0f, 0.0f, 0.0f};
+    transform->scale = {1.0f, 1.0f, 1.0f};
+
     setupMesh();
 }
 
@@ -74,6 +81,14 @@ void Mesh::Draw(Shader &shader) const
 //        glBindTexture(GL_TEXTURE_2D, textures[i].id);
 //    }
 //    glActiveTexture(GL_TEXTURE0);
+
+    shader.use();
+
+    glm::mat3 pMat = {transform->position.x(), 0.0f, 0.0f,
+                      0.0f, transform->position.y(), 0.0f,
+                      0.0f, 0.0f, transform->position.z()};
+
+    shader.setMat4x4("model", &pMat[0][0]);
 
     // draw mesh
 

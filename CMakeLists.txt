@@ -22,7 +22,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(DEFINED ENV{GLEW_ROOT})
         set(GLEW_ROOT $ENV{GLEW_ROOT})
         # Aggiungi il percorso alle directory include e lib
-        include_directories("${GLEW_ROOT}/include")
+        include_directories("${GLEW_ROOT}/include"
+                            "$ENV{Path}")
         include_directories($ENV{GLM})
         link_directories("${GLEW_ROOT}/lib/Release/x64")
     else()
@@ -62,11 +63,14 @@ add_executable(CMEngine
         Engine/GUI/Rendering/shader.cpp
         Engine/GUI/Rendering/mesh.cpp
         Engine/GUI/Rendering/rendererDebugger.h
+        Engine/Core/CMAPICore.h
+        Engine/Math/Transforms.h
+        Engine/Math/Math.h
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Aggiungi le directory di inclusione e librerie per GLEW
-    target_include_directories(CMEngine PRIVATE "${GLEW_ROOT}/include")
+    target_include_directories(CMEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE "${GLEW_ROOT}/include")
     target_link_directories(CMEngine PRIVATE "${GLEW_ROOT}/lib/Release/x64")
 
     target_link_libraries(CMEngine PRIVATE
@@ -77,6 +81,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             Qt::OpenGLWidgets
             glew32s
             opengl32
+            "C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Host.win-x64/8.0.8/runtimes/win-x64/native/nethost.lib"
     )
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

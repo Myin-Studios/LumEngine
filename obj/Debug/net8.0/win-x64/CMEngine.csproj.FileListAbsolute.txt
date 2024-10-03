@@ -1,0 +1,12 @@
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.GeneratedMSBuildEditorConfig.editorconfig
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.AssemblyInfoInputs.cache
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.AssemblyInfo.cs
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.csproj.CoreCompileInputs.cache
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.sourcelink.json
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMEngine.deps.json
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMEngine.dll
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMEngine.pdb
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.dll
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\refint\CMEngine.dll
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMEngine.pdb
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\ref\CMEngine.dll

@@ -29,21 +29,28 @@ void Renderer::initializeGL()
 void Renderer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+
+    glBindTexture(GL_TEXTURE_2D, fboTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
 }
 
 void Renderer::paintGL()
 {
     makeCurrent();
-
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+//
+//    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClearColor(0.1, 0.1, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
+    RendererDebugger::checkOpenGLError("FBO binding - rendering phase");
+
     if (s != nullptr)
     {
         s->use();
-        s->setMat4x4("model", &glm::mat4(1.0f)[0][0]);
         s->setMat4x4("view", &glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))[0][0]);
         s->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
 
@@ -56,54 +63,80 @@ void Renderer::paintGL()
         }
     }
 
-    fboShader->use();
-    glDisable(GL_DEPTH_TEST);
+    RendererDebugger::checkOpenGLError("after model loading");
 
-    glBindVertexArray(screenVAO);
-    glDisable(GL_DEPTH_TEST);
-    glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // second pass
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//
+//    fboShader->use();
+//    glBindVertexArray(screenVAO);
+//    glDisable(GL_DEPTH_TEST);
+//    glBindTexture(GL_TEXTURE_2D, fboTexture);
+//    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     RendererDebugger::checkOpenGLError("rendering");
 }
 
 void Renderer::checkFrameBufferError()
 {
-    switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
-    {
-        case !GL_FRAMEBUFFER_COMPLETE:
-        {
-            cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-        }
-        default:
-        {
-            return;
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        switch(status) {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                std::cout << "GL_FRAMEBUFFER_UNDEFINED" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                std::cout << "GL_FRAMEBUFFER_UNSUPPORTED" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                std::cout << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS" << std::endl;
+                break;
+            default:
+                std::cout << "Unknown framebuffer error: " << status << std::endl;
+                break;
         }
     }
 }
 
 void Renderer::setupFrameBuffer()
 {
+    makeCurrent();
+
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenRenderbuffers(1, &RBO);
     glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->width(), this->height());
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
-    checkFrameBufferError();
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteFramebuffers(1, &FBO);
 
     glGenVertexArrays(1, &screenVAO);
     glGenBuffers(1, &screenVBO);
@@ -121,6 +154,8 @@ void Renderer::setupFrameBuffer()
 
     glBindVertexArray(0);
 
+    checkFrameBufferError();
+
     RendererDebugger::checkOpenGLError("setting up screen buffers");
 
     fboShader = new Shader("../Engine/Resources/Shaders/fboVertex.glsl", "../Engine/Resources/Shaders/fboFragment.glsl");
@@ -135,6 +170,7 @@ void Renderer::cleanup()
         delete s;
         s = nullptr;
     }
+
 
     doneCurrent();
 }

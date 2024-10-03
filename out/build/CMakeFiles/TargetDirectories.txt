@@ -1,0 +1,5 @@
+D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMakeFiles/CMEngine.dir
+D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMakeFiles/edit_cache.dir
+D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMakeFiles/rebuild_cache.dir
+D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMakeFiles/CMEngine_autogen_timestamp_deps.dir
+D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMakeFiles/CMEngine_autogen.dir

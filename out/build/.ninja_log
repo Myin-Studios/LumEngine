@@ -1,0 +1,39 @@
+# ninja log v5
+12	2468	7495878677004817	CMEngine_autogen/timestamp	2a4865587f4bea1c
+2469	2703	7495878680120403	D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/qrc_res.cpp	c35fc1a85e0ae6e6
+2740	12094	7495878773951170	CMakeFiles/CMEngine.dir/Engine/GUI/guibuilder.cpp.obj	83ce057a3dbb2522
+12	2468	7495878677004817	CMEngine_autogen/mocs_compilation.cpp	2a4865587f4bea1c
+12	2468	7495878677004817	D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMEngine_autogen/timestamp	2a4865587f4bea1c
+12	2468	7495878677004817	D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMEngine_autogen/mocs_compilation.cpp	2a4865587f4bea1c
+2469	2703	7495878680120403	qrc_res.cpp	c35fc1a85e0ae6e6
+2788	3528	7495878688298451	CMakeFiles/CMEngine.dir/qrc_res.cpp.obj	30562708e29199d9
+2720	12534	7495878778427266	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/renderer.cpp.obj	be2b9e6faf74631a
+2776	6609	7495878719077701	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/shader.cpp.obj	67f92fecf4833eaa
+2782	6615	7495878719137694	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/mesh.cpp.obj	caa84e05b3b00ba0
+2762	9629	7495878749308032	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/utilsbutton.cpp.obj	e1a581cc49fb9d9d
+2733	9644	7495878749553236	CMakeFiles/CMEngine.dir/Engine/GUI/Panels/panel.cpp.obj	5d86b5a9884f12c9
+2754	9712	7495878750213334	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/basebutton.cpp.obj	55b9640c7354448
+2770	9801	7495878751088600	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/tabsbutton.cpp.obj	dc758cccbce8405a
+2726	9814	7495878751238577	CMakeFiles/CMEngine.dir/Engine/GUI/Windows/mainwindow.cpp.obj	bbb74451f41d74ca
+2748	9866	7495878751790414	CMakeFiles/CMEngine.dir/Engine/GUI/Panels/properties.cpp.obj	1fc39338c0b0f0ae
+2708	12348	7495878776566834	CMakeFiles/CMEngine.dir/main.cpp.obj	8eaf04ece4f1c98b
+2703	12233	7495878775376457	CMakeFiles/CMEngine.dir/CMEngine_autogen/mocs_compilation.cpp.obj	8c64d224f27bc1e6
+12534	16796	7495878795198555	CMEngine.exe	b3395f84d0ff8089
+131	1795	7495880117908496	CMEngine_autogen/timestamp	a8340138aa939e96
+131	1795	7495880117908496	CMEngine_autogen/mocs_compilation.cpp	a8340138aa939e96
+131	1795	7495880117908496	D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMEngine_autogen/timestamp	a8340138aa939e96
+131	1795	7495880117908496	D:/Progetti/Dev/Engine/New/CMEngine (Linux)/CMEngine/out/build/CMEngine_autogen/mocs_compilation.cpp	a8340138aa939e96
+1869	2874	7495880129401629	CMakeFiles/CMEngine.dir/qrc_res.cpp.obj	b3a26666ddd63a85
+1858	4568	7495880146141770	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/shader.cpp.obj	b7446868e2f145c0
+1864	4691	7495880147447075	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/mesh.cpp.obj	d3f3d240f109b268
+1846	7205	7495880172669605	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/utilsbutton.cpp.obj	fcef0e9c74d34049
+1822	7233	7495880172959653	CMakeFiles/CMEngine.dir/Engine/GUI/Panels/panel.cpp.obj	3a0db7840bc69a4a
+1841	7246	7495880173089751	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/basebutton.cpp.obj	b890676d9a2f67a4
+1852	7252	7495880173174928	CMakeFiles/CMEngine.dir/Engine/GUI/Buttons/tabsbutton.cpp.obj	f6cacd929039c710
+1815	7308	7495880173764923	CMakeFiles/CMEngine.dir/Engine/GUI/Windows/mainwindow.cpp.obj	ad2bd65933a3fdc5
+1834	7374	7495880174440203	CMakeFiles/CMEngine.dir/Engine/GUI/Panels/properties.cpp.obj	f87e929a26bc46d0
+1795	8967	7495880190326642	CMakeFiles/CMEngine.dir/CMEngine_autogen/mocs_compilation.cpp.obj	bae5e1475838a3aa
+1829	9105	7495880191691864	CMakeFiles/CMEngine.dir/Engine/GUI/guibuilder.cpp.obj	e6e5f19ff81eb9e2
+1799	9225	7495880192895258	CMakeFiles/CMEngine.dir/main.cpp.obj	fe86f588f1ecb295
+1808	9334	7495880194010531	CMakeFiles/CMEngine.dir/Engine/GUI/Rendering/renderer.cpp.obj	754ab3ec66f0242d
+9334	11576	7495880196021955	CMEngine.exe	d2651734b2d38388

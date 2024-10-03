@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Assets/CryoMoonLogo.ico</file>
+        <file>Assets/Buttons/PlayButton.png</file>
+
+        <file>Icons/CMEngine_Logo.svg</file>
+
+        <file>Icons/New/CMEngine_PlayHover.svg</file>
+        <file>Icons/New/CMEngine_PlayInactive.svg</file>
+        <file>Icons/New/CMEngine_Play.svg</file>
+        <file>Icons/New/CMEngine_Pause.svg</file>
+        <file>Icons/New/CMEngine_PauseHover.svg</file>
+        <file>Icons/New/CMEngine_PauseInactive.svg</file>
+        <file>Icons/New/CMEngine_Tabs.svg</file>
+        <file>Icons/New/CMEngine_TabsHover.svg</file>
+
+        <file>Shaders/vertexShader.glsl</file>
+        <file>Shaders/fragmentShader.glsl</file>
+        <file>Shaders/baseVert.glsl</file>
+        <file>Shaders/baseFrag.glsl</file>
+    </qresource>
+</RCC>
