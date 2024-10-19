@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="File di origine">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="File di intestazione">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="File di risorse">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Engine\Resources\res.qrc.depends" />
+    <None Include="IcyEngine.qtvscr" />
+    <None Include="Engine\Resources\Shaders\baseFrag.glsl" />
+    <None Include="Engine\Resources\Shaders\baseVert.glsl" />
+    <None Include="Engine\Resources\Shaders\fboFragment.glsl" />
+    <None Include="Engine\Resources\Shaders\fboVertex.glsl" />
+    <None Include="Engine\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Engine\Resources\Shaders\vertexShader.glsl" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_File.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_New.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Open.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Pause_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Pause_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Play_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Script.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Settings.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Logo.svg" />
+    <None Include="Engine\Resources\Icons\MyinLogo_WhiteBlue.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Build.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_BuildHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_BuildInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Folder.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_FolderHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_FolderInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Pause.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PauseHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PauseInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Play.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PlayHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PlayInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Tabs.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Core\CMAPICore.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\scriptingThreading.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Buttons\basebutton.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Panels\properties.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\mesh.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\shader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\guibuilder.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Math.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Transforms.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Engine\Core\hostInitializer.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Panels\panel.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Rendering\renderer.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Windows\mainwindow.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Console\console.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Console\consoleOutput.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Buttons\tabsbutton.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Panels\panel.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Panels\properties.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Rendering\mesh.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Rendering\renderer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Rendering\shader.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\guibuilder.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Engine\Resources\res.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Engine\Resources\Icons\CMEngine_Logo.ico">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\CryoMoonLogo.ico">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\CMEIcon.ico">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\CryoMoonEngineLogo.png">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\Buttons\BaseButton.png">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\Buttons\PauseButton.png">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\Buttons\PlayButton.png">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\Buttons\StopButton.png">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\Buttons\Bitmaps\PlayButton.bmp">
+      <Filter>File di risorse</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Engine\Resources\Assets\Fonts\Comfortaa-VariableFont_wght.ttf" />
+  </ItemGroup>
+</Project>

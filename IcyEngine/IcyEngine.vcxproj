@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_File.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_New.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Open.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Pause_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Pause_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Play_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save_Active.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Save_Inactive.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Script.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Icon_Settings.svg" />
+    <None Include="Engine\Resources\Icons\CMEngine_Logo.svg" />
+    <None Include="Engine\Resources\Icons\MyinLogo_WhiteBlue.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Build.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_BuildHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_BuildInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Folder.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_FolderHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_FolderInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Pause.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PauseHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PauseInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Play.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PlayHover.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_PlayInactive.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_Tabs.svg" />
+    <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
+    <None Include="Engine\Resources\res.qrc.depends" />
+    <None Include="Engine\Resources\Shaders\baseFrag.glsl" />
+    <None Include="Engine\Resources\Shaders\baseVert.glsl" />
+    <None Include="Engine\Resources\Shaders\fboFragment.glsl" />
+    <None Include="Engine\Resources\Shaders\fboVertex.glsl" />
+    <None Include="Engine\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Engine\Resources\Shaders\vertexShader.glsl" />
+    <None Include="IcyEngine.qtvscr" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
+    <ClInclude Include="Engine\Core\CMAPICore.h" />
+    <ClInclude Include="Engine\Core\scriptingThreading.h" />
+    <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
+    <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
+    <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
+    <QtMoc Include="Engine\GUI\Console\console.h" />
+    <QtMoc Include="Engine\GUI\Console\consoleOutput.h" />
+    <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h" />
+    <ClInclude Include="Engine\GUI\guibuilder.h" />
+    <ClInclude Include="Engine\GUI\Panels\properties.h" />
+    <ClInclude Include="Engine\GUI\Rendering\mesh.h" />
+    <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h" />
+    <ClInclude Include="Engine\GUI\Rendering\shader.h" />
+    <ClInclude Include="Engine\Math\Math.h" />
+    <ClInclude Include="Engine\Math\Transforms.h" />
+    <QtMoc Include="Engine\GUI\Windows\mainwindow.h" />
+    <QtMoc Include="Engine\GUI\Rendering\renderer.h" />
+    <QtMoc Include="Engine\GUI\Panels\panel.h" />
+    <QtMoc Include="Engine\GUI\Loading\loadingWindow.h" />
+    <QtMoc Include="Engine\Core\hostInitializer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp" />
+    <ClCompile Include="Engine\GUI\Buttons\tabsbutton.cpp" />
+    <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp" />
+    <ClCompile Include="Engine\GUI\guibuilder.cpp" />
+    <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
+    <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
+    <ClCompile Include="Engine\GUI\Rendering\mesh.cpp" />
+    <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
+    <ClCompile Include="Engine\GUI\Rendering\shader.cpp" />
+    <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Engine\Resources\res.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Engine\Resources\Assets\Buttons\BaseButton.png" />
+    <Image Include="Engine\Resources\Assets\Buttons\Bitmaps\PlayButton.bmp" />
+    <Image Include="Engine\Resources\Assets\Buttons\PauseButton.png" />
+    <Image Include="Engine\Resources\Assets\Buttons\PlayButton.png" />
+    <Image Include="Engine\Resources\Assets\Buttons\StopButton.png" />
+    <Image Include="Engine\Resources\Assets\CMEIcon.ico" />
+    <Image Include="Engine\Resources\Assets\CryoMoonEngineLogo.png" />
+    <Image Include="Engine\Resources\Assets\CryoMoonLogo.ico" />
+    <Image Include="Engine\Resources\Icons\CMEngine_Logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Engine\Resources\Assets\Fonts\Comfortaa-VariableFont_wght.ttf" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{934275d7-046b-41bd-b720-62231f376331}</ProjectGuid>
+    <RootNamespace>IcyEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <Keyword>QtVS_v304</Keyword>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(QtMsBuild)\qt_defaults.props" Condition="Exists('$(QtMsBuild)\qt_defaults.props')" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(GLEW_LIB);$(GLM);$(Qt6_DIR)/lib;$(NETHOST_LIB);$(GLEW_ROOT)/lib/Release/x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(GLEW_ROOT)/include;$(GLM);$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST_LIB);$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32s.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLEW_LIB);$(Qt6_DIR)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreLinkEvent>
+      <Command>
+      </Command>
+    </PreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

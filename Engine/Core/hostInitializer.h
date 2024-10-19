@@ -1,8 +1,0 @@
-//
-// Created by darkd on 06/10/2024.
-//
-
-#ifndef CMENGINE_HOSTINITIALIZER_H
-#define CMENGINE_HOSTINITIALIZER_H
-
-#endif //CMENGINE_HOSTINITIALIZER_H

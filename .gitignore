@@ -1,8 +1,0 @@
-/Testing
-/CMEngine_autogen
-/cmake-build-debug
-/cmake-build-debug_win
-.idea
-.cmake
-cmake_install.cmake
-qrc_res.cpp

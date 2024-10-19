@@ -1,8 +1,0 @@
-//
-// Created by darkd on 06/10/2024.
-//
-
-#ifndef CMENGINE_LOADINGWINDOW_H
-#define CMENGINE_LOADINGWINDOW_H
-
-#endif //CMENGINE_LOADINGWINDOW_H

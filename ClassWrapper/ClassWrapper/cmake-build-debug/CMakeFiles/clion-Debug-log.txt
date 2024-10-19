@@ -1,6 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -G "Visual Studio 17 2022" -S "D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper" -B "D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\cmake-build-debug"
--- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.22631.
--- Configuring done (0.0s)
-CMake Error: CMake can not determine linker language for target: IcyClassWrapper
--- Generating done (0.1s)
-CMake Generate step failed.  Build files cannot be regenerated correctly.

@@ -1,5 +1,0 @@
-D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\x64\Debug\Ijwhost.dll
-D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\x64\Debug\ClassWrapper.deps.json
-D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\x64\Debug\ClassWrapper.runtimeconfig.json
-D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\ClassWrapper\x64\Debug\ClassWrapper.sourcelink.json
-D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\ClassWrapper\ClassWrapper\ClassWrapper\x64\Debug\ClassWrapper.genruntimeconfig.cache

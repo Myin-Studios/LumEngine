@@ -1,0 +1,6 @@
+IcyEngine/
+obj/
+out/
+x64/
+
+corehost.log
