@@ -1,0 +1,20 @@
+^D:\PROJECTS\DEV\ENGINE\NEW\CMENGINE (LINUX)\CMENGINE\ENGINE\RESOURCES\RES.QRC
+setlocal
+C:\Qt\6.7.2\msvc2019_64\.\bin\rcc.exe --no-zstd --name res --output "D:/Projects/Dev/Engine/New/CMEngine (Linux)/CMEngine/Build/qrc_res.cpp" "D:/Projects/Dev/Engine/New/CMEngine (Linux)/CMEngine/Engine/Resources/res.qrc"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\PROJECTS\DEV\ENGINE\NEW\CMENGINE (LINUX)\CMENGINE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/Projects/Dev/Engine/New/CMEngine (Linux)/CMEngine" "-BD:/Projects/Dev/Engine/New/CMEngine (Linux)/CMEngine/Build" --check-stamp-file "D:/Projects/Dev/Engine/New/CMEngine (Linux)/CMEngine/Build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

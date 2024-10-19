@@ -1,0 +1,12 @@
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMScripting.deps.json
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMScripting.dll
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Debug\net8.0\win-x64\CMScripting.pdb
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.AssemblyInfoInputs.cache
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.AssemblyInfo.cs
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.csproj.CoreCompileInputs.cache
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.sourcelink.json
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.dll
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\refint\CMScripting.dll
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\CMScripting.pdb
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Debug\net8.0\win-x64\ref\CMScripting.dll

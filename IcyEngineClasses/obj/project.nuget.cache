@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "L2NWz+H2MbvJ7hEs1oNB0wqtGg6irCTt0iCmFQPHlSpNlSfwthABaYopk1glDK4TYXvW+ASoSD46YaKQQRA83Q==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\Dev\\Engine\\New\\CMEngine (Linux)\\CMEngine\\IcyEngineClasses\\IcyEngineClasses.vcxproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\darkd\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.26100.34\\microsoft.windows.sdk.net.ref.10.0.26100.34.nupkg.sha512"
+  ],
+  "logs": []
+}

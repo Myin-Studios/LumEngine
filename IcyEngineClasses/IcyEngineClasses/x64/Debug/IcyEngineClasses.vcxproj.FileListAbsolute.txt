@@ -1,0 +1,5 @@
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\IcyEngineClasses\x64\Debug\Ijwhost.dll
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\IcyEngineClasses\x64\Debug\IcyEngineClasses.deps.json
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\IcyEngineClasses\x64\Debug\IcyEngineClasses.runtimeconfig.json
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\IcyEngineClasses\IcyEngineClasses\x64\Debug\IcyEngineClasses.sourcelink.json
+D:\Projects\Dev\Engine\New\CMEngine (Linux)\CMEngine\IcyEngineClasses\IcyEngineClasses\x64\Debug\IcyEngineClasses.genruntimeconfig.cache

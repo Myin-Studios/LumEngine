@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>CMScripting</AssemblyName>
+    <RootNamespace>CMScripting</RootNamespace>
+  </PropertyGroup>
+
+  <target Name="CopyDLLs" AfterTargets="Publish">
+    <Copy SourceFiles="cmake-build-debug_win\CMEngine.dll" DestinationFolder="$(OutputPath)" />
+  </target>
+</Project>

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "SyXh4mboVUUVHR3/8ugoEoYMJi0T5+GDAfrWpl+Ig0s39vVD00520yxt81T5GqXqaeLtJ1oKiON45h2inyb9ew==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\Dev\\Engine\\New\\CMEngine (Linux)\\CMEngine\\ClassWrapper\\ClassWrapper\\ClassWrapper.vcxproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\darkd\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.26100.34\\microsoft.windows.sdk.net.ref.10.0.26100.34.nupkg.sha512"
+  ],
+  "logs": []
+}

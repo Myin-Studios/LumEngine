@@ -1,0 +1,5 @@
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Release\net8.0\CMEngine.GeneratedMSBuildEditorConfig.editorconfig
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Release\net8.0\CMEngine.AssemblyInfoInputs.cache
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Release\net8.0\CMEngine.AssemblyInfo.cs
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Release\net8.0\CMEngine.csproj.CoreCompileInputs.cache
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\obj\Release\net8.0\CMEngine.sourcelink.json

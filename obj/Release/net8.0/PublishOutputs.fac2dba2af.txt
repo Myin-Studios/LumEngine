@@ -1,0 +1,3 @@
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Release\net8.0\publish\CMEngine.dll
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Release\net8.0\publish\CMEngine.deps.json
+D:\Progetti\Dev\Engine\New\CMEngine (Linux)\CMEngine\bin\Release\net8.0\publish\CMEngine.pdb
