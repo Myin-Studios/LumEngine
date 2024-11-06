@@ -575,6 +575,25 @@ public:
 	{
 		return {_x + s, _y + s, _z + s};
 	}
+
+    inline Vec3Core& operator+=(const Vec3Core& v)
+    {
+        this->_x += v.x();
+        this->_y += v.y();
+        this->_z += v.z();
+
+        return *this;
+    }
+
+    inline Vec3Core& operator+=(const double s)
+    {
+        this->_x += s;
+        this->_y += s;
+        this->_z += s;
+
+        return *this;
+	}
+
     inline Vec3Core operator-(const Vec3Core& v) const
 	{
 		return {_x - v._x, _y - v._y, _z - v._z};

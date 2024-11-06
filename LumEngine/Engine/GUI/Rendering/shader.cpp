@@ -7,10 +7,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
 
-    if (!std::filesystem::exists(vertexPath)) {
+    if (!std::filesystem::exists(std::filesystem::absolute(std::filesystem::path(vertexPath)))) {
         std::cerr << "Vertex shader file does not exist: " << vertexPath << std::endl;
     }
-    if (!std::filesystem::exists(fragmentPath)) {
+    if (!std::filesystem::exists(std::filesystem::absolute(std::filesystem::path(fragmentPath)))) {
         std::cerr << "Fragment shader file does not exist: " << fragmentPath << std::endl;
     }
 
@@ -19,8 +19,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     try
     {
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
+        vShaderFile.open(std::filesystem::absolute(std::filesystem::path(vertexPath)).string());
+        fShaderFile.open(std::filesystem::absolute(std::filesystem::path(fragmentPath)).string());
 
         stringstream vs;
         vs << vShaderFile.rdbuf();
@@ -116,6 +116,24 @@ void Shader::setFloat(const std::string &name, float value) const
         cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
 }
 
+void Shader::setFloatArray(const string& name, GLsizei count, const float* value) const
+{
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform1fv(loc, count, value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
+}
+
+void Shader::setVec3(const string& name, glm::vec3 v3) const
+{
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform3f(loc, v3.x, v3.y, v3.z);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
+}
+
 void Shader::setMat4x4(const std::string &name, const float* value) const
 {
     GLint loc = glGetUniformLocation(ID, name.c_str());
@@ -123,4 +141,13 @@ void Shader::setMat4x4(const std::string &name, const float* value) const
 
     if (loc < 0)
         cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+}
+
+void Shader::setVec3Array(const string& name, GLsizei count, const float* value) const
+{
+    GLint loc = glGetUniformLocation(ID, name.c_str());
+    glUniform3fv(loc, count, value);
+
+    if (loc < 0)
+        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
 }

@@ -54,6 +54,8 @@
     <None Include="Engine\Resources\Shaders\fboFragment.glsl" />
     <None Include="Engine\Resources\Shaders\fboVertex.glsl" />
     <None Include="Engine\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Engine\Resources\Shaders\PBRFrag.glsl" />
+    <None Include="Engine\Resources\Shaders\PBRVert.glsl" />
     <None Include="Engine\Resources\Shaders\vertexShader.glsl" />
     <None Include="IcyEngine.qtvscr" />
   </ItemGroup>
@@ -69,6 +71,10 @@
     <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h" />
     <ClInclude Include="Engine\GUI\guibuilder.h" />
     <ClInclude Include="Engine\GUI\Panels\properties.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Colors\colors.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Lighting\lighting.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Materials\materials.h" />
     <ClInclude Include="Engine\GUI\Rendering\mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h" />
     <ClInclude Include="Engine\GUI\Rendering\shader.h" />
@@ -87,10 +93,12 @@
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
+    <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\mesh.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\shader.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
+    <ClCompile Include="Engine\Math\Transforms.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +113,7 @@
     <Image Include="Engine\Resources\Assets\CMEIcon.ico" />
     <Image Include="Engine\Resources\Assets\CryoMoonEngineLogo.png" />
     <Image Include="Engine\Resources\Assets\CryoMoonLogo.ico" />
+    <Image Include="Engine\Resources\Assets\LumEngine_Logo.ico" />
     <Image Include="Engine\Resources\Icons\CMEngine_Logo.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -151,7 +160,9 @@
   <Import Project="$(QtMsBuild)\qt_defaults.props" Condition="Exists('$(QtMsBuild)\qt_defaults.props')" />
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtDeploy>true</QtDeploy>
+  </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
@@ -178,8 +189,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(GLEW_LIB);$(GLM);$(Qt6_DIR)/lib;$(NETHOST_LIB);$(GLEW_ROOT)/lib/Release/x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(GLEW_ROOT)/include;$(GLM);$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST_LIB);$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -216,7 +227,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
@@ -225,7 +236,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32s.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GLEW_LIB);$(Qt6_DIR)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -233,8 +244,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y C:\vcpkg\installed\x64-windows\bin\glew32.dll $(SolutionDir)$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
     <PreLinkEvent>
       <Command>

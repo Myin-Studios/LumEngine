@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Lighting/lighting.h"
+#include "Camera/camera.h"
+
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
 #include "glm/vec2.hpp"
@@ -12,11 +15,13 @@
 #include <QOpenGLTexture>
 #include <QtOpenGL/qopenglshaderprogram.h>
 #include <vector>
+#include <set>
 #include <QMimeData>
 #include <QDragEnterEvent>
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+#include <QTimer>
 #include <iostream>
 
 #include "mesh.h"
@@ -39,16 +44,32 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 private:
+    void UpdateCamera();
+
     void checkFrameBufferError();
     void setupFrameBuffer();
     void cleanup();
     void loadModel(const QString& path);
     bool loadOBJ(const QString& path);
 
-    Mesh* model = nullptr;
+    Camera* editorCamera;
+    QPoint mousePos;
+    bool canUpdateCamera = false;
+    set<int> keyPressed;
+
+    QTimer* updateTimer;
+
     vector<Mesh> models;
     Shader* s = nullptr;
+
+    vector<Light> lights;
 
     unsigned int FBO;
     unsigned int fboTexture;

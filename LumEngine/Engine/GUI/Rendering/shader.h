@@ -23,5 +23,8 @@ public:
     void setBool(const string &name, bool value) const;
     void setInt(const string &name, int value) const;
     void setFloat(const string &name, float value) const;
+    void setFloatArray(const string& name, GLsizei count, const float* value) const;
+    void setVec3(const string& name, glm::vec3 v3) const;
+    void setVec3Array(const string& name, GLsizei count, const float* value) const;
     void setMat4x4(const string &name, const float* value) const;
 };

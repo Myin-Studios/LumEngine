@@ -32,15 +32,19 @@
 
 #include "Math.h"
 #include "../Core/CMAPICore.h"
+#include <cmath>
 
 class Transform3DCore
 {
 public:
     ~Transform3DCore() {
         std::cout << "Transform3DCore instance destroyed." << std::endl;
+
+        delete position;
+        position = nullptr;
     }
 
-    std::unique_ptr<Vec3Core> position;
+    Vec3Core* position;
     Vec3Core rotation;
     Vec3Core scale;
 
@@ -52,19 +56,35 @@ public:
     Vec3Core down = Vec3Core(0, -1, 0);
 
     Transform3DCore()
-        : position(std::make_unique<Vec3Core>(0, 0, 0)),
+        : position(new Vec3Core(0, 0, 0)),
         rotation(0, 0, 0),
         scale(1, 1, 1)
     {}
 
+    /* --------------------------{ Position }--------------------------*/
+
     void SetPosition(float x, float y, float z) {
-        position = std::make_unique<Vec3Core>(x, y, z);
+        position = new Vec3Core(x, y, z);
         std::cout << "Position updated to: " << position->x() << ", " << position->y() << ", " << position->z() << std::endl;
     }
+
+    void Move(float x, float y, float z);
+    
+    void Move(Vec3Core* v);
 
     Vec3Core& GetPosition() const {
         return *position;
     }
+
+    /* --------------------------{ Rotation }--------------------------*/
+
+    void SetRotation(float yaw, float pitch, float roll);
+    void Rotate(float yaw, float pitch, float roll);
+
+private:
+    float _yaw = 0.0f;
+    float _pitch = 0.0f;
+    float _roll = 0.0f;
 };
 
 /*

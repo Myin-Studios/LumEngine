@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -162,8 +163,8 @@ public slots:
 
         std::cout << "Loading project..." << std::endl;
 
-        const wchar_t* assembly_path = L"../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.dll";
-        const wchar_t* dotnet_type = L"LumScripting.Script.Main.Program, LumScripting";
+        const wchar_t* assembly_path = L"../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.dll";
+        const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
         const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
 
         if (assembly_loader == nullptr) {
@@ -214,16 +215,35 @@ protected:
 
         emit progressUpdated("Init Assembly loader...", 100 / 5 * 2);
 
-        const char_t* config_path = L"../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.runtimeconfig.json";
+        std::filesystem::path p_config_path("../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.runtimeconfig.json");
+        std::wstring s_config_path(std::filesystem::absolute(p_config_path).wstring());
+
+        if (!std::filesystem::exists(p_config_path))
+        {
+            std::cout << "Config file doesn't exist!" << std::endl;
+            return;
+        }
+
+        const char_t* config_path = s_config_path.c_str();
+        
         assembly_loader = get_dotnet_load_assembly(config_path);
         if (assembly_loader == nullptr) {
             emit progressUpdated("Failed to get assembly loader.", 100 / 5);
             return;
         }
 
+        std::filesystem::path p_assembly_path("../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.dll");
+        std::wstring s_assembly_path(std::filesystem::absolute(p_assembly_path).wstring());
+
+        if (!std::filesystem::exists(p_assembly_path))
+        {
+            std::cout << "Assembly file doesn't exist!" << std::endl;
+            return;
+        }
+
         const wchar_t *delegate_type = L"System.Action";
-        const wchar_t *assembly_path = L"../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.dll";
-        const wchar_t *dotnet_type = L"LumScripting.Script.Main.Program, LumScripting";
+        const wchar_t* assembly_path = s_assembly_path.c_str();
+        const wchar_t *dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
         const wchar_t *dotnet_type_method_Start = L"Start";
         const wchar_t *dotnet_type_method_Run = L"Run";
 

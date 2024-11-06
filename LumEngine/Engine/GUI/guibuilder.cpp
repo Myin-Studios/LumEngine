@@ -4,7 +4,7 @@ GuiBuilder::GuiBuilder()
 {
     mainWindow = new MainWindow();
     topPanel = new Panel(mainWindow->centralWidget());
-    rightPanel = new Panel(mainWindow->centralWidget());
+    rightPanel = new VerticalPanel(mainWindow->centralWidget());
     tBtn = new TabsButton(nullptr);
     playButton = new PlayButton(nullptr);
     centralLayout = new QVBoxLayout(nullptr);
@@ -15,6 +15,9 @@ GuiBuilder::GuiBuilder()
 
     playButton->setIconSize(QSize(20, 20));
     tBtn->setIconSize(QSize(20, 20));
+
+    rightPanel->setBaseWidth(tBtn->width());
+    QObject::connect(tBtn, &QPushButton::clicked, rightPanel, &VerticalPanel::expand);
 
     scene->setStyleSheet("border-radius: 30px");
     scene->setGeometry(scene->x(), scene->y(), 800, 600);

@@ -1,14 +1,15 @@
-﻿using LumEngine.Script.FileLoader;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace LumScripting.Script.Main
+using LumScripting.Script.Timing;
+using LumScripting.Script.Properties;
+
+namespace LumScriptLoader.Main
 {
     public class Program
     {
         static GameCore gameCore = new GameCore();
         static Time time = new Time();
         static Property propertyManager = new Property();
-        static ScriptPathLoader pathLoader = new ScriptPathLoader();
 
         public static void Example()
         {

@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "shader.h"
+#include "Materials/materials.h"
 #include "rendererDebugger.h"
 
 #include "Engine/Math/Transforms.h"
@@ -39,10 +40,15 @@ public:
     ~Mesh();
 
     Mesh(vector<Vertex> vertices);
-    void Draw(Shader &shader) const;
+    void Draw() const;
+
+    void SetMaterial(shared_ptr<Material> m) { this->material = m; }
+    shared_ptr<Material> GetMaterial() const { return this->material; }
+
 private:
     //  render data
     unsigned int VAO = 0, VBO = 0;
+    shared_ptr<Material> material;
 
     void setupMesh();
 };

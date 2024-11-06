@@ -37,7 +37,7 @@ private:
     QSplitter* sceneConsoleSplitter = nullptr;
 
     Panel* topPanel = nullptr;
-    Panel* rightPanel = nullptr;
+    VerticalPanel* rightPanel = nullptr;
 
     QLabel* positionLabel = nullptr;
     Vec3Property* position = nullptr;

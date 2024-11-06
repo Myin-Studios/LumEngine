@@ -57,7 +57,7 @@ void Mesh::setupMesh()
     RendererDebugger::checkOpenGLError("mesh setup");
 }
 
-void Mesh::Draw(Shader &shader) const
+void Mesh::Draw() const
 {
 //    unsigned int diffuseNr = 1;
 //    unsigned int specularNr = 1;
@@ -77,15 +77,14 @@ void Mesh::Draw(Shader &shader) const
 //    }
 //    glActiveTexture(GL_TEXTURE0);
 
-    shader.use();
+    material->GetShader()->use();
 
     glm::mat4 tMat(transform->scale.x(), 0.0f, 0.0f, transform->position->x(),
         0.0f, transform->scale.y(), 0.0f, transform->position->y(),
         0.0f, 0.0f, transform->scale.z(), transform->position->z(),
         0.0f, 0.0f, 0.0f, 1.0f);
 
-    shader.setMat4x4("model", &tMat[0][0]);
-
+    material->GetShader()->setMat4x4("model", &tMat[0][0]);
 
     // draw mesh
 
@@ -95,7 +94,7 @@ void Mesh::Draw(Shader &shader) const
 
     GLint currentProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
-    if (currentProgram != shader.ID) {
+    if (currentProgram != material->GetShader()->ID) {
         std::cerr << "Shader program not active!" << std::endl;
     }
 

@@ -4,6 +4,10 @@ Renderer::Renderer(QWidget *parent)
         : QOpenGLWidget(parent)
 {
     setAcceptDrops(true);
+
+    updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, [this]() { update(); });
+    updateTimer->setInterval(1000/60);
 }
 
 Renderer::~Renderer()
@@ -21,7 +25,30 @@ void Renderer::initializeGL()
         return;
     }
     
+    editorCamera = new Camera();
+    mousePos = QPoint(0, 0);
+    editorCamera->GetTransform()->SetPosition(0.0f, 0.0f, 3.0f);
+
     s = new Shader("Engine/Resources/Shaders/baseVert.glsl", "Engine/Resources/Shaders/baseFrag.glsl");
+
+    Light* l1 = new Light();
+    l1->GetTransform()->SetPosition(3.0f, 3.0f, 3.0f);
+    l1->color = Color::RGB(1.0f, 0.0f, 0.0f);
+    l1->SetIntensity(50.0f);
+
+    Light* l2 = new Light();
+    l2->GetTransform()->SetPosition(-3.0f, 1.0f, 3.0f);
+    l2->color = Color::RGB(0.0f, 1.0f, 0.0f);
+    l2->SetIntensity(50.0f);
+
+    Light* l3 = new Light();
+    l3->GetTransform()->SetPosition(-4.0f, -2.0f, 3.0f);
+    l3->color = Color::RGB(0.0f, 0.0f, 1.0f);
+    l3->SetIntensity(50.0f);
+
+    lights.push_back(*l1);
+    lights.push_back(*l2);
+    lights.push_back(*l3);
 
     setupFrameBuffer();
 }
@@ -45,30 +72,83 @@ void Renderer::paintGL()
     glClearColor(0.1, 0.1, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     RendererDebugger::checkOpenGLError("FBO binding - rendering phase");
 
-    if (s != nullptr)
+    if (canUpdateCamera)
     {
-        s->use();
+        UpdateCamera();
+    }
 
-        if (!models.empty())
+    if (!models.empty())
+    {
+        for (Mesh& m : models)
         {
-            for (Mesh& m : models)
-            {
-                glm::mat4 tMat(m.transform->scale.x(), 0.0f, 0.0f, m.transform->position->x(),
-                    0.0f, m.transform->scale.y(), 0.0f, m.transform->position->y(),
-                    0.0f, 0.0f, m.transform->scale.z(), m.transform->position->z(),
-                    0.0f, 0.0f, 0.0f, 1.0f);
+            m.Draw();
 
-                cout << "(" << m.transform->position->x() << ", " << m.transform->position->y() << ", " << m.transform->position->z() << ")" << endl;
+            glm::mat4 tMat(m.transform->scale.x(), 0.0f, 0.0f, m.transform->position->x(),
+                0.0f, m.transform->scale.y(), 0.0f, m.transform->position->y(),
+                0.0f, 0.0f, m.transform->scale.z(), m.transform->position->z(),
+                0.0f, 0.0f, 0.0f, 1.0f);
 
-                s->setMat4x4("model", &tMat[0][0]);
+            m.GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
 
-                s->setMat4x4("view", &glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))[0][0]);
-                s->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+            glm::mat4 view = glm::lookAt(
+                glm::vec3(
+                    editorCamera->GetTransform()->GetPosition().x(),
+                    editorCamera->GetTransform()->GetPosition().y(),
+                    editorCamera->GetTransform()->GetPosition().z()),
+                glm::vec3(
+                    editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
+                    editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
+                    editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
+                glm::vec3(
+                    editorCamera->GetTransform()->up.x(),
+                    editorCamera->GetTransform()->up.y(),
+                    editorCamera->GetTransform()->up.z())
+            );
 
-                m.Draw(*s);
+            m.GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
+
+            m.GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+
+            vector<glm::vec3> lightPositions;
+            vector<glm::vec3> lightColors;
+            std::vector<float> intensities;
+            for (const auto& light : lights) {
+                lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
+                    light.GetTransform()->GetPosition().y(),
+                    light.GetTransform()->GetPosition().z());
+
+                lightColors.emplace_back(glm::vec3(
+                    light.color.r(),
+                    light.color.g(),
+                    light.color.b()
+                ));
+
+                intensities.push_back(light.GetIntensity());
+            }
+
+            m.GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
+
+            m.GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
+
+            m.GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
+
+            // Imposta la posizione della camera
+            m.GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
+                editorCamera->GetTransform()->GetPosition().x(),
+                editorCamera->GetTransform()->GetPosition().y(),
+                editorCamera->GetTransform()->GetPosition().z()
+            ));
+
+            if (auto pbrMat = std::dynamic_pointer_cast<PBR>(m.GetMaterial())) {
+                Color::Color c(1.0f, 0.5f, 0.0f);
+                pbrMat->SetAlbedo(c);
+                pbrMat->SetMetallic(1.0f);
+                pbrMat->SetRoughness(0.4f);
             }
         }
     }
@@ -87,6 +167,22 @@ void Renderer::paintGL()
 //    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     RendererDebugger::checkOpenGLError("rendering");
+}
+
+void Renderer::UpdateCamera()
+{
+    if (keyPressed.find(Qt::Key_A) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->right.Normalize() * -0.1f));
+    if (keyPressed.find(Qt::Key_D) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->right.Normalize() * 0.1f));
+    if (keyPressed.find(Qt::Key_W) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->forward.Normalize() * 0.1f));
+    if (keyPressed.find(Qt::Key_S) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->forward.Normalize() * -0.1f));
+    if (keyPressed.find(Qt::Key_Q) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->up.Normalize() * -0.05f));
+    if (keyPressed.find(Qt::Key_E) != keyPressed.end())
+        editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->up.Normalize() * 0.05f));
 }
 
 void Renderer::checkFrameBufferError()
@@ -210,6 +306,91 @@ void Renderer::dropEvent(QDropEvent *event) {
     }
 }
 
+void Renderer::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        canUpdateCamera = true;
+
+        mousePos = event->pos();
+
+        updateTimer->start();
+    }
+}
+
+void Renderer::mouseMoveEvent(QMouseEvent* event)
+{
+    QPoint currentPos = event->pos();
+
+    float deltaX = 0.0f;
+    float deltaY = 0.0f;
+
+    if (event->buttons() & Qt::RightButton)
+    {
+        deltaX = currentPos.x() - mousePos.x();
+        deltaY = currentPos.y() - mousePos.y();
+
+        editorCamera->GetTransform()->Rotate(deltaX * 0.1f, -deltaY * 0.1f, 0.0f);
+        cout << "Forward: " << editorCamera->GetTransform()->forward << endl
+             << "Right: " << editorCamera->GetTransform()->forward << endl
+             << "Up: " << editorCamera->GetTransform()->forward << endl;
+        mousePos = currentPos;
+    }
+}
+
+void Renderer::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        canUpdateCamera = false;
+        updateTimer->stop();
+
+        keyPressed.clear();
+    }
+}
+
+void Renderer::keyPressEvent(QKeyEvent* event)
+{
+    if (canUpdateCamera)
+    {
+        if (event->key() == Qt::Key_W)
+        {
+            keyPressed.emplace(event->key());
+        }
+        if (event->key() == Qt::Key_A)
+        {
+            keyPressed.emplace(event->key());
+        }
+        if (event->key() == Qt::Key_S)
+        {
+            keyPressed.emplace(event->key());
+        }
+        if (event->key() == Qt::Key_D)
+        {
+            keyPressed.emplace(event->key());
+        }
+        if (event->key() == Qt::Key_Q)
+        {
+            keyPressed.emplace(event->key());
+        }
+        if (event->key() == Qt::Key_E)
+        {
+            keyPressed.emplace(event->key());
+        }
+
+        update();
+    }
+}
+
+void Renderer::keyReleaseEvent(QKeyEvent* event)
+{
+    if (canUpdateCamera)
+    {
+        keyPressed.erase(event->key());
+    }
+}
+
+
 void Renderer::loadModel(const QString& path) {
     if (path.endsWith(".obj"))
     {
@@ -286,10 +467,17 @@ bool Renderer::loadOBJ(const QString& path) {
 
     makeCurrent();
 
-    models.emplace_back(ver);
+    Mesh *m = new Mesh(ver);
+
+    shared_ptr<PBR> pbr = make_shared<PBR>();
+
+    m->SetMaterial(pbr);
+
+    models.push_back(*m);
 
     RendererDebugger::checkOpenGLError("model loading");
 
+    setFocus();
     update();
 
     return true;

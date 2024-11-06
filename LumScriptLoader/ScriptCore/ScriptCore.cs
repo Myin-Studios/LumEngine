@@ -1,13 +1,17 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
+using LumScripting.Script.Scripting;
+using LumScripting.Script.Attributes;
+
+using LumScripting.Script.Log;
+using Windows.ApplicationModel.Core;
+
 public class ScriptCompiler
 {
+    /*
     public static string CompileScriptsToDll(string scriptDirectory, string outputDllPath)
     {
         List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
@@ -56,20 +60,22 @@ public class ScriptCompiler
             return outputDllPath; // Restituisce il percorso della DLL se la compilazione ha successo
         }
     }
+    */
 }
 
 public class ScriptManager
 {
     private List<IScript> scripts = new List<IScript>();
 
+    /*
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
         string fullAssemblyPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0", projectName + ".dll");
-        string icyScriptingDllPath = Path.GetFullPath("../IcyScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/IcyScripting.dll");
+        string icyScriptingDllPath = Path.GetFullPath("../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.dll");
 
         Console.WriteLine($"Loading user assembly from: {fullAssemblyPath}");
-        Console.WriteLine($"Looking for IcyScripting at: {icyScriptingDllPath}");
+        Console.WriteLine($"Looking for LumScripting at: {icyScriptingDllPath}");
 
         if (!File.Exists(fullAssemblyPath))
         {
@@ -79,7 +85,7 @@ public class ScriptManager
 
         if (!File.Exists(icyScriptingDllPath))
         {
-            Console.WriteLine("IcyScripting assembly file not found.");
+            Console.WriteLine("LumScripting assembly file not found.");
             return;
         }
 
@@ -89,7 +95,7 @@ public class ScriptManager
 
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
-                if (args.Name.StartsWith("IcyScripting"))
+                if (args.Name.StartsWith("LumScripting"))
                 {
                     return Assembly.LoadFrom(icyScriptingDllPath);
                 }
@@ -104,23 +110,13 @@ public class ScriptManager
             // Verifica che icyScriptingAssembly non sia null
             if (icyScriptingAssembly == null)
             {
-                Console.WriteLine("Failed to load IcyScripting assembly.");
-                return;
-            }
-
-            // Ora icyScriptingAssembly contiene l'assembly IcyScripting
-            Type? scriptInterfaceType = icyScriptingAssembly.GetType("IcyScripting.Script.Scripting.IScript");
-
-            // A questo punto verifica che il tipo sia stato trovato
-            if (scriptInterfaceType == null)
-            {
-                Console.WriteLine("IScript type not found in IcyScripting assembly.");
+                Console.WriteLine("Failed to load LumScripting assembly.");
                 return;
             }
 
             // Ottieni tutti i tipi che implementano l'interfaccia IScript
             var scriptTypes = userAssembly.GetTypes()
-                .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract);
+                .Where(t => (typeof(IScript)).IsAssignableFrom(t) && !t.IsAbstract);
 
             Console.WriteLine(scriptTypes.Count());
 
@@ -129,24 +125,31 @@ public class ScriptManager
                 // Crea un'istanza del tipo di script
                 var scriptInstance = Activator.CreateInstance(scriptType);
 
-                // Aggiungi la logica per gestire le proprietà
-                var properties = scriptType.GetProperties();
-                foreach (var prop in properties)
+                // Verifica se l'istanza implementa IScript e fai il cast
+                if (scriptInstance is IScript script)
                 {
-                    // Verifica se l'attributo [Property] è presente
-                    if (Attribute.IsDefined(prop, typeof(PropertyAttribute)))
+                    // Aggiungi la logica per gestire le proprietà
+                    var properties = scriptType.GetProperties();
+                    foreach (var prop in properties)
                     {
-                        // Gestisci la proprietà in base alle tue necessità
-                        // Esempio: setta una proprietà specifica
-                        // prop.SetValue(scriptInstance, /* valore desiderato */);
+                        // Verifica se l'attributo [Property] è presente
+                        if (Attribute.IsDefined(prop, typeof(PropertyAttribute)))
+                        {
+                            // Gestisci la proprietà in base alle tue necessità
+                            // Esempio: setta una proprietà specifica
+                            // prop.SetValue(script, valore desiderato);
+                        }
                     }
+
+                    // Registra lo script nel motore come IScript
+                    scripts.Add(script);
+                    Console.WriteLine($"Added script: {script.GetType().Name}");
                 }
-
-                // Se hai bisogno di registrare lo script nel motore
-                scripts.Add((dynamic)scriptInstance);
-                Console.WriteLine($"Added script: {scriptInstance.GetType().Name}");
+                else
+                {
+                    Console.WriteLine($"The script instance does not implement IScript: {scriptType.Name}");
+                }
             }
-
         }
         catch (ReflectionTypeLoadException ex)
         {
@@ -159,6 +162,93 @@ public class ScriptManager
         catch (Exception ex)
         {
             Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+        }
+    }
+    */
+
+    public void Load(string assemblyPath)
+    {
+        string projectName = Path.GetFileName(assemblyPath);
+        string fullAssemblyPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0", projectName + ".dll");
+        string lumScriptingDllPath = Path.GetFullPath("../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.dll");
+
+        if (!File.Exists(fullAssemblyPath))
+        {
+            Logger.Error($"File: {fullAssemblyPath} doesn't exist!");
+            return;
+        }
+
+        if (!File.Exists(lumScriptingDllPath))
+        {
+            Logger.Error($"LumScripting assembly not found at: {lumScriptingDllPath}");
+            return;
+        }
+
+        // Verifica se LumScripting è già stato caricato
+        Assembly lumScriptingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(a => a.FullName.StartsWith("LumScripting"));
+
+        if (lumScriptingAssembly == null)
+        {
+            try
+            {
+                lumScriptingAssembly = Assembly.LoadFrom(lumScriptingDllPath);
+                Logger.Succeed($"Loaded LumScripting assembly from {lumScriptingDllPath}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error loading LumScripting assembly: {ex.Message}");
+                return;
+            }
+        }
+        else
+        {
+            Logger.Succeed("LumScripting is already loaded.");
+        }
+
+        // Ora puoi continuare a caricare l'assembly dell'utente
+        Assembly userAssembly;
+        try
+        {
+            userAssembly = Assembly.LoadFrom(fullAssemblyPath);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error loading user assembly: {ex.Message}");
+            return;
+        }
+
+        // Trova il tipo IScript nell'assembly LumScripting
+        Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.IScript");
+        if (scriptInterfaceType == null)
+        {
+            Logger.Error("IScript type not found in LumScripting.");
+            return;
+        }
+
+        var scriptTypes = userAssembly.GetTypes()
+            .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract);
+
+        foreach (var scriptType in scriptTypes)
+        {
+            Logger.Succeed($"Found script: {scriptType.FullName}");
+
+            var scriptInstance = Activator.CreateInstance(scriptType);
+            if (scriptInstance is IScript validScript)
+            {
+                // Aggiungi lo script alla lista
+                scripts.Add(validScript);
+                Logger.Succeed($"Added script: {validScript.GetType().Name}");
+            }
+            else
+            {
+                Logger.Error($"Failed to cast {scriptType.FullName} to IScript.");
+            }
+        }
+
+        if (!scriptTypes.Any())
+        {
+            Logger.Warning("No scripts implementing IScript were found.");
         }
     }
 

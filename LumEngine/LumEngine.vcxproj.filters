@@ -52,6 +52,8 @@
     <None Include="Engine\Resources\Icons\New\CMEngine_PlayInactive.svg" />
     <None Include="Engine\Resources\Icons\New\CMEngine_Tabs.svg" />
     <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
+    <None Include="Engine\Resources\Shaders\PBRVert.glsl" />
+    <None Include="Engine\Resources\Shaders\PBRFrag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">
@@ -94,6 +96,18 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Lighting\lighting.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Materials\materials.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Colors\colors.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -154,6 +168,12 @@
     <ClCompile Include="main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Math\Transforms.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Engine\Resources\res.qrc" />
@@ -184,6 +204,9 @@
       <Filter>File di risorse</Filter>
     </Image>
     <Image Include="Engine\Resources\Assets\Buttons\Bitmaps\PlayButton.bmp">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="Engine\Resources\Assets\LumEngine_Logo.ico">
       <Filter>File di risorse</Filter>
     </Image>
   </ItemGroup>
