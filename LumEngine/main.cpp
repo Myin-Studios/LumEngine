@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
 #if defined(Q_OS_WIN)
             QApplication::setStyle(QStyleFactory::create("Fusion")); // Tema Fusion per Windows
-            QIcon icon("Engine/Resources/Assets/LumEngine_Logo.ico");
+            QIcon icon("Resources/Assets/LumEngine_Logo.ico");
             if (!icon.isNull()) {
                 builder->getMainWindow()->setWindowIcon(icon);
             }

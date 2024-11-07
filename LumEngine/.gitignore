@@ -2,5 +2,6 @@ IcyEngine/
 obj/
 out/
 x64/
+Output/
 
 corehost.log

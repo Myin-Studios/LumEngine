@@ -26,10 +26,9 @@ void Renderer::initializeGL()
     }
     
     editorCamera = new Camera();
+
     mousePos = QPoint(0, 0);
     editorCamera->GetTransform()->SetPosition(0.0f, 0.0f, 3.0f);
-
-    s = new Shader("Engine/Resources/Shaders/baseVert.glsl", "Engine/Resources/Shaders/baseFrag.glsl");
 
     Light* l1 = new Light();
     l1->GetTransform()->SetPosition(3.0f, 3.0f, 3.0f);
@@ -62,6 +61,8 @@ void Renderer::resizeGL(int w, int h)
 
     glBindRenderbuffer(GL_RENDERBUFFER, RBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+
+    update();
 }
 
 void Renderer::paintGL()
@@ -264,19 +265,12 @@ void Renderer::setupFrameBuffer()
 
     RendererDebugger::checkOpenGLError("setting up screen buffers");
 
-    fboShader = new Shader("Engine/Resources/Shaders/fboVertex.glsl", "Engine/Resources/Shaders/fboFragment.glsl");
+    fboShader = new Shader("Resources/Shaders/fboVertex.glsl", "Resources/Shaders/fboFragment.glsl");
 }
 
 void Renderer::cleanup()
 {
     makeCurrent();
-
-    if (s)
-    {
-        delete s;
-        s = nullptr;
-    }
-
 
     doneCurrent();
 }
@@ -308,6 +302,8 @@ void Renderer::dropEvent(QDropEvent *event) {
 
 void Renderer::mousePressEvent(QMouseEvent* event)
 {
+    setFocus();
+
     if (event->button() == Qt::RightButton)
     {
         canUpdateCamera = true;
@@ -331,9 +327,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
         deltaY = currentPos.y() - mousePos.y();
 
         editorCamera->GetTransform()->Rotate(deltaX * 0.1f, -deltaY * 0.1f, 0.0f);
-        cout << "Forward: " << editorCamera->GetTransform()->forward << endl
-             << "Right: " << editorCamera->GetTransform()->forward << endl
-             << "Up: " << editorCamera->GetTransform()->forward << endl;
+
         mousePos = currentPos;
     }
 }
@@ -394,7 +388,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 void Renderer::loadModel(const QString& path) {
     if (path.endsWith(".obj"))
     {
-        if (loadOBJ(path)) cout << "Model loaded successfully!" << endl;
+        if (!loadOBJ(path)) std::cerr << "Error during model loading!" << std::endl;
     }
 }
 

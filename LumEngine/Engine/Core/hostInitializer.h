@@ -215,7 +215,7 @@ protected:
 
         emit progressUpdated("Init Assembly loader...", 100 / 5 * 2);
 
-        std::filesystem::path p_config_path("../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.runtimeconfig.json");
+        std::filesystem::path p_config_path("LumScripting/LumScriptLoader.runtimeconfig.json");
         std::wstring s_config_path(std::filesystem::absolute(p_config_path).wstring());
 
         if (!std::filesystem::exists(p_config_path))
@@ -232,7 +232,7 @@ protected:
             return;
         }
 
-        std::filesystem::path p_assembly_path("../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.dll");
+        std::filesystem::path p_assembly_path("LumScripting/LumScriptLoader.dll");
         std::wstring s_assembly_path(std::filesystem::absolute(p_assembly_path).wstring());
 
         if (!std::filesystem::exists(p_assembly_path))

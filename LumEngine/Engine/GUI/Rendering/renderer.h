@@ -67,7 +67,6 @@ private:
     QTimer* updateTimer;
 
     vector<Mesh> models;
-    Shader* s = nullptr;
 
     vector<Light> lights;
 

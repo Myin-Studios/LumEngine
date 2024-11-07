@@ -51,8 +51,7 @@ public:
 	{
 		_Albedo = Color::Color();
 
-		this->SetShader(new Shader("Engine/Resources/Shaders/PBRVert.glsl", "Engine/Resources/Shaders/PBRFrag.glsl"));
-		cout << this->GetShader()->ID << endl;
+		this->SetShader(new Shader("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
 	}
 
 	const Color::Color GetAlbedo() { return this->_Albedo; }
