@@ -32,6 +32,9 @@ private:
     component_entry_point_fn LoadAssemblyMethod = nullptr;
     hostfxr_handle cxt = nullptr;
 
+    const wchar_t* assembly_path = L"LumScripting/LumScriptLoader.dll";
+    const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
+
 // Funzione per caricare la libreria dinamica
     void* load_library(const char_t* path) {
 #if defined(_WIN32)
@@ -157,8 +160,8 @@ public slots:
 
         std::cout << "Loading project..." << std::endl;
 
-        const wchar_t* assembly_path = L"LumScripting/LumScriptLoader.dll";
-        const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
+        assembly_path = L"LumScripting/LumScriptLoader.dll";
+        dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
         const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
 
         if (assembly_loader == nullptr) {
@@ -235,8 +238,6 @@ protected:
         }
 
         const wchar_t* delegate_type = L"System.Action";
-        const wchar_t* assembly_path = s_assembly_path.c_str();
-        const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
         const wchar_t* dotnet_type_method_Start = L"Start";
         const wchar_t* dotnet_type_method_Run = L"Run";
 
