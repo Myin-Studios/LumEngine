@@ -100,9 +100,7 @@ public class ScriptManager
 
         try
         {
-            Logger.Debug($"Loading assembly from: {fullAssemblyPath}");
-
-            // Carica prima LumScripting per essere sicuri che sia disponibile
+            // Carica prima LumScripting
             string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
             Logger.Debug($"Loading LumScripting from: {Path.GetFullPath(engineLumScriptingPath)}");
 
@@ -117,23 +115,12 @@ public class ScriptManager
             }
             Logger.Debug($"Found IScript type: {scriptInterfaceType.FullName}");
 
-            // Ora carica l'assembly utente
+            // Carica l'assembly utente
             Assembly userAssembly = loadContext.LoadFromAssemblyPath(fullAssemblyPath);
             Logger.Debug($"Loaded assembly: {userAssembly.FullName}");
 
-            // Log dei tipi disponibili nell'assembly utente
-            Logger.Debug($"Types in user assembly:");
-            foreach (var t in userAssembly.GetTypes())
-            {
-                Logger.Debug($" - {t.FullName}");
-                foreach (var iface in t.GetInterfaces())
-                {
-                    Logger.Debug($"   Implements: {iface.FullName} from {iface.Assembly.Location}");
-                }
-            }
-
             var scriptTypes = userAssembly.GetTypes()
-                .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Scripting.IScript") && !t.IsAbstract)
                 .ToList();
 
             Logger.Debug($"Found {scriptTypes.Count} script types");
@@ -143,22 +130,24 @@ public class ScriptManager
                 try
                 {
                     Logger.Debug($"Creating instance of: {type.FullName}");
-                    var instance = Activator.CreateInstance(type);
-                    Logger.Debug($"Instance created, attempting cast to IScript");
+                    object instance = Activator.CreateInstance(type);
+                    Logger.Debug($"Instance created");
 
-                    // Usa reflection per il cast invece del cast diretto
-                    bool isScript = scriptInterfaceType.IsInstanceOfType(instance);
-                    if (isScript)
+                    // Verifica che i metodi dell'interfaccia esistano
+                    var startMethod = type.GetMethod("onStart");
+                    var runMethod = type.GetMethod("onRun");
+
+                    if (startMethod != null && runMethod != null)
                     {
-                        Logger.Succeed($"Found script: {type.FullName}");
-                        // Usa reflection per creare un delegate che chiama i metodi dell'interfaccia
-                        dynamic script = instance;
-                        scripts.Add((IScript)script);
+                        // Crea un wrapper che implementa IScript
+                        var wrapper = new ScriptWrapper(instance);
+                        scripts.Add(wrapper);
+                        Logger.Succeed($"Successfully loaded script: {type.FullName}");
                         Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
                     }
                     else
                     {
-                        Logger.Error($"Instance is not of type IScript: {type.FullName}");
+                        Logger.Error($"Type {type.FullName} is missing required methods");
                     }
                 }
                 catch (Exception ex)
@@ -169,16 +158,36 @@ public class ScriptManager
             }
 
             Logger.Debug($"Total scripts loaded: {scripts.Count}");
-            foreach (var script in scripts)
-            {
-                Logger.Debug($"Loaded script type: {script.GetType().FullName}");
-            }
         }
         catch (Exception ex)
         {
             Logger.Error($"Failed to load assembly {projectName}: {ex.Message}");
             Logger.Error($"Stack trace: {ex.StackTrace}");
-            return;
+        }
+    }
+
+    public class ScriptWrapper : IScript
+    {
+        private readonly object _instance;
+        private readonly MethodInfo _startMethod;
+        private readonly MethodInfo _runMethod;
+
+        public ScriptWrapper(object instance)
+        {
+            _instance = instance;
+            var type = instance.GetType();
+            _startMethod = type.GetMethod("onStart");
+            _runMethod = type.GetMethod("onRun");
+        }
+
+        public void onStart()
+        {
+            _startMethod?.Invoke(_instance, null);
+        }
+
+        public void onRun()
+        {
+            _runMethod?.Invoke(_instance, null);
         }
     }
 
