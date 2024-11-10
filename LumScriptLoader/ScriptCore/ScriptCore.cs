@@ -66,69 +66,120 @@ public class ScriptCompiler
 public class ScriptManager
 {
     private List<IScript> scripts = new List<IScript>();
+    private AssemblyLoadContext loadContext;
+
+    public ScriptManager()
+    {
+        // Crea un nuovo context con un resolver personalizzato
+        loadContext = new AssemblyLoadContext("ScriptLoadContext", isCollectible: true);
+        loadContext.Resolving += AssemblyResolving;
+    }
+
+    private Assembly AssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
+    {
+        // Se viene richiesto LumScripting, carica quello dell'engine
+        if (assemblyName.Name == "LumScripting")
+        {
+            string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
+            Logger.Debug($"Redirecting LumScripting load to: {engineLumScriptingPath}");
+            return context.LoadFromAssemblyPath(Path.GetFullPath(engineLumScriptingPath));
+        }
+        return null;
+    }
 
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
         string fullAssemblyPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0", projectName + ".dll");
-        Assembly? lumScriptingAssembly = AppDomain.CurrentDomain.GetAssemblies()
-            .FirstOrDefault(a => a.FullName.StartsWith("LumScripting"));
 
-        var loadContext = new AssemblyLoadContext("ScriptLoadContext", isCollectible: true);
+        if (!File.Exists(fullAssemblyPath))
+        {
+            Logger.Error($"Assembly path: {fullAssemblyPath} doesn't exist!");
+            return;
+        }
 
-        Assembly userAssembly;
         try
         {
-            userAssembly = loadContext.LoadFromAssemblyPath(fullAssemblyPath);
+            Logger.Debug($"Loading assembly from: {fullAssemblyPath}");
+
+            // Carica prima LumScripting per essere sicuri che sia disponibile
+            string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
+            Logger.Debug($"Loading LumScripting from: {Path.GetFullPath(engineLumScriptingPath)}");
+
+            Assembly lumScriptingAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineLumScriptingPath));
+            Logger.Debug($"Loaded LumScripting assembly: {lumScriptingAssembly.FullName}");
+
+            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.IScript");
+            if (scriptInterfaceType == null)
+            {
+                Logger.Error("IScript type not found in LumScripting.");
+                return;
+            }
+            Logger.Debug($"Found IScript type: {scriptInterfaceType.FullName}");
+
+            // Ora carica l'assembly utente
+            Assembly userAssembly = loadContext.LoadFromAssemblyPath(fullAssemblyPath);
+            Logger.Debug($"Loaded assembly: {userAssembly.FullName}");
+
+            // Log dei tipi disponibili nell'assembly utente
+            Logger.Debug($"Types in user assembly:");
+            foreach (var t in userAssembly.GetTypes())
+            {
+                Logger.Debug($" - {t.FullName}");
+                foreach (var iface in t.GetInterfaces())
+                {
+                    Logger.Debug($"   Implements: {iface.FullName} from {iface.Assembly.Location}");
+                }
+            }
+
+            var scriptTypes = userAssembly.GetTypes()
+                .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract)
+                .ToList();
+
+            Logger.Debug($"Found {scriptTypes.Count} script types");
+
+            foreach (var type in scriptTypes)
+            {
+                try
+                {
+                    Logger.Debug($"Creating instance of: {type.FullName}");
+                    var instance = Activator.CreateInstance(type);
+                    Logger.Debug($"Instance created, attempting cast to IScript");
+
+                    // Usa reflection per il cast invece del cast diretto
+                    bool isScript = scriptInterfaceType.IsInstanceOfType(instance);
+                    if (isScript)
+                    {
+                        Logger.Succeed($"Found script: {type.FullName}");
+                        // Usa reflection per creare un delegate che chiama i metodi dell'interfaccia
+                        dynamic script = instance;
+                        scripts.Add((IScript)script);
+                        Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
+                    }
+                    else
+                    {
+                        Logger.Error($"Instance is not of type IScript: {type.FullName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Failed to create instance of {type.FullName}: {ex.Message}");
+                    Logger.Error($"Stack trace: {ex.StackTrace}");
+                }
+            }
+
+            Logger.Debug($"Total scripts loaded: {scripts.Count}");
+            foreach (var script in scripts)
+            {
+                Logger.Debug($"Loaded script type: {script.GetType().FullName}");
+            }
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error loading user assembly: {ex.Message}");
+            Logger.Error($"Failed to load assembly {projectName}: {ex.Message}");
+            Logger.Error($"Stack trace: {ex.StackTrace}");
             return;
         }
-
-        Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.IScript");
-        if (scriptInterfaceType == null)
-        {
-            Logger.Error("IScript type not found in LumScripting.");
-            return;
-        }
-
-        var scripts = userAssembly.GetTypes()
-            .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract)
-            .Select(t => Activator.CreateInstance(t))
-            .OfType<IScript>();
-
-        foreach (var script in scripts)
-        {
-            Logger.Succeed($"Found script: {script.GetType().FullName}");
-            // this.scripts.Add(script);
-        }
-
-        // 
-        // var scriptTypes = userAssembly.GetTypes()
-        //     .Where(t => scriptInterfaceType.IsAssignableFrom(t) && !t.IsAbstract);
-        // 
-        // foreach (var scriptType in scriptTypes)
-        // {
-        //     Logger.Succeed($"Found script: {scriptType.FullName}");
-        // 
-        //     var scriptInstance = Activator.CreateInstance(scriptType);
-        //     if (scriptInstance is IScript validScript)
-        //     {
-        //         scripts.Add(validScript);
-        //         Logger.Succeed($"Added script: {validScript.GetType().Name}");
-        //     }
-        //     else
-        //     {
-        //         Logger.Error($"Failed to cast {scriptType.FullName} to IScript.");
-        //     }
-        // }
-        // 
-        // if (!scriptTypes.Any())
-        // {
-        //     Logger.Warning("No scripts implementing IScript were found.");
-        // }
     }
 
     public void Start()
