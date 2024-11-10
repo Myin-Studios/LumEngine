@@ -2,6 +2,7 @@
 
 using LumScripting.Script.Timing;
 using LumScripting.Script.Properties;
+using LumScripting.Script.Log;
 
 namespace LumScriptLoader.Main
 {

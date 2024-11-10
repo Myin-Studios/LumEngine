@@ -48,6 +48,8 @@
     <None Include="Engine\Resources\Icons\New\CMEngine_PlayInactive.svg" />
     <None Include="Engine\Resources\Icons\New\CMEngine_Tabs.svg" />
     <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_LightSettingsHover.svg" />
     <None Include="Engine\Resources\res.qrc.depends" />
     <None Include="Engine\Resources\Shaders\baseFrag.glsl" />
     <None Include="Engine\Resources\Shaders\baseVert.glsl" />
@@ -58,6 +60,18 @@
     <None Include="Engine\Resources\Shaders\PBRVert.glsl" />
     <None Include="Engine\Resources\Shaders\vertexShader.glsl" />
     <None Include="IcyEngine.qtvscr" />
+    <None Include="Output\Debug\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Output\Debug\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Output\Release\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Output\Release\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Output\Release\Resources\Shaders\baseFrag.glsl" />
+    <None Include="Output\Release\Resources\Shaders\baseVert.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fboFragment.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fboVertex.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Output\Release\Resources\Shaders\PBRFrag.glsl" />
+    <None Include="Output\Release\Resources\Shaders\PBRVert.glsl" />
+    <None Include="Output\Release\Resources\Shaders\vertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
@@ -163,7 +177,9 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtDeploy>true</QtDeploy>
   </PropertyGroup>
-  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtDeploy>true</QtDeploy>
+  </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') OR !Exists('$(QtMsBuild)\Qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
   </Target>

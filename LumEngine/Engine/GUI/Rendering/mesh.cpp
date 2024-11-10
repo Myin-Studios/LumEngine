@@ -10,6 +10,8 @@ Mesh::Mesh(vector<Vertex> vertices)
 Mesh::~Mesh() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+
+    std::cout << "Destroying mesh" << std::endl;
 }
 
 void Mesh::setupMesh()
@@ -59,32 +61,14 @@ void Mesh::setupMesh()
 
 void Mesh::Draw() const
 {
-//    unsigned int diffuseNr = 1;
-//    unsigned int specularNr = 1;
-//    for(unsigned int i = 0; i < textures.size(); i++)
-//    {
-//        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-//        // retrieve texture number (the N in diffuse_textureN)
-//        string number;
-//        string name = textures[i].type;
-//        if(name == "texture_diffuse")
-//            number = std::to_string(diffuseNr++);
-//        else if(name == "texture_specular")
-//            number = std::to_string(specularNr++);
-//
-//        shader.setInt(("material." + name + number).c_str(), i);
-//        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-//    }
-//    glActiveTexture(GL_TEXTURE0);
-
     material->GetShader()->use();
 
-    glm::mat4 tMat(transform->scale.x(), 0.0f, 0.0f, transform->position->x(),
-        0.0f, transform->scale.y(), 0.0f, transform->position->y(),
-        0.0f, 0.0f, transform->scale.z(), transform->position->z(),
-        0.0f, 0.0f, 0.0f, 1.0f);
-
-    material->GetShader()->setMat4x4("model", &tMat[0][0]);
+    // glm::mat4 tMat(transform->scale.x(), 0.0f, 0.0f, transform->position->x(),
+    //     0.0f, transform->scale.y(), 0.0f, transform->position->y(),
+    //     0.0f, 0.0f, transform->scale.z(), transform->position->z(),
+    //     0.0f, 0.0f, 0.0f, 1.0f);
+    // 
+    // material->GetShader()->setMat4x4("model", &tMat[0][0]);
 
     // draw mesh
 

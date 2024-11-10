@@ -2,7 +2,7 @@
 
 Panel::Panel(QWidget* parent) : QFrame(parent)
 {
-    m_layout = new QHBoxLayout(this);
+    m_layout = new QVBoxLayout(this);
 
     setLayout(m_layout);
 }

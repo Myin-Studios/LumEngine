@@ -93,3 +93,13 @@ public:
 	BlinnPhong() = default;
 };
 
+//--------------------------------{ SKYBOX }--------------------------------
+
+class ProceduralSkybox : public Material
+{
+public:
+	ProceduralSkybox() : Material(new Shader("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
+	{
+
+	}
+};

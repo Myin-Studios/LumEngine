@@ -51,13 +51,15 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
 private:
+    
     void UpdateCamera();
 
+    void setupSkysphere();
     void checkFrameBufferError();
     void setupFrameBuffer();
     void cleanup();
     void loadModel(const QString& path);
-    bool loadOBJ(const QString& path);
+    std::shared_ptr<Mesh> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
 
     Camera* editorCamera;
     QPoint mousePos;
@@ -66,7 +68,8 @@ private:
 
     QTimer* updateTimer;
 
-    vector<Mesh> models;
+    std::shared_ptr<Mesh> skysphere;
+    vector<shared_ptr<Mesh>> models;
 
     vector<Light> lights;
 

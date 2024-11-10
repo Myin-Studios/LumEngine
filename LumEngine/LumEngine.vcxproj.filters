@@ -54,6 +54,20 @@
     <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
     <None Include="Engine\Resources\Shaders\PBRVert.glsl" />
     <None Include="Engine\Resources\Shaders\PBRFrag.glsl" />
+    <None Include="Engine\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Output\Release\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Output\Release\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Output\Debug\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Output\Debug\Resources\Icons\New\LumE_HierarchyHover.svg" />
+    <None Include="Output\Release\Resources\Shaders\vertexShader.glsl" />
+    <None Include="Output\Release\Resources\Shaders\baseFrag.glsl" />
+    <None Include="Output\Release\Resources\Shaders\baseVert.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fboFragment.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fboVertex.glsl" />
+    <None Include="Output\Release\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Output\Release\Resources\Shaders\PBRFrag.glsl" />
+    <None Include="Output\Release\Resources\Shaders\PBRVert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">

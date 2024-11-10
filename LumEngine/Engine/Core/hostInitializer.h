@@ -85,11 +85,6 @@ private:
 // Funzione che carica l'assembly e ottiene il puntatore alla funzione
     load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t *config_path)
     {
-        if (!load_hostfxr()) {
-            std::cerr << "Errore durante il caricamento di hostfxr." << std::endl;
-            return nullptr;
-        }
-
         void *load_assembly_and_get_function_pointer = nullptr;
 
         // Inizializza CoreCLR con il file di configurazione .NET
@@ -111,7 +106,6 @@ private:
             std::cerr << "Get delegate failed: " << std::hex << std::showbase << rc << std::endl;
         }
 
-        close_fptr(cxt);
         return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
     }
 
@@ -163,7 +157,7 @@ public slots:
 
         std::cout << "Loading project..." << std::endl;
 
-        const wchar_t* assembly_path = L"../LumScriptLoader/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScriptLoader.dll";
+        const wchar_t* assembly_path = L"LumScripting/LumScriptLoader.dll";
         const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
         const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
 
@@ -172,32 +166,31 @@ public slots:
             return;
         }
 
-        int rc = assembly_loader(
-            assembly_path,
-            dotnet_type,
-            dotnet_type_method_LoadAssembly,
-            nullptr,
-            nullptr,
-            (void**)&LoadAssemblyMethod
-        );
+        // Carica il metodo solo se non è stato già caricato
+        if (LoadAssemblyMethod == nullptr) {
+            int rc = assembly_loader(
+                assembly_path,
+                dotnet_type,
+                dotnet_type_method_LoadAssembly,
+                nullptr,
+                nullptr,
+                (void**)&LoadAssemblyMethod
+            );
 
-        // Convert QString to std::wstring and then get a wchar_t* pointer
+            if (rc != 0 || LoadAssemblyMethod == nullptr) {
+                std::cerr << "Failed to load LoadAssembly method. Error code: " << std::hex << rc << std::endl;
+                emit progressUpdated("Failed to load LoadAssembly method.", 100 / 5);
+                return;
+            }
+        }
+
+        // Convert QString a wchar_t*
         std::wstring wpath = path.toStdWString();
         const wchar_t* wpath_cstr = wpath.c_str();
-
-        // Calculate the size of the string in bytes (including the null terminator)
         int32_t path_size_in_bytes = static_cast<int32_t>((wpath.size() + 1) * sizeof(wchar_t));
 
-        // Prepare the argument array (only one argument, the string pointer)
-        void* args[] = { (void*)wpath_cstr };
-
-        // Call the function, passing the correct size of the argument in bytes
-        if (rc == 0) {
-            LoadAssemblyMethod((void*)wpath_cstr, path_size_in_bytes);  // Pass only one argument
-        }
-        else {
-            std::cerr << "Can't find LoadAssembly method! " << std::hex << rc << std::endl;
-        }
+        // Chiama il metodo gestito
+        LoadAssemblyMethod((void*)wpath_cstr, path_size_in_bytes);
     }
 
 signals:
@@ -215,67 +208,73 @@ protected:
 
         emit progressUpdated("Init Assembly loader...", 100 / 5 * 2);
 
-        std::filesystem::path p_config_path("LumScripting/LumScriptLoader.runtimeconfig.json");
-        std::wstring s_config_path(std::filesystem::absolute(p_config_path).wstring());
-
-        if (!std::filesystem::exists(p_config_path))
-        {
-            std::cout << "Config file doesn't exist!" << std::endl;
-            return;
-        }
-
-        const char_t* config_path = s_config_path.c_str();
-        
-        assembly_loader = get_dotnet_load_assembly(config_path);
+        // Check if assembly_loader is already set
         if (assembly_loader == nullptr) {
-            emit progressUpdated("Failed to get assembly loader.", 100 / 5);
-            return;
+            std::filesystem::path p_config_path("LumScripting/LumScriptLoader.runtimeconfig.json");
+            std::wstring s_config_path(std::filesystem::absolute(p_config_path).wstring());
+
+            if (!std::filesystem::exists(p_config_path)) {
+                std::cout << "Config file doesn't exist!" << std::endl;
+                return;
+            }
+
+            const char_t* config_path = s_config_path.c_str();
+            assembly_loader = get_dotnet_load_assembly(config_path);
+            if (assembly_loader == nullptr) {
+                emit progressUpdated("Failed to get assembly loader.", 100 / 5);
+                return;
+            }
         }
 
         std::filesystem::path p_assembly_path("LumScripting/LumScriptLoader.dll");
         std::wstring s_assembly_path(std::filesystem::absolute(p_assembly_path).wstring());
 
-        if (!std::filesystem::exists(p_assembly_path))
-        {
+        if (!std::filesystem::exists(p_assembly_path)) {
             std::cout << "Assembly file doesn't exist!" << std::endl;
             return;
         }
 
-        const wchar_t *delegate_type = L"System.Action";
+        const wchar_t* delegate_type = L"System.Action";
         const wchar_t* assembly_path = s_assembly_path.c_str();
-        const wchar_t *dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
-        const wchar_t *dotnet_type_method_Start = L"Start";
-        const wchar_t *dotnet_type_method_Run = L"Run";
+        const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
+        const wchar_t* dotnet_type_method_Start = L"Start";
+        const wchar_t* dotnet_type_method_Run = L"Run";
 
         emit progressUpdated("Init Script Runner: 1...", 100 / 5 * 3);
 
-        int rc = assembly_loader(
+        if (StartScript == nullptr) {
+            int rc = assembly_loader(
                 assembly_path,
                 dotnet_type,
                 dotnet_type_method_Start,
                 delegate_type,
                 nullptr,
                 (void**)&StartScript
-        );
+            );
+
+            if (rc != 0) {
+                std::cerr << "Failed to load StartScript function. Error code: " << std::hex << rc << std::endl;
+                return;
+            }
+        }
 
         emit progressUpdated("Init Script Runner: 2...", 100 / 5 * 4);
 
-        if (rc == 0) {
-            rc = assembly_loader(
-                    assembly_path,
-                    dotnet_type,
-                    dotnet_type_method_Run,
-                    delegate_type,
-                    nullptr,
-                    (void**)&UpdateScript
+        if (UpdateScript == nullptr) {
+            int rc = assembly_loader(
+                assembly_path,
+                dotnet_type,
+                dotnet_type_method_Run,
+                delegate_type,
+                nullptr,
+                (void**)&UpdateScript
             );
-        }
 
-        if (rc != 0 || StartScript == nullptr || UpdateScript == nullptr) {
-            std::cerr << "Failed to load managed function. Error code: " << std::hex << rc << std::endl;
-            return;
+            if (rc != 0) {
+                std::cerr << "Failed to load UpdateScript function. Error code: " << std::hex << rc << std::endl;
+                return;
+            }
         }
-
 
         // Al termine invia l'aggiornamento finale
         emit progressUpdated("Loading completed", 100);

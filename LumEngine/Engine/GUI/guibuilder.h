@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include <QSplitter>
 
+#include <memory>
+
 #pragma once
 
 class GuiBuilder
@@ -21,27 +23,34 @@ public:
     GuiBuilder();
     ~GuiBuilder();
 
-    MainWindow* getMainWindow() const { return mainWindow; }
-    PlayButton* getPlayButton() const { return playButton; }
+    MainWindow* getMainWindow() const { return mainWindow.get(); }
+    PlayButton* getPlayButton() const { return playButton.get(); }
+
 private:
-    MainWindow* mainWindow = nullptr;
+    std::unique_ptr<MainWindow> mainWindow;
 
-    QHBoxLayout* positionLayout = nullptr;
-    QHBoxLayout* topLine = nullptr;
-    QVBoxLayout* centralLayout = nullptr;
+    std::unique_ptr<QHBoxLayout> positionLayout;
+    std::unique_ptr<QHBoxLayout> topLine;
+    std::unique_ptr<QVBoxLayout> centralLayout;
 
-    Renderer* scene = nullptr;
-    Console* console = nullptr;
-    RedirectStreamBuf* outputRedirector = nullptr;
+    std::unique_ptr<Renderer> scene;
+    std::unique_ptr<Console> console;
+    std::unique_ptr<RedirectStreamBuf> outputRedirector;
 
-    QSplitter* sceneConsoleSplitter = nullptr;
+    std::unique_ptr<QSplitter> sceneConsoleSplitter;
+    std::unique_ptr<QSplitter> rightPanelSplitter;
+    std::unique_ptr<QWidget> mainContainer;
 
-    Panel* topPanel = nullptr;
-    VerticalPanel* rightPanel = nullptr;
+    std::unique_ptr<Panel> topPanel;
+    std::unique_ptr<VerticalPanel> leftPanel;
 
-    QLabel* positionLabel = nullptr;
-    Vec3Property* position = nullptr;
+    std::unique_ptr<BaseButton> consoleButton;
+    std::unique_ptr<BaseButton> lightingSettingsButton;
+    std::unique_ptr<BaseButton> hierarchyButton;
 
-    PlayButton* playButton = nullptr;
-    TabsButton* tBtn = nullptr;
+    std::unique_ptr<QLabel> positionLabel;
+    std::unique_ptr<Vec3Property> position;
+
+    std::unique_ptr<PlayButton> playButton;
+    std::unique_ptr<TabsButton> tBtn;
 };

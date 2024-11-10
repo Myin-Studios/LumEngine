@@ -170,7 +170,8 @@ public class ScriptManager
     {
         string projectName = Path.GetFileName(assemblyPath);
         string fullAssemblyPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0", projectName + ".dll");
-        string lumScriptingDllPath = Path.GetFullPath("../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/LumScripting.dll");
+        string lumScriptingDllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LumScripting", "LumScripting.dll");
+        string lumScriptLoaderDllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LumScripting", "LumScriptLoader.dll");
 
         if (!File.Exists(fullAssemblyPath))
         {
@@ -181,6 +182,12 @@ public class ScriptManager
         if (!File.Exists(lumScriptingDllPath))
         {
             Logger.Error($"LumScripting assembly not found at: {lumScriptingDllPath}");
+            return;
+        }
+
+        if (!File.Exists(lumScriptLoaderDllPath))
+        {
+            Logger.Error($"LumScriptLoader assembly not found at: {lumScriptLoaderDllPath}");
             return;
         }
 
@@ -204,6 +211,34 @@ public class ScriptManager
         else
         {
             Logger.Succeed("LumScripting is already loaded.");
+        }
+
+        // Verifica se LumScriptLoader è già stato caricato
+        Assembly lumScriptLoaderAssembly = AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(a => a.FullName.StartsWith("LumScriptLoader"));
+
+        if (lumScriptLoaderAssembly == null)
+        {
+            try
+            {
+                lumScriptLoaderAssembly = Assembly.LoadFrom(lumScriptLoaderDllPath);
+                Logger.Succeed($"Loaded LumScriptLoader assembly from {lumScriptLoaderDllPath}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error loading LumScriptLoader assembly: {ex.Message}");
+                return;
+            }
+        }
+        else
+        {
+            Logger.Succeed("LumScriptLoader is already loaded.");
+        }
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assembly in assemblies)
+        {
+            Logger.Debug($"Loaded assembly: {assembly.FullName}");
         }
 
         // Ora puoi continuare a caricare l'assembly dell'utente

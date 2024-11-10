@@ -34,7 +34,7 @@ namespace LumScripting
                 }
 
                 void SetPosition(float x, float y, float z) {
-                    System::Console::WriteLine("SetPosition called with values: {0}, {1}, {2}", x, y, z);
+                    Console::WriteLine(String::Format("Position updated to: ({0}, {1}, {2})", x, y, z));
                     coreTransform->SetPosition(x, y, z);
                 }
 
