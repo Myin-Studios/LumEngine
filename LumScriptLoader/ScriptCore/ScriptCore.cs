@@ -8,6 +8,7 @@ using LumScripting.Script.Attributes;
 
 using LumScripting.Script.Log;
 using Windows.ApplicationModel.Core;
+using LumScripting.Script.Entities;
 
 public class ScriptCompiler
 {
@@ -141,6 +142,11 @@ public class ScriptManager
                     {
                         // Crea un wrapper che implementa IScript
                         var wrapper = new ScriptWrapper(instance);
+
+                        // Chiama SetEntity direttamente sull'istanza
+                        var setEntityMethod = type.GetMethod("SetEntity", new[] { typeof(LumScripting.Script.Entities.Entity) });
+                        setEntityMethod?.Invoke(wrapper, new object[] { new Entity() });
+
                         scripts.Add(wrapper);
                         Logger.Succeed($"Successfully loaded script: {type.FullName}");
                         Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
@@ -171,6 +177,7 @@ public class ScriptManager
         private readonly object _instance;
         private readonly MethodInfo _startMethod;
         private readonly MethodInfo _runMethod;
+        private readonly MethodInfo _setEntityMethod;
 
         public ScriptWrapper(object instance)
         {
@@ -178,6 +185,7 @@ public class ScriptManager
             var type = instance.GetType();
             _startMethod = type.GetMethod("onStart");
             _runMethod = type.GetMethod("onRun");
+            _setEntityMethod = type.GetMethod("SetEntity", new[] { typeof(LumScripting.Script.Entities.Entity) });
         }
 
         public void onStart()
@@ -189,6 +197,11 @@ public class ScriptManager
         {
             _runMethod?.Invoke(_instance, null);
         }
+
+        public void SetEntity(Entity entity)
+        {
+            _setEntityMethod?.Invoke(_instance, new object[] { entity });
+        }
     }
 
     public void Start()
@@ -197,8 +210,6 @@ public class ScriptManager
         {
             script.onStart();
         }
-
-        Console.WriteLine(scripts.Count);
     }
 
     public void Run()

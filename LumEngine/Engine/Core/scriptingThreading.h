@@ -16,14 +16,14 @@ public:
 protected:
     void run() override {
 
-        running = true; // Imposta running su true
+        // running = true; // Imposta running su true
 
         StartScript(nullptr, 0); // Chiama StartScript
 
-        while (running) {
-            UpdateScript(nullptr, 0);
-            QThread::msleep(1000 / 60);
-        }
+        // while (running) {
+        //     // UpdateScript(nullptr, 0);
+        //     QThread::msleep(1000 / 60);
+        // }
     }
 
 private:
