@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../LumEngine/LumEngine/Engine/Math/Transforms.h"
+#include "../LumTypes/Transformations/Transformations.h"
 #include "../Math/Math.h"
 
 using namespace LumScripting::Script::Math;
@@ -19,7 +19,15 @@ namespace LumScripting
             public:
                 Transform3D()
                 {
-                    coreTransform = new Transform3DCore(); // Allocazione nativa
+                    try
+                    {
+                        coreTransform = new Transform3DCore(); // Allocazione nativa
+                    }
+                    catch (const std::exception& e)
+                    {
+                        Console::WriteLine("Exception during Transform3DCore initialization: " + gcnew String(e.what()));
+                        coreTransform = nullptr;
+                    }
                 }
 
                 ~Transform3D() {
@@ -34,6 +42,10 @@ namespace LumScripting
                 }
 
                 void SetPosition(float x, float y, float z) {
+                    if (coreTransform == nullptr) {
+                        Console::WriteLine("coreTransform is null in SetPosition.");
+                        return;
+                    }
                     Console::WriteLine(String::Format("Position updated to: ({0}, {1}, {2})", x, y, z));
                     coreTransform->SetPosition(x, y, z);
                 }

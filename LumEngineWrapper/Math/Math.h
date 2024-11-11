@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../LumEngine/LumEngine/Engine/Math/Math.h"
+#include "../LumTypes/Mathematics/Math.h"
 
 using namespace System;
 

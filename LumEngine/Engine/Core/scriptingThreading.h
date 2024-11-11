@@ -17,8 +17,8 @@ protected:
     void run() override {
 
         // running = true; // Imposta running su true
-
-        StartScript(nullptr, 0); // Chiama StartScript
+        
+        StartScript(nullptr, 0);
 
         // while (running) {
         //     // UpdateScript(nullptr, 0);

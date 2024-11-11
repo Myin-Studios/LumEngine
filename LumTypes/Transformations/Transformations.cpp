@@ -1,10 +1,10 @@
-#include "Transforms.h"
+#include "Transformations.h"
 
 void Transform3DCore::Move(float x, float y, float z)
 {
-	Vec3Core* tmp = new Vec3Core(x, y, z);
-	this->position->operator+=(*tmp);
-	delete tmp;  // Dealloca la memoria
+    Vec3Core* tmp = new Vec3Core(x, y, z);
+    this->position->operator+=(*tmp);
+    delete tmp;  // Dealloca la memoria
 }
 
 void Transform3DCore::Move(Vec3Core* v)
@@ -14,9 +14,9 @@ void Transform3DCore::Move(Vec3Core* v)
 
 void Transform3DCore::SetRotation(float yaw, float pitch, float roll)
 {
-	this->_yaw = yaw;
-	this->_pitch = pitch;
-	this->_roll = roll;
+    this->_yaw = yaw;
+    this->_pitch = pitch;
+    this->_roll = roll;
 }
 
 void Transform3DCore::Rotate(float yaw, float pitch, float roll)

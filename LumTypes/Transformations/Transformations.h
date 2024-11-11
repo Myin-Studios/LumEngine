@@ -30,8 +30,7 @@
 
 #pragma once
 
-#include "Math.h"
-#include "../Core/CMAPICore.h"
+#include "../Mathematics/Math.h"
 #include <cmath>
 
 class Transform3DCore
@@ -69,7 +68,7 @@ public:
     }
 
     void Move(float x, float y, float z);
-    
+
     void Move(Vec3Core* v);
 
     Vec3Core& GetPosition() const {
@@ -85,48 +84,4 @@ private:
     float _yaw = 0.0f;
     float _pitch = 0.0f;
     float _roll = 0.0f;
-};
-
-/*
-extern "C" {
-    CM_API inline Transform3DCore* CreateTransform3D() {
-        return new Transform3DCore();
-    }
-
-    CM_API inline void DestroyTransform3D(Transform3DCore* instance) {
-        delete instance;
-    }
-
-    CM_API inline void SetPosition(Transform3DCore* instance, float x, float y, float z) {
-        if (instance != nullptr)
-        {
-            std::cout << "Setting position to: " << x << ", " << y << ", " << z << std::endl;
-            instance->SetPosition(x, y, z);
-        }
-        else cerr << "Instance is null!" << endl;
-    }
-
-    CM_API inline void GetPosition(Transform3DCore* instance, float* x, float* y, float* z) {
-        if (instance != nullptr) {
-            *x = instance->position->x();
-            *y = instance->position->y();
-            *z = instance->position->z();
-        }
-    }
-}
-*/
-
-class Transform2D
-{
-public:
-    Vec2 position;
-    Vec2 rotation;
-    Vec2 scale;
-
-    Transform2D()
-    {
-        position = Vec2(0, 0);
-        rotation = Vec2(0, 0);
-        scale = Vec2(1, 1);
-    }
 };

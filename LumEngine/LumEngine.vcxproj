@@ -92,8 +92,6 @@
     <ClInclude Include="Engine\GUI\Rendering\mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h" />
     <ClInclude Include="Engine\GUI\Rendering\shader.h" />
-    <ClInclude Include="Engine\Math\Math.h" />
-    <ClInclude Include="Engine\Math\Transforms.h" />
     <QtMoc Include="Engine\GUI\Windows\mainwindow.h" />
     <QtMoc Include="Engine\GUI\Rendering\renderer.h" />
     <QtMoc Include="Engine\GUI\Panels\panel.h" />
@@ -112,7 +110,6 @@
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\shader.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
-    <ClCompile Include="Engine\Math\Transforms.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -205,16 +202,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
     <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>Output\Debug</OutDir>
+    <OutDir>Output/$(Configuration)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>Output\Release</OutDir>
+    <OutDir>Output/$(Configuration)</OutDir>
     <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -253,13 +250,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;Output\Debug</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;Output\$(Configuration)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GLEW_LIB);$(Qt6_DIR)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -285,14 +283,15 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;Output\Debug</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;Output\$(Configuration)</AdditionalIncludeDirectories>
+      <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGL.lib;Qt6OpenGLWidgets.lib;opengl32.lib;nethost.lib</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGL.lib;Qt6OpenGLWidgets.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

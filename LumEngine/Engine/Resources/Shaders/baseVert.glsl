@@ -15,7 +15,7 @@ uniform mat4 projection;
 void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0)); // Trasforma la posizione del vertice
-    Normal = aNormal; // Passa la normale
+    Normal = normalize(aNormal); // Passa la normale
     TexCoord = aTexCoord; // Passa le coordinate texture
 
     gl_Position = projection * view * vec4(FragPos, 1.0); // Calcola la posizione finale
