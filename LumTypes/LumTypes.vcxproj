@@ -137,6 +137,7 @@
     <ClInclude Include="Transformations\Transformations.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Mathematics\Math.cpp" />
     <ClCompile Include="Transformations\Transformations.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

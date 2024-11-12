@@ -32,12 +32,13 @@
 
 #include "../Mathematics/Math.h"
 #include <cmath>
+#include <iostream>
 
 class Transform3DCore
 {
 public:
     ~Transform3DCore() {
-        std::cout << "Transform3DCore instance destroyed." << std::endl;
+        // std::cout << "Transform3DCore instance destroyed." << std::endl;
 
         delete position;
         position = nullptr;
@@ -60,10 +61,16 @@ public:
         scale(1, 1, 1)
     {}
 
+    Transform3DCore(const Transform3DCore& other);
+
+    Transform3DCore& operator=(const Transform3DCore& other);
+
     /* --------------------------{ Position }--------------------------*/
 
     void SetPosition(float x, float y, float z) {
-        position = new Vec3Core(x, y, z);
+        position->setX(x);
+        position->setY(y);
+        position->setZ(z);
         std::cout << "Position updated to: " << position->x() << ", " << position->y() << ", " << position->z() << std::endl;
     }
 

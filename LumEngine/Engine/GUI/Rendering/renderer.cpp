@@ -127,6 +127,8 @@ void Renderer::paintGL()
 
             m->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
 
+            std::cout << "(" << m->transform->GetPosition().x() << ", " << m->transform->GetPosition().y() << ", " << m->transform->GetPosition().z() << ")" << std::endl;
+
             glm::mat4 view = glm::lookAt(
                 glm::vec3(
                     editorCamera->GetTransform()->GetPosition().x(),

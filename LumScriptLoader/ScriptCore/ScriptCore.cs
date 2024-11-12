@@ -66,24 +66,27 @@ public class ScriptCompiler
 
 public class ScriptManager
 {
-    private List<IScript> scripts = new List<IScript>();
+    private List<IScript> scripts;
     private AssemblyLoadContext loadContext;
 
     public ScriptManager()
     {
-        // Crea un nuovo context con un resolver personalizzato
-        loadContext = new AssemblyLoadContext("ScriptLoadContext", isCollectible: true);
+        scripts = new List<IScript>();
+
+        // Crea un nuovo AssemblyLoadContext con il nostro handler per il resolving
+        loadContext = new AssemblyLoadContext("ScriptLoader");
         loadContext.Resolving += AssemblyResolving;
     }
 
+    // MODIFICATO: Aggiunto supporto per LumEngineWrapper
     private Assembly AssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        // Se viene richiesto LumScripting, carica quello dell'engine
-        if (assemblyName.Name == "LumScripting")
+        // Gestisce sia LumScripting che LumEngineWrapper
+        if (assemblyName.Name == "LumScripting" || assemblyName.Name == "LumEngineWrapper")
         {
-            string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
-            Logger.Debug($"Redirecting LumScripting load to: {engineLumScriptingPath}");
-            return context.LoadFromAssemblyPath(Path.GetFullPath(engineLumScriptingPath));
+            string engineAssemblyPath = Path.Combine("LumScripting", $"{assemblyName.Name}.dll");
+            Logger.Debug($"Redirecting {assemblyName.Name} load to: {engineAssemblyPath}");
+            return context.LoadFromAssemblyPath(Path.GetFullPath(engineAssemblyPath));
         }
         return null;
     }
@@ -101,12 +104,19 @@ public class ScriptManager
 
         try
         {
-            // Carica prima LumScripting
+            // MODIFICATO: Carica entrambe le dipendenze dell'engine
             string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
-            Logger.Debug($"Loading LumScripting from: {Path.GetFullPath(engineLumScriptingPath)}");
+            string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
 
+            // Carica LumScripting
+            Logger.Debug($"Loading LumScripting from: {Path.GetFullPath(engineLumScriptingPath)}");
             Assembly lumScriptingAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineLumScriptingPath));
             Logger.Debug($"Loaded LumScripting assembly: {lumScriptingAssembly.FullName}");
+
+            // NUOVO: Carica LumEngineWrapper
+            Logger.Debug($"Loading LumEngineWrapper from: {Path.GetFullPath(engineWrapperPath)}");
+            Assembly wrapperAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineWrapperPath));
+            Logger.Debug($"Loaded LumEngineWrapper assembly: {wrapperAssembly.FullName}");
 
             Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.IScript");
             if (scriptInterfaceType == null)
@@ -116,9 +126,23 @@ public class ScriptManager
             }
             Logger.Debug($"Found IScript type: {scriptInterfaceType.FullName}");
 
+            Logger.Debug("Loaded assemblies before user assembly loading:");
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Logger.Succeed($"{assembly.FullName}");
+            }
+
             // Carica l'assembly utente
             Assembly userAssembly = loadContext.LoadFromAssemblyPath(fullAssemblyPath);
             Logger.Debug($"Loaded assembly: {userAssembly.FullName}");
+
+            Logger.Debug("Loaded assemblies after user assembly loading:");
+            var ass = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in ass)
+            {
+                Logger.Succeed($"{assembly.FullName}");
+            }
 
             var scriptTypes = userAssembly.GetTypes()
                 .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Scripting.IScript") && !t.IsAbstract)
@@ -172,6 +196,17 @@ public class ScriptManager
         }
     }
 
+    public void Unload()
+    {
+        scripts.Clear();
+        loadContext.Unload();
+    }
+
+    public List<IScript> GetScripts()
+    {
+        return scripts;
+    }
+
     public class ScriptWrapper : IScript
     {
         private readonly object _instance;
@@ -190,9 +225,27 @@ public class ScriptManager
 
         public void onStart()
         {
-            _startMethod?.Invoke(_instance, null);
+            try
+            {
+                Console.WriteLine($"Starting invoke of {_startMethod} on {_instance}");
+                Console.WriteLine($"Method declaring type: {_startMethod?.DeclaringType}");
+                Console.WriteLine($"Instance type: {_instance?.GetType()}");
+                _startMethod?.Invoke(_instance, null);
+                Console.WriteLine("Invoke completed successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception during invoke: {ex.Message}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner: {ex.InnerException.Message}");
+                    Console.WriteLine($"Inner Stack: {ex.InnerException.StackTrace}");
+                }
+                throw;
+            }
         }
-
+        
         public void onRun()
         {
             _runMethod?.Invoke(_instance, null);

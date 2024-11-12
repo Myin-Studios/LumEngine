@@ -1,5 +1,40 @@
 #include "Transformations.h"
 
+Transform3DCore::Transform3DCore(const Transform3DCore& other)
+    : position(new Vec3Core(*other.position))
+    , rotation(other.rotation)
+    , scale(other.scale)
+    , forward(other.forward)
+    , right(other.right)
+    , up(other.up)
+    , backward(other.backward)
+    , left(other.left)
+    , down(other.down)
+    , _yaw(other._yaw)
+    , _pitch(other._pitch)
+    , _roll(other._roll)
+{}
+
+Transform3DCore& Transform3DCore::operator=(const Transform3DCore & other)
+{
+    if (this != &other) {
+        delete position;
+        position = new Vec3Core(*other.position);
+        rotation = other.rotation;
+        scale = other.scale;
+        forward = other.forward;
+        right = other.right;
+        up = other.up;
+        backward = other.backward;
+        left = other.left;
+        down = other.down;
+        _yaw = other._yaw;
+        _pitch = other._pitch;
+        _roll = other._roll;
+    }
+    return *this;
+}
+
 void Transform3DCore::Move(float x, float y, float z)
 {
     Vec3Core* tmp = new Vec3Core(x, y, z);
@@ -9,7 +44,7 @@ void Transform3DCore::Move(float x, float y, float z)
 
 void Transform3DCore::Move(Vec3Core* v)
 {
-    this->position->operator+=(*v);
+    // this->position->operator+=(*v);
 }
 
 void Transform3DCore::SetRotation(float yaw, float pitch, float roll)

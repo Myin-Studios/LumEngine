@@ -26,5 +26,8 @@
     <ClCompile Include="Transformations\Transformations.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="Mathematics\Math.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

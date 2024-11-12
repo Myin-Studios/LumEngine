@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Math\Math.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Transforms\Transforms.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="ScriptLoader\ScriptLoader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Math.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
