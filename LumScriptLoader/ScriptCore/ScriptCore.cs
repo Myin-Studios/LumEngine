@@ -12,47 +12,61 @@ using Windows.ApplicationModel.Core;
 using LumScripting.Script.Entities;
 using Microsoft.CodeAnalysis.Scripting;
 
+public class SharedAssemblyLoadContext : AssemblyLoadContext
+{
+    private Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
+    private string[] _sharedAssemblyNames = new[] { "LumScripting", "LumEngineWrapper" };
+
+    public SharedAssemblyLoadContext() : base("SharedLoader", isCollectible: false)
+    {
+        // Carica gli assembly condivisi
+        foreach (var name in _sharedAssemblyNames)
+        {
+            string path = Path.Combine("LumScripting", $"{name}.dll");
+            var assembly = LoadFromAssemblyPath(Path.GetFullPath(path));
+            _loadedAssemblies[name] = assembly;
+        }
+    }
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        // Se è uno degli assembly condivisi, restituisci quello già caricato
+        if (_loadedAssemblies.TryGetValue(assemblyName.Name, out var assembly))
+        {
+            return assembly;
+        }
+
+        // Per tutti gli altri, cerca tra gli assembly già caricati nel dominio
+        return null;
+    }
+}
+
 public class ScriptManager
 {
     private List<IScript> scripts;
-    private AssemblyLoadContext loadContext;
-    private Assembly wrapperAssembly;
-    private Assembly scriptingAssembly;
+    private SharedAssemblyLoadContext sharedContext;
+    private AssemblyLoadContext scriptContext;
 
     public ScriptManager()
     {
         scripts = new List<IScript>();
 
-        // Prima carica LumEngineWrapper globalmente
-        string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
-        wrapperAssembly = Assembly.LoadFrom(Path.GetFullPath(engineWrapperPath));
-        Logger.Debug($"Loaded LumEngineWrapper globally: {wrapperAssembly.FullName}");
+        // Crea il contesto condiviso
+        sharedContext = new SharedAssemblyLoadContext();
 
-        // Carica LumScripting globalmente
-        string engineScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
-        scriptingAssembly = Assembly.LoadFrom(Path.GetFullPath(engineScriptingPath));
-        Logger.Debug($"Loaded LumScripting globally: {scriptingAssembly.FullName}");
-
-        // Crea l'AssemblyLoadContext
-        loadContext = new AssemblyLoadContext("ScriptLoader", isCollectible: true);
-        loadContext.Resolving += AssemblyResolving;
+        // Crea il contesto per gli script utente
+        scriptContext = new AssemblyLoadContext("ScriptLoader", isCollectible: true);
+        scriptContext.Resolving += ScriptAssemblyResolving;
     }
 
-    private Assembly AssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
+    private Assembly ScriptAssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        // Importante: restituisci le reference corrette per evitare doppi caricamenti
-        switch (assemblyName.Name)
+        // Per LumScripting e LumEngineWrapper, usa le versioni dal contesto condiviso
+        if (assemblyName.Name == "LumScripting" || assemblyName.Name == "LumEngineWrapper")
         {
-            case "LumEngineWrapper":
-                return wrapperAssembly;
-            case "LumScripting":
-                return scriptingAssembly;
-            default:
-                // Per tutti gli altri assembly, cerca prima tra quelli già caricati
-                var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
-                return loadedAssembly;
+            return sharedContext.Assemblies.First(a => a.GetName().Name == assemblyName.Name);
         }
+        return null;
     }
 
     public void Load(string assemblyPath)
@@ -68,67 +82,52 @@ public class ScriptManager
 
         try
         {
-            Type scriptInterfaceType = scriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
+            // Usa il contesto condiviso per ottenere il tipo IScript
+            var lumScriptingAssembly = sharedContext.Assemblies.First(a => a.GetName().Name == "LumScripting");
+            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
+
             if (scriptInterfaceType == null)
             {
                 Logger.Error("IScript type not found in LumScripting.");
                 return;
             }
-            Logger.Debug($"Found IScript type: {scriptInterfaceType.FullName}");
 
-            Logger.Debug("Loaded assemblies before user assembly loading:");
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (Assembly assembly in assemblies)
+            // Carica l'assembly utente nel contesto degli script
+            Assembly userAssembly = scriptContext.LoadFromAssemblyPath(fullAssemblyPath);
+
+            // Verifica assemblies duplicati
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .GroupBy(a => a.GetName().Name)
+                .Where(g => g.Count() > 1)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            if (loadedAssemblies.Any())
             {
-                Logger.Succeed($"{assembly.FullName}");
-            }
-
-            // Carica l'assembly utente
-            Assembly userAssembly = loadContext.LoadFromAssemblyPath(fullAssemblyPath);
-            Logger.Debug($"Loaded assembly: {userAssembly.FullName}");
-
-            Logger.Debug("Loaded assemblies after user assembly loading:");
-            var ass = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (Assembly assembly in ass)
-            {
-                Logger.Succeed($"{assembly.FullName}");
+                Logger.Warning("Duplicate assemblies detected:");
+                foreach (var kvp in loadedAssemblies)
+                {
+                    Logger.Warning($"{kvp.Key}: loaded {kvp.Value} times");
+                }
             }
 
             var scriptTypes = userAssembly.GetTypes()
                 .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
                 .ToList();
 
-            Logger.Debug($"Found {scriptTypes.Count} script types");
-
             foreach (var type in scriptTypes)
             {
                 try
                 {
-                    Logger.Debug($"Creating instance of: {type.FullName}");
-
-                    // Aggiungi più informazioni di debug
-                    Logger.Debug($"Base type: {type.BaseType?.FullName}");
-                    Logger.Debug($"Assembly: {type.Assembly.FullName}");
-
                     object instance = Activator.CreateInstance(type);
-                    Logger.Debug($"Instance created successfully");
-
                     var wrapper = new ScriptWrapper(instance);
 
-                    // Ottieni il tipo Entity dall'assembly originale
+                    // Usa il contesto condiviso per ottenere il tipo Entity
+                    var wrapperAssembly = sharedContext.Assemblies.First(a => a.GetName().Name == "LumEngineWrapper");
                     var entityType = wrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
-                    Logger.Debug($"Entity type found: {entityType != null}");
-
                     var entity = Activator.CreateInstance(entityType);
-                    Logger.Debug($"Entity instance created");
 
-                    // Usa l'interfaccia pubblica
                     ((IEntityContainer)wrapper).SetEntityInstance(entity);
-                    Logger.Debug($"Entity initialized through IEntityContainer");
-
                     scripts.Add(wrapper);
-                    Logger.Succeed($"Successfully loaded script: {type.FullName}");
-                    Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
                 }
                 catch (Exception ex)
                 {
@@ -136,8 +135,6 @@ public class ScriptManager
                     Logger.Error($"Stack trace: {ex.StackTrace}");
                 }
             }
-
-            Logger.Debug($"Total scripts loaded: {scripts.Count}");
         }
         catch (Exception ex)
         {
@@ -149,7 +146,6 @@ public class ScriptManager
     public void Unload()
     {
         scripts.Clear();
-        loadContext.Unload();
     }
 
     public List<IScript> GetScripts()
