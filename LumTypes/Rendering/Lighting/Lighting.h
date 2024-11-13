@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../LumTypes/Transformations/Transformations.h"
-#include "../Colors/colors.h"
+#include "../Colors/Color.h"
 
 enum LightType
 {

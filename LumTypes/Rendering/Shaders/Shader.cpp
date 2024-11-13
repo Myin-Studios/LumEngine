@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "Shader.h"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -22,10 +22,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         vShaderFile.open(std::filesystem::absolute(std::filesystem::path(vertexPath)).string());
         fShaderFile.open(std::filesystem::absolute(std::filesystem::path(fragmentPath)).string());
 
-        stringstream vs;
+        std::stringstream vs;
         vs << vShaderFile.rdbuf();
 
-        stringstream fs;
+        std::stringstream fs;
         fs << fShaderFile.rdbuf();
 
         vertexCode = vs.str();
@@ -95,7 +95,7 @@ void Shader::setBool(const std::string &name, bool value) const
     glUniform1i(loc, (int)value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << std::endl;
 }
 
 void Shader::setInt(const std::string &name, int value) const
@@ -104,7 +104,7 @@ void Shader::setInt(const std::string &name, int value) const
     glUniform1i(loc, value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << std::endl;
 }
 
 void Shader::setFloat(const std::string &name, float value) const
@@ -113,25 +113,25 @@ void Shader::setFloat(const std::string &name, float value) const
     glUniform1f(loc, value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << std::endl;
 }
 
-void Shader::setFloatArray(const string& name, GLsizei count, const float* value) const
+void Shader::setFloatArray(const std::string& name, GLsizei count, const float* value) const
 {
     GLint loc = glGetUniformLocation(ID, name.c_str());
     glUniform1fv(loc, count, value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << std::endl;
 }
 
-void Shader::setVec3(const string& name, glm::vec3 v3) const
+void Shader::setVec3(const std::string& name, glm::vec3 v3) const
 {
     GLint loc = glGetUniformLocation(ID, name.c_str());
     glUniform3f(loc, v3.x, v3.y, v3.z);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << std::endl;
 }
 
 void Shader::setMat4x4(const std::string &name, const float* value) const
@@ -140,14 +140,14 @@ void Shader::setMat4x4(const std::string &name, const float* value) const
     glUniformMatrix4fv(loc, 1, GL_FALSE, value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " <<  loc << std::endl;
 }
 
-void Shader::setVec3Array(const string& name, GLsizei count, const float* value) const
+void Shader::setVec3Array(const std::string& name, GLsizei count, const float* value) const
 {
     GLint loc = glGetUniformLocation(ID, name.c_str());
     glUniform3fv(loc, count, value);
 
     if (loc < 0)
-        cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << endl;
+        std::cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << std::endl;
 }

@@ -34,7 +34,9 @@
 #include <cmath>
 #include <iostream>
 
-class Transform3DCore
+#include "../Entities/Properties/Property.h"
+
+class Transform3DCore : public IProperty
 {
 public:
     ~Transform3DCore() {

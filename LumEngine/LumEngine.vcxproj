@@ -86,12 +86,7 @@
     <ClInclude Include="Engine\GUI\guibuilder.h" />
     <ClInclude Include="Engine\GUI\Panels\properties.h" />
     <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h" />
-    <ClInclude Include="Engine\GUI\Rendering\Colors\colors.h" />
-    <ClInclude Include="Engine\GUI\Rendering\Lighting\lighting.h" />
-    <ClInclude Include="Engine\GUI\Rendering\Materials\materials.h" />
-    <ClInclude Include="Engine\GUI\Rendering\mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h" />
-    <ClInclude Include="Engine\GUI\Rendering\shader.h" />
     <QtMoc Include="Engine\GUI\Windows\mainwindow.h" />
     <QtMoc Include="Engine\GUI\Rendering\renderer.h" />
     <QtMoc Include="Engine\GUI\Panels\panel.h" />
@@ -106,9 +101,7 @@
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
-    <ClCompile Include="Engine\GUI\Rendering\mesh.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
-    <ClCompile Include="Engine\GUI\Rendering\shader.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

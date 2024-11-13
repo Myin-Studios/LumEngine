@@ -88,13 +88,7 @@
     <ClInclude Include="Engine\GUI\Panels\properties.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI\Rendering\mesh.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\GUI\Rendering\shader.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\guibuilder.h">
@@ -104,15 +98,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\GUI\Rendering\Lighting\lighting.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\GUI\Rendering\Materials\materials.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\GUI\Rendering\Colors\colors.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h">
@@ -158,13 +143,7 @@
     <ClCompile Include="Engine\GUI\Panels\properties.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\GUI\Rendering\mesh.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\GUI\Rendering\shader.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp">

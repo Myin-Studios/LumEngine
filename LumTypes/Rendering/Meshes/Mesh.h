@@ -40,11 +40,13 @@
 #include <string>
 #include <iostream>
 
-#include "shader.h"
-#include "Materials/materials.h"
-#include "rendererDebugger.h"
+#include "../LumTypes/Rendering/Shaders/Shader.h"
+#include "../LumTypes/Rendering/Materials/Materials.h"
+#include "../LumEngine/Engine/GUI/Rendering/rendererDebugger.h"
 
 #include "../LumTypes/Transformations/Transformations.h"
+
+#include "../LumTypes/Entities/Properties/Property.h"
 
 using namespace std;
 
@@ -61,15 +63,14 @@ struct Texture {
     string type;
 };
 
-class Mesh
+class MeshCore : public IProperty
 {
 public:
     vector<Vertex> vertices;
     Transform3DCore* transform;
-    Mesh() = default;
-    ~Mesh();
+    ~MeshCore();
 
-    Mesh(vector<Vertex> vertices);
+    MeshCore(vector<Vertex> vertices = {});
     void Draw() const;
 
     void SetMaterial(shared_ptr<Material> m) { this->material = m; }

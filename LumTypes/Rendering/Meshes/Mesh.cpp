@@ -1,20 +1,20 @@
-#include "mesh.h"
+#include "Mesh.h"
 
-Mesh::Mesh(vector<Vertex> vertices)
+MeshCore::MeshCore(vector<Vertex> vertices)
         : vertices(std::move(vertices)) {
 
     transform = new Transform3DCore();
     setupMesh();
 }
 
-Mesh::~Mesh() {
+MeshCore::~MeshCore() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
     std::cout << "Destroying mesh" << std::endl;
 }
 
-void Mesh::setupMesh()
+void MeshCore::setupMesh()
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -59,7 +59,7 @@ void Mesh::setupMesh()
     RendererDebugger::checkOpenGLError("mesh setup");
 }
 
-void Mesh::Draw() const
+void MeshCore::Draw() const
 {
     material->GetShader()->use();
 

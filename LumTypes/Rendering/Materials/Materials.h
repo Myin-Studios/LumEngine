@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../shader.h"
-#include "../Colors/colors.h"
+#include "../Shaders/Shader.h"
+#include "../Colors/Color.h"
 
 namespace MaterialTypes
 {

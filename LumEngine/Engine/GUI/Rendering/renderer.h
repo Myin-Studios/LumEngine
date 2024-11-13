@@ -30,8 +30,10 @@
 
 #pragma once
 
-#include "Lighting/lighting.h"
+#include "../LumTypes/Rendering/Lighting/Lighting.h"
 #include "Camera/camera.h"
+#include "../LumTypes/Entities/Entity.h"
+#include "../LumTypes/Rendering/Meshes/Mesh.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
@@ -53,8 +55,6 @@
 #include <QDebug>
 #include <QTimer>
 #include <iostream>
-
-#include "mesh.h"
 
 using namespace std;
 
@@ -89,7 +89,7 @@ private:
     void setupFrameBuffer();
     void cleanup();
     void loadModel(const QString& path);
-    std::shared_ptr<Mesh> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
+    std::unique_ptr<MeshCore> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
 
     Camera* editorCamera;
     QPoint mousePos;
@@ -98,8 +98,9 @@ private:
 
     QTimer* updateTimer;
 
-    std::shared_ptr<Mesh> skysphere;
-    vector<shared_ptr<Mesh>> models;
+    std::shared_ptr<MeshCore> skysphere;
+    vector<shared_ptr<MeshCore>> models;
+    vector<shared_ptr<BaseEntity>> entities;
 
     vector<Light> lights;
 
