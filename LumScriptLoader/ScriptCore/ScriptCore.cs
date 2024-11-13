@@ -16,7 +16,8 @@ public class ScriptManager
 {
     private List<IScript> scripts;
     private AssemblyLoadContext loadContext;
-    private Assembly wrapperAssembly; // Aggiungi questo campo
+    private Assembly wrapperAssembly;
+    private Assembly scriptingAssembly;
 
     public ScriptManager()
     {
@@ -26,6 +27,11 @@ public class ScriptManager
         string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
         wrapperAssembly = Assembly.LoadFrom(Path.GetFullPath(engineWrapperPath));
         Logger.Debug($"Loaded LumEngineWrapper globally: {wrapperAssembly.FullName}");
+        
+        // Prima carica LumScripting globalmente
+        string engineScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
+        scriptingAssembly = Assembly.LoadFrom(Path.GetFullPath(engineScriptingPath));
+        Logger.Debug($"Loaded LumScripting globally: {scriptingAssembly.FullName}");
 
         // Poi crea l'AssemblyLoadContext
         loadContext = new AssemblyLoadContext("ScriptLoader");
@@ -36,13 +42,11 @@ public class ScriptManager
     {
         if (assemblyName.Name == "LumEngineWrapper")
         {
-            // Ritorna l'assembly già caricato globalmente
             return wrapperAssembly;
         }
         if (assemblyName.Name == "LumScripting")
         {
-            string engineAssemblyPath = Path.Combine("LumScripting", "LumScripting.dll");
-            return context.LoadFromAssemblyPath(Path.GetFullPath(engineAssemblyPath));
+            return scriptingAssembly;
         }
         return null;
     }
@@ -60,21 +64,7 @@ public class ScriptManager
 
         try
         {
-            // MODIFICATO: Carica entrambe le dipendenze dell'engine
-            string engineLumScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
-            string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
-
-            // Carica LumScripting
-            Logger.Debug($"Loading LumScripting from: {Path.GetFullPath(engineLumScriptingPath)}");
-            Assembly lumScriptingAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineLumScriptingPath));
-            Logger.Debug($"Loaded LumScripting assembly: {lumScriptingAssembly.FullName}");
-
-            // NUOVO: Carica LumEngineWrapper
-            Logger.Debug($"Loading LumEngineWrapper from: {Path.GetFullPath(engineWrapperPath)}");
-            Assembly wrapperAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineWrapperPath));
-            Logger.Debug($"Loaded LumEngineWrapper assembly: {wrapperAssembly.FullName}");
-
-            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
+            Type scriptInterfaceType = scriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
             if (scriptInterfaceType == null)
             {
                 Logger.Error("IScript type not found in LumScripting.");
@@ -121,24 +111,16 @@ public class ScriptManager
 
                     var wrapper = new ScriptWrapper(instance);
 
-                    // Crea e imposta l'Entity
-                    // Usa reflection per chiamare InitializeEntity
+                    // Ottieni il tipo Entity dall'assembly originale
                     var entityType = wrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
                     Logger.Debug($"Entity type found: {entityType != null}");
 
                     var entity = Activator.CreateInstance(entityType);
                     Logger.Debug($"Entity instance created");
 
-                    // Ottieni il tipo di ScriptWrapper dall'assembly corretto
-                    var scriptWrapperType = wrapper.GetType();
-                    var initializeEntityMethod = scriptWrapperType.GetMethod("InitializeEntity");
-
-                    // Assicurati che il parametro sia del tipo corretto
-                    var parameterType = initializeEntityMethod.GetParameters()[0].ParameterType;
-                    var convertedEntity = Convert.ChangeType(entity, parameterType);
-
-                    initializeEntityMethod.Invoke(wrapper, new[] { convertedEntity });
-                    Logger.Debug($"Entity initialized");
+                    // Usa l'interfaccia pubblica
+                    ((IEntityContainer)wrapper).SetEntityInstance(entity);
+                    Logger.Debug($"Entity initialized through IEntityContainer");
 
                     scripts.Add(wrapper);
                     Logger.Succeed($"Successfully loaded script: {type.FullName}");

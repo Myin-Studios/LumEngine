@@ -14,7 +14,12 @@ namespace LumScripting.Script.Internal
         void SetEntity(Entity entity);
     }
 
-    public class ScriptWrapper : IScriptInternal  // Classe public
+    public interface IEntityContainer
+    {
+        void SetEntityInstance(object entity);
+    }
+
+    public class ScriptWrapper : IScriptInternal, IEntityContainer  // Classe public
     {
         private readonly object _instance;
         private readonly MethodInfo _startMethod;
@@ -59,6 +64,17 @@ namespace LumScripting.Script.Internal
         public void onRun()
         {
             _runMethod?.Invoke(_instance, null);
+        }
+
+        public void SetEntityInstance(object entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            if (entity is Entity entityTyped)
+            {
+                ((IScriptInternal)this).SetEntity(entityTyped);
+            }
         }
     }
 }
