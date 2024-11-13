@@ -114,8 +114,7 @@ public class ScriptManager
                     var wrapper = new ScriptWrapper(instance);
 
                     // Crea e imposta l'Entity
-                    var wAssembly = wrapper.GetType().Assembly;
-                    var entityType = wAssembly.GetType("LumScripting.Script.Entities.Entity");
+                    var entityType = loadContext.Assemblies?.FirstOrDefault(a => a.FullName.Contains("LumEngineWrapper"))?.GetType("LumScripting.Script.Entities.Entity");
                     Logger.Debug($"Entity type found: {entityType != null}");
 
                     var entity = Activator.CreateInstance(entityType);
