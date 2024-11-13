@@ -3,66 +3,14 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
+using LumScripting.Script.Internal;
 using LumScripting.Script.Scripting;
 using LumScripting.Script.Attributes;
 
 using LumScripting.Script.Log;
 using Windows.ApplicationModel.Core;
 using LumScripting.Script.Entities;
-
-public class ScriptCompiler
-{
-    /*
-    public static string CompileScriptsToDll(string scriptDirectory, string outputDllPath)
-    {
-        List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
-
-        // Cerca tutti i file .cs nelle cartelle e sottocartelle
-        var scriptFiles = Directory.GetFiles(scriptDirectory, "*.cs", SearchOption.AllDirectories);
-
-        foreach (var scriptFile in scriptFiles)
-        {
-            string scriptCode = File.ReadAllText(scriptFile);
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(scriptCode);
-            syntaxTrees.Add(syntaxTree);
-        }
-
-        var references = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic)
-            .Select(a => MetadataReference.CreateFromFile(a.Location))
-            .Cast<MetadataReference>()
-            .ToList();
-
-        // Compilazione in un'assembly DLL
-        CSharpCompilation compilation = CSharpCompilation.Create(
-            Path.GetFileNameWithoutExtension(outputDllPath), // Nome dell'assembly
-            syntaxTrees,
-            references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary) // DLL come output
-        );
-
-        EmitResult result;
-        using (var fs = new FileStream(outputDllPath, FileMode.Create, FileAccess.Write))
-        {
-            result = compilation.Emit(fs); // Scrive l'output della compilazione in una DLL
-        }
-
-        if (!result.Success)
-        {
-            foreach (var diagnostic in result.Diagnostics)
-            {
-                Console.WriteLine($"Error: {diagnostic.GetMessage()}");
-            }
-            return null; // Restituisce null se la compilazione fallisce
-        }
-        else
-        {
-            Console.WriteLine($"DLL salvata correttamente in: {outputDllPath}");
-            return outputDllPath; // Restituisce il percorso della DLL se la compilazione ha successo
-        }
-    }
-    */
-}
+using Microsoft.CodeAnalysis.Scripting;
 
 public class ScriptManager
 {
@@ -118,7 +66,7 @@ public class ScriptManager
             Assembly wrapperAssembly = loadContext.LoadFromAssemblyPath(Path.GetFullPath(engineWrapperPath));
             Logger.Debug($"Loaded LumEngineWrapper assembly: {wrapperAssembly.FullName}");
 
-            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.IScript");
+            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
             if (scriptInterfaceType == null)
             {
                 Logger.Error("IScript type not found in LumScripting.");
@@ -145,7 +93,7 @@ public class ScriptManager
             }
 
             var scriptTypes = userAssembly.GetTypes()
-                .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Scripting.IScript") && !t.IsAbstract)
+                .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
                 .ToList();
 
             Logger.Debug($"Found {scriptTypes.Count} script types");
@@ -155,30 +103,30 @@ public class ScriptManager
                 try
                 {
                     Logger.Debug($"Creating instance of: {type.FullName}");
+
+                    // Aggiungi più informazioni di debug
+                    Logger.Debug($"Base type: {type.BaseType?.FullName}");
+                    Logger.Debug($"Assembly: {type.Assembly.FullName}");
+
                     object instance = Activator.CreateInstance(type);
-                    Logger.Debug($"Instance created");
+                    Logger.Debug($"Instance created successfully");
 
-                    // Verifica che i metodi dell'interfaccia esistano
-                    var startMethod = type.GetMethod("onStart");
-                    var runMethod = type.GetMethod("onRun");
+                    var wrapper = new ScriptWrapper(instance);
 
-                    if (startMethod != null && runMethod != null)
-                    {
-                        // Crea un wrapper che implementa IScript
-                        var wrapper = new ScriptWrapper(instance);
+                    // Crea e imposta l'Entity
+                    var wAssembly = wrapper.GetType().Assembly;
+                    var entityType = wAssembly.GetType("LumScripting.Script.Entities.Entity");
+                    Logger.Debug($"Entity type found: {entityType != null}");
 
-                        // Chiama SetEntity direttamente sull'istanza
-                        var setEntityMethod = type.GetMethod("SetEntity", new[] { typeof(LumScripting.Script.Entities.Entity) });
-                        setEntityMethod?.Invoke(wrapper, new object[] { new Entity() });
+                    var entity = Activator.CreateInstance(entityType);
+                    Logger.Debug($"Entity instance created");
 
-                        scripts.Add(wrapper);
-                        Logger.Succeed($"Successfully loaded script: {type.FullName}");
-                        Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
-                    }
-                    else
-                    {
-                        Logger.Error($"Type {type.FullName} is missing required methods");
-                    }
+                    wrapper.InitializeEntity((Entity)entity);
+                    Logger.Debug($"Entity initialized");
+
+                    scripts.Add(wrapper);
+                    Logger.Succeed($"Successfully loaded script: {type.FullName}");
+                    Logger.Debug($"Script added to list. Current script count: {scripts.Count}");
                 }
                 catch (Exception ex)
                 {
@@ -207,56 +155,6 @@ public class ScriptManager
         return scripts;
     }
 
-    public class ScriptWrapper : IScript
-    {
-        private readonly object _instance;
-        private readonly MethodInfo _startMethod;
-        private readonly MethodInfo _runMethod;
-        private readonly MethodInfo _setEntityMethod;
-
-        public ScriptWrapper(object instance)
-        {
-            _instance = instance;
-            var type = instance.GetType();
-            _startMethod = type.GetMethod("onStart");
-            _runMethod = type.GetMethod("onRun");
-            _setEntityMethod = type.GetMethod("SetEntity", new[] { typeof(LumScripting.Script.Entities.Entity) });
-        }
-
-        public void onStart()
-        {
-            try
-            {
-                Console.WriteLine($"Starting invoke of {_startMethod} on {_instance}");
-                Console.WriteLine($"Method declaring type: {_startMethod?.DeclaringType}");
-                Console.WriteLine($"Instance type: {_instance?.GetType()}");
-                _startMethod?.Invoke(_instance, null);
-                Console.WriteLine("Invoke completed successfully");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception during invoke: {ex.Message}");
-                Console.WriteLine($"Stack: {ex.StackTrace}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"Inner: {ex.InnerException.Message}");
-                    Console.WriteLine($"Inner Stack: {ex.InnerException.StackTrace}");
-                }
-                throw;
-            }
-        }
-        
-        public void onRun()
-        {
-            _runMethod?.Invoke(_instance, null);
-        }
-
-        public void SetEntity(Entity entity)
-        {
-            _setEntityMethod?.Invoke(_instance, new object[] { entity });
-        }
-    }
-
     public void Start()
     {
         foreach (var script in scripts)
@@ -273,7 +171,6 @@ public class ScriptManager
         }
     }
 }
-
 public class GameCore
 {
     private ScriptManager scriptManager = new ScriptManager();
