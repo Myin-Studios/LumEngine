@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Shaders/Shader.h"
 #include "../Colors/Color.h"
+#include "../LumEngine/Engine/GUI/Rendering/Shaders/Shaders.h"
 
 namespace MaterialTypes
 {
@@ -18,7 +18,7 @@ class Material
 public:
 	Material() = default;
 
-	Material(Shader* s)
+	Material(ShaderCore* s)
 	{
 		shader = s;
 	}
@@ -28,13 +28,13 @@ public:
 		shader = nullptr;
 	}
 	
-	Shader* GetShader() const { return this->shader; }
+	ShaderCore* GetShader() const { return this->shader; }
 
 protected:
-	void SetShader(Shader* s) { this->shader = s; }
+	void SetShader(ShaderCore* s) { this->shader = s; }
 
 private:
-	Shader* shader = nullptr;
+	ShaderCore* shader = nullptr;
 };
 
 class PBR : public Material
@@ -51,7 +51,7 @@ public:
 	{
 		_Albedo = Color::Color();
 
-		this->SetShader(new Shader("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
+		this->SetShader(new ShaderCore("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
 	}
 
 	const Color::Color GetAlbedo() { return this->_Albedo; }
@@ -98,7 +98,7 @@ public:
 class ProceduralSkybox : public Material
 {
 public:
-	ProceduralSkybox() : Material(new Shader("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
+	ProceduralSkybox() : Material(new ShaderCore("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
 	{
 
 	}

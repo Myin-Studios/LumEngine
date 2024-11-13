@@ -158,6 +158,9 @@
     <ProjectReference Include="..\LumEngine\LumEngine.vcxproj">
       <Project>{934275d7-046b-41bd-b720-62231f376331}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\LumTypes\LumTypes.vcxproj">
+      <Project>{c27820ec-17d0-4f35-a8fd-bab582861d3e}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

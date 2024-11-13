@@ -103,6 +103,9 @@
     <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Engine\Core\hostInitializer.h">
@@ -156,6 +159,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

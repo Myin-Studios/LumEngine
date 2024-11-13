@@ -411,7 +411,7 @@ void Renderer::setupFrameBuffer()
 
     RendererDebugger::checkOpenGLError("setting up screen buffers");
 
-    fboShader = new Shader("Resources/Shaders/fboVertex.glsl", "Resources/Shaders/fboFragment.glsl");
+    fboShader = new ShaderCore("Resources/Shaders/fboVertex.glsl", "Resources/Shaders/fboFragment.glsl");
 }
 
 void Renderer::cleanup()

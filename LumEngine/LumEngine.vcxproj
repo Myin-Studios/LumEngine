@@ -80,6 +80,7 @@
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
     <QtMoc Include="Engine\GUI\Console\console.h" />
     <QtMoc Include="Engine\GUI\Console\consoleOutput.h" />
     <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h" />
@@ -102,6 +103,7 @@
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
+    <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
