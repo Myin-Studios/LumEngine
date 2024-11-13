@@ -27,28 +27,32 @@ public class ScriptManager
         string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
         wrapperAssembly = Assembly.LoadFrom(Path.GetFullPath(engineWrapperPath));
         Logger.Debug($"Loaded LumEngineWrapper globally: {wrapperAssembly.FullName}");
-        
-        // Prima carica LumScripting globalmente
+
+        // Carica LumScripting globalmente
         string engineScriptingPath = Path.Combine("LumScripting", "LumScripting.dll");
         scriptingAssembly = Assembly.LoadFrom(Path.GetFullPath(engineScriptingPath));
         Logger.Debug($"Loaded LumScripting globally: {scriptingAssembly.FullName}");
 
-        // Poi crea l'AssemblyLoadContext
-        loadContext = new AssemblyLoadContext("ScriptLoader");
+        // Crea l'AssemblyLoadContext
+        loadContext = new AssemblyLoadContext("ScriptLoader", isCollectible: true);
         loadContext.Resolving += AssemblyResolving;
     }
 
     private Assembly AssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        if (assemblyName.Name == "LumEngineWrapper")
+        // Importante: restituisci le reference corrette per evitare doppi caricamenti
+        switch (assemblyName.Name)
         {
-            return wrapperAssembly;
+            case "LumEngineWrapper":
+                return wrapperAssembly;
+            case "LumScripting":
+                return scriptingAssembly;
+            default:
+                // Per tutti gli altri assembly, cerca prima tra quelli già caricati
+                var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+                return loadedAssembly;
         }
-        if (assemblyName.Name == "LumScripting")
-        {
-            return scriptingAssembly;
-        }
-        return null;
     }
 
     public void Load(string assemblyPath)
