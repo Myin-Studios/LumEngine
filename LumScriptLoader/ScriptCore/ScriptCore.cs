@@ -16,24 +16,32 @@ public class ScriptManager
 {
     private List<IScript> scripts;
     private AssemblyLoadContext loadContext;
+    private Assembly wrapperAssembly; // Aggiungi questo campo
 
     public ScriptManager()
     {
         scripts = new List<IScript>();
 
-        // Crea un nuovo AssemblyLoadContext con il nostro handler per il resolving
+        // Prima carica LumEngineWrapper globalmente
+        string engineWrapperPath = Path.Combine("LumScripting", "LumEngineWrapper.dll");
+        wrapperAssembly = Assembly.LoadFrom(Path.GetFullPath(engineWrapperPath));
+        Logger.Debug($"Loaded LumEngineWrapper globally: {wrapperAssembly.FullName}");
+
+        // Poi crea l'AssemblyLoadContext
         loadContext = new AssemblyLoadContext("ScriptLoader");
         loadContext.Resolving += AssemblyResolving;
     }
 
-    // MODIFICATO: Aggiunto supporto per LumEngineWrapper
     private Assembly AssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        // Gestisce sia LumScripting che LumEngineWrapper
-        if (assemblyName.Name == "LumScripting" || assemblyName.Name == "LumEngineWrapper")
+        if (assemblyName.Name == "LumEngineWrapper")
         {
-            string engineAssemblyPath = Path.Combine("LumScripting", $"{assemblyName.Name}.dll");
-            Logger.Debug($"Redirecting {assemblyName.Name} load to: {engineAssemblyPath}");
+            // Ritorna l'assembly già caricato globalmente
+            return wrapperAssembly;
+        }
+        if (assemblyName.Name == "LumScripting")
+        {
+            string engineAssemblyPath = Path.Combine("LumScripting", "LumScripting.dll");
             return context.LoadFromAssemblyPath(Path.GetFullPath(engineAssemblyPath));
         }
         return null;
@@ -114,13 +122,22 @@ public class ScriptManager
                     var wrapper = new ScriptWrapper(instance);
 
                     // Crea e imposta l'Entity
-                    var entityType = loadContext.Assemblies?.FirstOrDefault(a => a.FullName.Contains("LumEngineWrapper"))?.GetType("LumScripting.Script.Entities.Entity");
+                    // Usa reflection per chiamare InitializeEntity
+                    var entityType = wrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
                     Logger.Debug($"Entity type found: {entityType != null}");
 
                     var entity = Activator.CreateInstance(entityType);
                     Logger.Debug($"Entity instance created");
 
-                    wrapper.InitializeEntity((Entity)entity);
+                    // Ottieni il tipo di ScriptWrapper dall'assembly corretto
+                    var scriptWrapperType = wrapper.GetType();
+                    var initializeEntityMethod = scriptWrapperType.GetMethod("InitializeEntity");
+
+                    // Assicurati che il parametro sia del tipo corretto
+                    var parameterType = initializeEntityMethod.GetParameters()[0].ParameterType;
+                    var convertedEntity = Convert.ChangeType(entity, parameterType);
+
+                    initializeEntityMethod.Invoke(wrapper, new[] { convertedEntity });
                     Logger.Debug($"Entity initialized");
 
                     scripts.Add(wrapper);
