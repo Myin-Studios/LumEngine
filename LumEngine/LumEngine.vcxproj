@@ -80,6 +80,7 @@
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
     <QtMoc Include="Engine\GUI\Console\console.h" />
     <QtMoc Include="Engine\GUI\Console\consoleOutput.h" />

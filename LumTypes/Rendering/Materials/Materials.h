@@ -18,7 +18,7 @@ class Material
 public:
 	Material() = default;
 
-	Material(ShaderCore* s)
+	Material(Shader* s)
 	{
 		shader = s;
 	}
@@ -28,13 +28,13 @@ public:
 		shader = nullptr;
 	}
 	
-	ShaderCore* GetShader() const { return this->shader; }
+	Shader* GetShader() const { return this->shader; }
 
 protected:
-	void SetShader(ShaderCore* s) { this->shader = s; }
+	void SetShader(Shader* s) { this->shader = s; }
 
 private:
-	ShaderCore* shader = nullptr;
+	Shader* shader = nullptr;
 };
 
 class PBR : public Material
@@ -51,7 +51,7 @@ public:
 	{
 		_Albedo = Color::Color();
 
-		this->SetShader(new ShaderCore("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
+		this->SetShader(new Shader("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
 	}
 
 	const Color::Color GetAlbedo() { return this->_Albedo; }
@@ -98,7 +98,7 @@ public:
 class ProceduralSkybox : public Material
 {
 public:
-	ProceduralSkybox() : Material(new ShaderCore("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
+	ProceduralSkybox() : Material(new Shader("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
 	{
 
 	}

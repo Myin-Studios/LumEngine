@@ -33,7 +33,7 @@
 #include "../LumTypes/Rendering/Lighting/Lighting.h"
 #include "Camera/camera.h"
 #include "../LumTypes/Entities/Entity.h"
-#include "../LumTypes/Rendering/Meshes/Mesh.h"
+#include "Meshes/Mesh.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"

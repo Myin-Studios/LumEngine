@@ -147,14 +147,10 @@
     <ClInclude Include="Rendering\Colors\Color.h" />
     <ClInclude Include="Rendering\Lighting\Lighting.h" />
     <ClInclude Include="Rendering\Materials\Materials.h" />
-    <ClInclude Include="Rendering\Meshes\Mesh.h" />
-    <ClInclude Include="Rendering\Shaders\Shader.h" />
     <ClInclude Include="Transformations\Transformations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mathematics\Math.cpp" />
-    <ClCompile Include="Rendering\Meshes\Mesh.cpp" />
-    <ClCompile Include="Rendering\Shaders\Shader.cpp" />
     <ClCompile Include="Transformations\Transformations.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

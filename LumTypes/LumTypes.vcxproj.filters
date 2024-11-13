@@ -21,9 +21,6 @@
     <ClInclude Include="Mathematics\Math.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Meshes\Mesh.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\Properties\Property.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -31,9 +28,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Materials\Materials.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Shaders\Shader.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Lighting\Lighting.h">
@@ -48,12 +42,6 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Mathematics\Math.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Meshes\Mesh.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Shaders\Shader.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

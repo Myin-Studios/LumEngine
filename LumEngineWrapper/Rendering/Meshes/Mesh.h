@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../LumTypes/Rendering/Meshes/Mesh.h"
+#include "../LumEngine/Engine/GUI/Rendering/Meshes/Mesh.h"
 
 namespace LumScripting
 {
