@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../LumTypes/Entities/Entity.h"
+#include "Properties/Properties.h"
 
 namespace LumScripting
 {
@@ -8,32 +9,59 @@ namespace LumScripting
     {
         namespace Entities
         {
-            public ref class Entity {
+            private ref class EntityInternal
+            {
             private:
                 BaseEntity* native;
 
             public:
-                Entity(BaseEntity* nativeEntity) : native(nativeEntity) {}
-                Entity() : native(new BaseEntity()) {}
+                EntityInternal(BaseEntity* nativeEntity) : native(nativeEntity) {}
+                EntityInternal() : native(new BaseEntity()) {}
 
-                // Metodo per aggiungere proprietà generiche
-                template <typename T> void AddProperty(T prop) {
-                    // Casting del valore passato a Object^
-                    Object^ managedProperty = safe_cast<Object^>(prop);
-
-                    // Converte Object^ in una forma utilizzabile per `BaseEntity`
-                    // Ad esempio, potresti dover usare marshal_as o altre conversioni,
-                    // a seconda di come funziona `BaseEntity`
-                    native->AddProperty<T>(prop);  // Chiama il metodo nativo di BaseEntity
+                void AddPropertyInternal(IProperty* nativeProp)
+                {
+                    native->AddProperty(std::unique_ptr<IProperty>(nativeProp));
                 }
 
-                // Metodo per ottenere proprietà generiche
-                template <typename T> T GetProperty() {
-                    // Recupera la proprietà come `Object^` dal lato nativo
-                    Object^ managedProperty = native->GetProperty();
+                IProperty* GetPropertyInternal()
+                {
+                    return native->GetProperty<IProperty>();
+                }
+            };
 
-                    // Esegue il cast a `T` e restituisce il valore
-                    return safe_cast<T>(managedProperty);
+            public ref class Entity {
+            private:
+                EntityInternal^ internal;
+
+            public:
+                Entity() : internal(gcnew EntityInternal()) {}
+
+                generic<typename T>
+                where T : LumScripting::Script::Properties::Property
+                void AddProperty(T prop)
+                {
+                    if (prop == nullptr)
+                        throw gcnew System::ArgumentNullException("prop");
+
+                    // Convertiamo la proprietà managed in nativa
+                    System::IntPtr ptr = System::Runtime::InteropServices::Marshal::AllocHGlobal(sizeof(T));
+                    System::Runtime::InteropServices::Marshal::StructureToPtr(prop, ptr, false);
+                    IProperty* nativeProp = static_cast<IProperty*>(ptr.ToPointer());
+
+                    internal->AddPropertyInternal(nativeProp);
+                }
+
+                generic<typename T>
+                where T : LumScripting::Script::Properties::Property
+                T GetProperty()
+                {
+                    IProperty* nativeProp = internal->GetPropertyInternal();
+                    if (nativeProp == nullptr)
+                        return {};
+
+                    return safe_cast<T>(System::Runtime::InteropServices::Marshal::PtrToStructure(
+                        System::IntPtr(nativeProp),
+                        T::typeid));
                 }
             };
         }

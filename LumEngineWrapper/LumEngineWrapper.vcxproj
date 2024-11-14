@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Entities\Entity.h" />
+    <ClInclude Include="Entities\Properties\Properties.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="Rendering\Meshes\Mesh.h" />
     <ClInclude Include="ScriptLoader\ScriptLoader.h" />

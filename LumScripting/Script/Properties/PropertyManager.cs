@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-namespace LumScripting.Script.Properties
+namespace LumScripting.Script.BaseProperties
 {
-    public class Property
+    public class BaseProperty
     {
         private static Dictionary<Type, object> properties = new Dictionary<Type, object>();
         

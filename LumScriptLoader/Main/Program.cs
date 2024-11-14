@@ -47,7 +47,7 @@ namespace LumScriptLoader.Main
 
         public static void Start()
         {
-            propertyManager.RegisterProperties();
+            //propertyManager.RegisterProperties();
             gameCore.Start();
         }
 
