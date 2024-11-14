@@ -78,79 +78,62 @@ public class ScriptManager
 
         try
         {
-            var tempAssembly = Assembly.LoadFile(scriptDllPath);
-            Logger.Info($"Checking dependencies for {tempAssembly.GetName().Name}:");
-
-            // Carica LumScripting e LumEngineWrapper dagli assembly referenziati
-            var lumScriptingAssembly = Assembly.Load(tempAssembly.GetReferencedAssemblies()
-                .First(a => a.Name == "LumScripting"));
-            var lumEngineWrapperAssembly = Assembly.Load(tempAssembly.GetReferencedAssemblies()
-                .First(a => a.Name == "LumEngineWrapper"));
-
-            Logger.Info($"- LumScripting referenced from: {lumScriptingAssembly.Location}");
-            Logger.Info($"- LumEngineWrapper referenced from: {lumEngineWrapperAssembly.Location}");
-
-            // Verifica il tipo Entity in LumEngineWrapper
-            var entityType = lumEngineWrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
-            if (entityType == null)
+            var loadedAssemblies = sharedContext.Assemblies.ToList();
+            Logger.Info("Assemblies already loaded in shared context:");
+            foreach (var asm in loadedAssemblies)
             {
-                Logger.Error("Could not find Entity type in LumEngineWrapper assembly");
-                return;
-            }
-            Logger.Info($"- Found Entity type in LumEngineWrapper: {entityType.FullName}");
-
-            // Verifica GameBehaviour in LumScripting
-            var gameBehaviourType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.GameBehaviour");
-            if (gameBehaviourType == null)
-            {
-                Logger.Error("Could not find GameBehaviour type in LumScripting assembly");
-                return;
-            }
-            Logger.Info($"- Found GameBehaviour type in LumScripting: {gameBehaviourType.FullName}");
-
-            // Verifica il tipo di Entity che GameBehaviour sta usando
-            var entityPropertyInGameBehaviour = gameBehaviourType.GetProperty("Entity");
-            if (entityPropertyInGameBehaviour != null)
-            {
-                Logger.Info($"- GameBehaviour.Entity property type: {entityPropertyInGameBehaviour.PropertyType.FullName}");
-                Logger.Info($"- GameBehaviour.Entity property assembly: {entityPropertyInGameBehaviour.PropertyType.Assembly.Location}");
+                Logger.Info($"- {asm.GetName().Name} v{asm.GetName().Version} from {asm.Location}");
             }
 
-            // Carica lo script nel contesto condiviso
+            // Carica lo script
             byte[] scriptBytes = File.ReadAllBytes(scriptDllPath);
             Assembly scriptAssembly = sharedContext.LoadFromStream(new MemoryStream(scriptBytes));
+
+            // Verifica come lo script vede GameBehaviour
+            var scriptGameBehaviourType = scriptAssembly.GetType("TestTransform").BaseType;
+            Logger.Info($"Script's GameBehaviour type: {scriptGameBehaviourType.FullName} from {scriptGameBehaviourType.Assembly.Location}");
+
+            // Verifica i metodi disponibili su GameBehaviour dal punto di vista dello script
+            Logger.Info("Methods available on GameBehaviour (as seen by script):");
+            foreach (var method in scriptGameBehaviourType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            {
+                Logger.Info($"- {method.Name} (Declaring Type: {method.DeclaringType.FullName}, Assembly: {method.DeclaringType.Assembly.GetName().Name})");
+            }
+
+            // Verifica le proprietà
+            Logger.Info("Properties available on GameBehaviour (as seen by script):");
+            foreach (var prop in scriptGameBehaviourType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            {
+                Logger.Info($"- {prop.Name} (Type: {prop.PropertyType.FullName}, Declaring Type: {prop.DeclaringType.FullName})");
+                Logger.Info($"  Get Method: {prop.GetGetMethod()?.Name}, Assembly: {prop.DeclaringType.Assembly.GetName().Name}");
+            }
 
             var scriptTypes = scriptAssembly.GetTypes()
                 .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
                 .ToList();
 
-            Logger.Info($"Found {scriptTypes.Count} script types in assembly");
-
             foreach (var type in scriptTypes)
             {
                 try
                 {
-                    Logger.Info($"Creating instance of script type: {type.FullName}");
-
-                    // Crea l'istanza dello script
+                    Logger.Info($"Creating instance of {type.FullName}");
                     object instance = Activator.CreateInstance(type);
-                    Logger.Info("Script instance created");
 
-                    // Crea il wrapper
+                    // Verifica se l'istanza può vedere il metodo get_Entity
+                    var entityProperty = type.BaseType.GetProperty("Entity");
+                    if (entityProperty != null)
+                    {
+                        var getMethod = entityProperty.GetGetMethod(true); // true per includere metodi non pubblici
+                        Logger.Info($"Entity property getter: {getMethod?.Name} from {getMethod?.DeclaringType.Assembly.GetName().Name}");
+                    }
+                    else
+                    {
+                        Logger.Error("Entity property not found on script's base type!");
+                    }
+
                     var wrapper = new ScriptWrapper(instance);
-                    Logger.Info("Script wrapper created");
-
-                    // Crea l'entity usando il tipo corretto da LumEngineWrapper
-                    var entity = Activator.CreateInstance(entityType);
-                    Logger.Info($"Entity instance created of type: {entity.GetType().FullName}");
-
-                    // Imposta l'entity nel wrapper
-                    ((IEntityContainer)wrapper).SetEntityInstance(entity);
-                    Logger.Info("Entity set in wrapper");
-
-                    // Aggiungi lo script alla lista
+                    ((IEntityContainer)wrapper).SetEntityInstance(new Entity());
                     scripts.Add(wrapper);
-                    Logger.Info($"Script {type.FullName} successfully loaded and initialized");
                 }
                 catch (Exception ex)
                 {
@@ -158,14 +141,11 @@ public class ScriptManager
                     Logger.Error($"Stack trace: {ex.StackTrace}");
                 }
             }
-
-            Logger.Info($"Successfully loaded {scripts.Count} scripts from {projectName}");
         }
         catch (Exception ex)
         {
             Logger.Error($"Failed to load script assembly: {ex.Message}");
             Logger.Error($"Stack trace: {ex.StackTrace}");
-
             if (ex.InnerException != null)
             {
                 Logger.Error($"Inner exception: {ex.InnerException.Message}");
