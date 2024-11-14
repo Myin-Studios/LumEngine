@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "../LumTypes/Transformations/Transformations.h"
+#include "Transformations/Transformations.h"
 #include "../Math/Math.h"
 
 using namespace System;
@@ -40,62 +40,66 @@ public ref class Transform3D
 {
 private:
     Transform3DCore* coreTransform;
+    bool disposed;
 
 public:
     Transform3D()
     {
         Console::WriteLine("=== Transform3D Initialization Debug ===");
-        Console::WriteLine("AppDomain: " + AppDomain::CurrentDomain->FriendlyName);
-        Console::WriteLine("Base Directory: " + AppDomain::CurrentDomain->BaseDirectory);
-        Console::WriteLine("Current Process: " + Process::GetCurrentProcess()->ProcessName);
-
+        disposed = false;
         try
         {
             Console::WriteLine("Creating Transform3DCore...");
             coreTransform = new Transform3DCore();
             Console::WriteLine("Transform3DCore created successfully");
-
-            // Test immediato del coreTransform
-            coreTransform->SetPosition(0, 0, 0);
-            Console::WriteLine("Initial position set successfully");
         }
         catch (System::Exception^ e)
         {
             Console::WriteLine("Managed Exception: " + e->Message);
-            Console::WriteLine("Stack: " + e->StackTrace);
-            throw;
-        }
-        catch (const std::exception& e)
-        {
-            Console::WriteLine("Native Exception: " + gcnew String(e.what()));
-            throw;
-        }
-        catch (...)
-        {
-            Console::WriteLine("Unknown Exception during initialization");
             throw;
         }
     }
 
+    // Distruttore - cleanup managed e unmanaged
     ~Transform3D()
     {
-        Console::WriteLine("Transform3D destructor - start");
-        if (coreTransform != nullptr)
+        if (!disposed)
         {
-            delete coreTransform;
-            coreTransform = nullptr;
+            // Chiamata al finalizer per il cleanup unmanaged
+            this->!Transform3D();
+            disposed = true;
         }
-        Console::WriteLine("Transform3D destructor - end");
+        // Sopprime la finalizzazione poiché abbiamo già fatto il cleanup
+        System::GC::SuppressFinalize(this);
+    }
+
+    // Finalizer - cleanup solo unmanaged
+    !Transform3D()
+    {
+        if (!disposed)
+        {
+            if (coreTransform != nullptr)
+            {
+                delete coreTransform;
+                coreTransform = nullptr;
+            }
+            disposed = true;
+        }
     }
 
     void SetPosition(float x, float y, float z)
     {
+        if (disposed)
+        {
+            throw gcnew System::ObjectDisposedException("Transform3D");
+        }
+
         Console::WriteLine(String::Format("SetPosition called with: ({0}, {1}, {2})", x, y, z));
         if (coreTransform == nullptr)
         {
-            Console::WriteLine("Error: coreTransform is null in SetPosition");
-            return;
+            throw gcnew System::NullReferenceException("coreTransform is null");
         }
+
         try
         {
             coreTransform->SetPosition(x, y, z);
@@ -103,19 +107,23 @@ public:
         }
         catch (const std::exception& e)
         {
-            Console::WriteLine("Exception in SetPosition: " + gcnew String(e.what()));
-            throw;
+            throw gcnew System::Exception(gcnew String(e.what()));
         }
     }
 
     Vec3^ GetPosition()
     {
+        if (disposed)
+        {
+            throw gcnew System::ObjectDisposedException("Transform3D");
+        }
+
         Console::WriteLine("GetPosition called");
         if (coreTransform == nullptr)
         {
-            Console::WriteLine("Error: coreTransform is null in GetPosition");
-            return nullptr;
+            throw gcnew System::NullReferenceException("coreTransform is null");
         }
+
         try
         {
             Vec3Core& pos = coreTransform->GetPosition();
@@ -123,8 +131,7 @@ public:
         }
         catch (const std::exception& e)
         {
-            Console::WriteLine("Exception in GetPosition: " + gcnew String(e.what()));
-            throw;
+            throw gcnew System::Exception(gcnew String(e.what()));
         }
     }
 };

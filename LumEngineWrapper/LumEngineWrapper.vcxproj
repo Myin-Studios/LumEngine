@@ -93,12 +93,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);$(LibraryPath)</LibraryPath>
-    <IncludePath>../LumEngine;$(IncludePath)</IncludePath>
+    <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);$(LibraryPath)</LibraryPath>
-    <IncludePath>../LumEngine;$(IncludePath)</IncludePath>
+    <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

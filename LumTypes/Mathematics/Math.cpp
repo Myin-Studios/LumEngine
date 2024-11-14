@@ -32,7 +32,7 @@
 
 Vec3Core::Vec3Core() : _x(0.0f), _y(0.0f), _z(0.0f) {}
 
-Vec3Core::Vec3Core(const Vec3Core& other) : _x(other._x), _y(other._z), _z(other._x) {}
+Vec3Core::Vec3Core(const Vec3Core& other) : _x(other._x), _y(other._y), _z(other._z) {}
 
 Vec3Core::Vec3Core(float x, float y, float z) : _x(x), _y(y), _z(z) {}
 

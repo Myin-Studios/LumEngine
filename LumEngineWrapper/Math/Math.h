@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "../LumTypes/Mathematics/Math.h"
+#include "Mathematics/Math.h"
 
 using namespace System;
 
