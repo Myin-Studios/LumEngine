@@ -11,6 +11,7 @@ using LumScripting.Script.Log;
 using Windows.ApplicationModel.Core;
 using LumScripting.Script.Entities;
 using Microsoft.CodeAnalysis.Scripting;
+using System.Diagnostics;
 
 public class SharedAssemblyLoadContext : AssemblyLoadContext
 {
@@ -45,18 +46,11 @@ public class ScriptManager
 {
     private List<IScript> scripts;
     private SharedAssemblyLoadContext sharedContext;
-    private AssemblyLoadContext scriptContext;
 
     public ScriptManager()
     {
         scripts = new List<IScript>();
-
-        // Crea il contesto condiviso
         sharedContext = new SharedAssemblyLoadContext();
-
-        // Crea il contesto per gli script utente
-        scriptContext = new AssemblyLoadContext("ScriptLoader", isCollectible: true);
-        scriptContext.Resolving += ScriptAssemblyResolving;
     }
 
     private Assembly ScriptAssemblyResolving(AssemblyLoadContext context, AssemblyName assemblyName)
@@ -82,51 +76,48 @@ public class ScriptManager
 
         try
         {
-            // Usa il contesto condiviso per ottenere il tipo IScript
-            var lumScriptingAssembly = sharedContext.Assemblies.First(a => a.GetName().Name == "LumScripting");
-            Type scriptInterfaceType = lumScriptingAssembly.GetType("LumScripting.Script.Internal.IScript");
+            byte[] assemblyBytes = File.ReadAllBytes(fullAssemblyPath);
+            Assembly userAssembly = sharedContext.LoadFromStream(new MemoryStream(assemblyBytes));
 
-            if (scriptInterfaceType == null)
-            {
-                Logger.Error("IScript type not found in LumScripting.");
-                return;
-            }
+            // Verifica che l'assembly sia caricato correttamente
+            Logger.Info($"Assembly loaded: {userAssembly.FullName}");
 
-            // Carica l'assembly utente nel contesto degli script
-            Assembly userAssembly = scriptContext.LoadFromAssemblyPath(fullAssemblyPath);
+            var allTypes = userAssembly.GetTypes();
+            Logger.Info($"Total types found: {allTypes.Length}");
 
-            // Verifica assemblies duplicati
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .GroupBy(a => a.GetName().Name)
-                .Where(g => g.Count() > 1)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            if (loadedAssemblies.Any())
-            {
-                Logger.Warning("Duplicate assemblies detected:");
-                foreach (var kvp in loadedAssemblies)
-                {
-                    Logger.Warning($"{kvp.Key}: loaded {kvp.Value} times");
-                }
-            }
-
-            var scriptTypes = userAssembly.GetTypes()
-                .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
+            var scriptTypes = allTypes
+                .Where(t => {
+                    try
+                    {
+                        return t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"Error checking type {t.FullName}: {ex.Message}");
+                        return false;
+                    }
+                })
                 .ToList();
+
+            Logger.Info($"Script types found: {scriptTypes.Count}");
 
             foreach (var type in scriptTypes)
             {
                 try
                 {
+                    Logger.Info($"Creating instance of {type.FullName}");
                     object instance = Activator.CreateInstance(type);
+
+                    Logger.Info("Creating wrapper");
                     var wrapper = new ScriptWrapper(instance);
 
-                    // Usa il contesto condiviso per ottenere il tipo Entity
-                    var wrapperAssembly = sharedContext.Assemblies.First(a => a.GetName().Name == "LumEngineWrapper");
-                    var entityType = wrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
-                    var entity = Activator.CreateInstance(entityType);
+                    Logger.Info("Creating entity");
+                    var entity = new Entity();
 
+                    Logger.Info("Setting entity instance");
                     ((IEntityContainer)wrapper).SetEntityInstance(entity);
+
+                    Logger.Info("Adding script to list");
                     scripts.Add(wrapper);
                 }
                 catch (Exception ex)
@@ -153,19 +144,52 @@ public class ScriptManager
         return scripts;
     }
 
-    public void Start()
-    {
-        foreach (var script in scripts)
-        {
-            script.onStart();
-        }
-    }
-
     public void Run()
     {
         foreach (var script in scripts)
         {
-            script.onRun();
+            try
+            {
+                script.onRun();
+            }
+            catch (Exception ex)
+            {
+                // Log dettagliato dell'eccezione
+                Logger.Error($"Exception in script execution: {ex.GetType().FullName}");
+                Logger.Error($"Message: {ex.Message}");
+                Logger.Error($"Stack trace: {ex.StackTrace}");
+
+                // Se c'è un'inner exception, logga anche quella
+                if (ex.InnerException != null)
+                {
+                    Logger.Error($"Inner exception: {ex.InnerException.Message}");
+                    Logger.Error($"Inner stack trace: {ex.InnerException.StackTrace}");
+                }
+            }
+        }
+    }
+
+    public void Start()
+    {
+        foreach (var script in scripts)
+        {
+            try
+            {
+                script.onStart();
+            }
+            catch (Exception ex)
+            {
+                // Log dettagliato dell'eccezione
+                Logger.Error($"Exception in script start: {ex.GetType().FullName}");
+                Logger.Error($"Message: {ex.Message}");
+                Logger.Error($"Stack trace: {ex.StackTrace}");
+
+                if (ex.InnerException != null)
+                {
+                    Logger.Error($"Inner exception: {ex.InnerException.Message}");
+                    Logger.Error($"Inner stack trace: {ex.InnerException.StackTrace}");
+                }
+            }
         }
     }
 }

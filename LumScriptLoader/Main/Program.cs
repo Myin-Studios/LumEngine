@@ -22,6 +22,21 @@ namespace LumScriptLoader.Main
 
         public static int LoadScriptPath(IntPtr pathPtr, int arg1)
         {
+            // Verifica assemblies duplicati
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .GroupBy(a => a.GetName().Name)
+                .Where(g => g.Count() > 1)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            if (loadedAssemblies.Any())
+            {
+                Logger.Warning("Duplicate assemblies detected:");
+                foreach (var kvp in loadedAssemblies)
+                {
+                    Logger.Warning($"{kvp.Key}: loaded {kvp.Value} times");
+                }
+            }
+
             string path = Marshal.PtrToStringUni(pathPtr);
             Console.WriteLine("Path from C#: " + path);
 

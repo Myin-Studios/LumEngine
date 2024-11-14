@@ -111,9 +111,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Engine\Core\hostInitializer.h">
-      <Filter>File di intestazione</Filter>
-    </QtMoc>
     <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
@@ -130,6 +127,9 @@
       <Filter>File di intestazione</Filter>
     </QtMoc>
     <QtMoc Include="Engine\GUI\Console\consoleOutput.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\Core\hostInitializer.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
   </ItemGroup>

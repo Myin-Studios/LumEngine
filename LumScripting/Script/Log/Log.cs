@@ -6,6 +6,12 @@
         {
             Console.WriteLine(msg.ToString());
         }
+        public static void Info(object msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(msg.ToString());
+            Console.ResetColor();
+        }
         public static void Succeed(object msg)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -29,6 +35,13 @@
         {
             string msg = string.Format(format, args);
             Console.WriteLine(msg);
+        }
+        public static void Info(string format, params object[] args)
+        {
+            string msg = string.Format(format, args);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(msg);
+            Console.ResetColor();
         }
         public static void Succeed(string format, params object[] args)
         {
