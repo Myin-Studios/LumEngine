@@ -116,7 +116,10 @@ namespace LumScripting.Script.Scripting
         private Entity _entity;
 
         // Proprietà pubblica per l'accesso degli utenti
-        public Entity Entity => _entity;
+        public Entity Entity
+        {
+            get { return _entity; }
+        }
 
         Entity IScriptInternal.Entity
         {

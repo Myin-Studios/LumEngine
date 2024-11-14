@@ -55,7 +55,7 @@ namespace ScriptLoaderCore
                 return;
             }
 
-            std::filesystem::path absEngineDllPath(std::filesystem::absolute("../LumScripting/bin/Debug/net8.0-windows10.0.26100.0/win-x64/"));
+            std::filesystem::path absEngineDllPath(std::filesystem::absolute("LumScripting/"));
             std::string engineDllPath(absEngineDllPath.string());
 
             // Leggi il contenuto del file .csproj
@@ -79,8 +79,11 @@ namespace ScriptLoaderCore
 
             std::string referenceBlock =
                 "  <ItemGroup>\n"
-                "    <Reference Include=\"IcyScripting\">\n"
-                "      <HintPath>" + absEngineDllPath.string() + "IcyScripting.dll" "</HintPath>\n"
+                "    <Reference Include=\"LumScripting\">\n"
+                "      <HintPath>" + absEngineDllPath.string() + "LumScripting.dll" "</HintPath>\n"
+                "    </Reference>\n"
+                "    <Reference Include=\"LumEngineWrapper\">\n"
+                "      <HintPath>" + absEngineDllPath.string() + "LumEngineWrapper.dll" "</HintPath>\n"
                 "    </Reference>\n"
                 "  </ItemGroup>\n";
 

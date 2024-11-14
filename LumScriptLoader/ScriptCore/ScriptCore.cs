@@ -67,7 +67,7 @@ public class ScriptManager
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
-        string scriptBinPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0");
+        string scriptBinPath = Path.Combine(assemblyPath, "bin", "x64", "Debug", "net8.0-windows10.0.26100.0"); ;
         string scriptDllPath = Path.Combine(scriptBinPath, $"{projectName}.dll");
 
         if (!File.Exists(scriptDllPath))
