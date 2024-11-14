@@ -12,6 +12,7 @@ using Windows.ApplicationModel.Core;
 using LumScripting.Script.Entities;
 using Microsoft.CodeAnalysis.Scripting;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 
 public class SharedAssemblyLoadContext : AssemblyLoadContext
 {
@@ -66,59 +67,90 @@ public class ScriptManager
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
-        string fullAssemblyPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0", projectName + ".dll");
+        string scriptBinPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows10.0.26100.0");
+        string scriptDllPath = Path.Combine(scriptBinPath, $"{projectName}.dll");
 
-        if (!File.Exists(fullAssemblyPath))
+        if (!File.Exists(scriptDllPath))
         {
-            Logger.Error($"Assembly path: {fullAssemblyPath} doesn't exist!");
+            Logger.Error($"Script DLL not found: {scriptDllPath}");
             return;
         }
 
         try
         {
-            byte[] assemblyBytes = File.ReadAllBytes(fullAssemblyPath);
-            Assembly userAssembly = sharedContext.LoadFromStream(new MemoryStream(assemblyBytes));
+            var tempAssembly = Assembly.LoadFile(scriptDllPath);
+            Logger.Info($"Checking dependencies for {tempAssembly.GetName().Name}:");
 
-            // Verifica che l'assembly sia caricato correttamente
-            Logger.Info($"Assembly loaded: {userAssembly.FullName}");
+            // Carica LumScripting e LumEngineWrapper dagli assembly referenziati
+            var lumScriptingAssembly = Assembly.Load(tempAssembly.GetReferencedAssemblies()
+                .First(a => a.Name == "LumScripting"));
+            var lumEngineWrapperAssembly = Assembly.Load(tempAssembly.GetReferencedAssemblies()
+                .First(a => a.Name == "LumEngineWrapper"));
 
-            var allTypes = userAssembly.GetTypes();
-            Logger.Info($"Total types found: {allTypes.Length}");
+            Logger.Info($"- LumScripting referenced from: {lumScriptingAssembly.Location}");
+            Logger.Info($"- LumEngineWrapper referenced from: {lumEngineWrapperAssembly.Location}");
 
-            var scriptTypes = allTypes
-                .Where(t => {
-                    try
-                    {
-                        return t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error($"Error checking type {t.FullName}: {ex.Message}");
-                        return false;
-                    }
-                })
+            // Verifica il tipo Entity in LumEngineWrapper
+            var entityType = lumEngineWrapperAssembly.GetType("LumScripting.Script.Entities.Entity");
+            if (entityType == null)
+            {
+                Logger.Error("Could not find Entity type in LumEngineWrapper assembly");
+                return;
+            }
+            Logger.Info($"- Found Entity type in LumEngineWrapper: {entityType.FullName}");
+
+            // Verifica GameBehaviour in LumScripting
+            var gameBehaviourType = lumScriptingAssembly.GetType("LumScripting.Script.Scripting.GameBehaviour");
+            if (gameBehaviourType == null)
+            {
+                Logger.Error("Could not find GameBehaviour type in LumScripting assembly");
+                return;
+            }
+            Logger.Info($"- Found GameBehaviour type in LumScripting: {gameBehaviourType.FullName}");
+
+            // Verifica il tipo di Entity che GameBehaviour sta usando
+            var entityPropertyInGameBehaviour = gameBehaviourType.GetProperty("Entity");
+            if (entityPropertyInGameBehaviour != null)
+            {
+                Logger.Info($"- GameBehaviour.Entity property type: {entityPropertyInGameBehaviour.PropertyType.FullName}");
+                Logger.Info($"- GameBehaviour.Entity property assembly: {entityPropertyInGameBehaviour.PropertyType.Assembly.Location}");
+            }
+
+            // Carica lo script nel contesto condiviso
+            byte[] scriptBytes = File.ReadAllBytes(scriptDllPath);
+            Assembly scriptAssembly = sharedContext.LoadFromStream(new MemoryStream(scriptBytes));
+
+            var scriptTypes = scriptAssembly.GetTypes()
+                .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
                 .ToList();
 
-            Logger.Info($"Script types found: {scriptTypes.Count}");
+            Logger.Info($"Found {scriptTypes.Count} script types in assembly");
 
             foreach (var type in scriptTypes)
             {
                 try
                 {
-                    Logger.Info($"Creating instance of {type.FullName}");
+                    Logger.Info($"Creating instance of script type: {type.FullName}");
+
+                    // Crea l'istanza dello script
                     object instance = Activator.CreateInstance(type);
+                    Logger.Info("Script instance created");
 
-                    Logger.Info("Creating wrapper");
+                    // Crea il wrapper
                     var wrapper = new ScriptWrapper(instance);
+                    Logger.Info("Script wrapper created");
 
-                    Logger.Info("Creating entity");
-                    var entity = new Entity();
+                    // Crea l'entity usando il tipo corretto da LumEngineWrapper
+                    var entity = Activator.CreateInstance(entityType);
+                    Logger.Info($"Entity instance created of type: {entity.GetType().FullName}");
 
-                    Logger.Info("Setting entity instance");
+                    // Imposta l'entity nel wrapper
                     ((IEntityContainer)wrapper).SetEntityInstance(entity);
+                    Logger.Info("Entity set in wrapper");
 
-                    Logger.Info("Adding script to list");
+                    // Aggiungi lo script alla lista
                     scripts.Add(wrapper);
+                    Logger.Info($"Script {type.FullName} successfully loaded and initialized");
                 }
                 catch (Exception ex)
                 {
@@ -126,11 +158,19 @@ public class ScriptManager
                     Logger.Error($"Stack trace: {ex.StackTrace}");
                 }
             }
+
+            Logger.Info($"Successfully loaded {scripts.Count} scripts from {projectName}");
         }
         catch (Exception ex)
         {
-            Logger.Error($"Failed to load assembly {projectName}: {ex.Message}");
+            Logger.Error($"Failed to load script assembly: {ex.Message}");
             Logger.Error($"Stack trace: {ex.StackTrace}");
+
+            if (ex.InnerException != null)
+            {
+                Logger.Error($"Inner exception: {ex.InnerException.Message}");
+                Logger.Error($"Inner stack trace: {ex.InnerException.StackTrace}");
+            }
         }
     }
 
