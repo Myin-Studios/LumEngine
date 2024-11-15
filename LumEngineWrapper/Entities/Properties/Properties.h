@@ -32,6 +32,9 @@ namespace LumScripting
                         native = nullptr;
                     }
                 }
+
+            internal:
+                IProperty* GetNativeProperty() { return native; }
             };
         }
     }

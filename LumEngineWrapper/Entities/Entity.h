@@ -43,11 +43,8 @@ namespace LumScripting
                     if (prop == nullptr)
                         throw gcnew System::ArgumentNullException("prop");
 
-                    // Convertiamo la proprietà managed in nativa
-                    System::IntPtr ptr = System::Runtime::InteropServices::Marshal::AllocHGlobal(sizeof(T));
-                    System::Runtime::InteropServices::Marshal::StructureToPtr(prop, ptr, false);
-                    IProperty* nativeProp = static_cast<IProperty*>(ptr.ToPointer());
-
+                    // Assumendo che Property abbia un campo/metodo per accedere al puntatore nativo
+                    IProperty* nativeProp = prop->GetNativeProperty(); // o accesso diretto al campo native
                     internal->AddPropertyInternal(nativeProp);
                 }
 
