@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                                   ///
 ///                                      THIS CODE IS PART OF:                                        ///
-///                                       CryoMoon Engine (C)                                         ///
+///                                          LumEngine (C)                                            ///
 ///                                                                                                   ///
 ///                                     WHICH IS LICENSED UNDER                                       ///
 ///                                          MIT License                                              ///
@@ -33,11 +33,25 @@
 #include "Mathematics/Math.h"
 
 using namespace System;
+using namespace System::Runtime::InteropServices;
+
+[StructLayout(LayoutKind::Sequential)]
+public value struct Vec3Native
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    Vec3Native(float x, float y, float z) : x(x), y(y), z(z) {}
+};
 
 public ref class Vec3
 {
 public:
     float x, y, z;
+
+    Vec3(const Vec3% v) : vec3(new Vec3Core(v.x, v.y, v.z)) {}
 
     Vec3()
         : x(0), y(0), z(0) // Inizializza x, y, z a zero
@@ -64,20 +78,11 @@ public:
         }
     }
 
-    // Eventuali metodi aggiuntivi per gestire Vec3Core possono essere aggiunti qui
+    Vec3 operator=(Vec3 v)
+    {
+        return Vec3(v.x, v.y, v.z);
+    }
 
 private:
     Vec3Core* vec3;  // Puntatore alla classe nativa
 };
-
-// namespace LumScripting
-// {
-//     namespace Script
-//     {
-//         namespace Math
-//         {
-//             
-//         }
-//     }
-// }
-// 

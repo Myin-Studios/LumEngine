@@ -31,222 +31,61 @@
 #pragma once
 
 #include "Transformations/Transformations.h"
+
+#pragma make_public(Transform3DCore)
+
 #include "../Math/Math.h"
 #include "../Entities/Properties/Properties.h"
 
 using namespace System;
 using namespace System::Diagnostics;
 using namespace LumScripting::Script::Properties;
+using namespace System::Runtime::InteropServices;
 
 public ref class Transform3D : public Property
 {
 private:
-    Transform3DCore* coreTransform;
-    bool disposed;
+    Vec3Native position;
+    Vec3Native rotation;
+    Vec3Native scale;
 
 public:
-    Transform3D()
+    Transform3D() : Property(new Transform3DCore())  // Passa Transform3DCore come IProperty
     {
-        Console::WriteLine("=== Transform3D Initialization Debug ===");
-        disposed = false;
-        try
-        {
-            Console::WriteLine("Creating Transform3DCore...");
-            coreTransform = new Transform3DCore();
-            Console::WriteLine("Transform3DCore created successfully");
-        }
-        catch (System::Exception^ e)
-        {
-            Console::WriteLine("Managed Exception: " + e->Message);
-            throw;
-        }
+        position = Vec3Native(0, 0, 0);
+        rotation = Vec3Native(0, 0, 0);
+        scale = Vec3Native(1, 1, 1);
     }
 
-    // Distruttore - cleanup managed e unmanaged
-    ~Transform3D()
+    property Vec3Native Position
     {
-        if (!disposed)
+        Vec3Native get() { return position; }
+        void set(Vec3Native value)
         {
-            // Chiamata al finalizer per il cleanup unmanaged
-            this->!Transform3D();
-            disposed = true;
-        }
-        // Sopprime la finalizzazione poiché abbiamo già fatto il cleanup
-        System::GC::SuppressFinalize(this);
-    }
-
-    // Finalizer - cleanup solo unmanaged
-    !Transform3D()
-    {
-        if (!disposed)
-        {
-            if (coreTransform != nullptr)
+            position = value;
+            if (native)
             {
-                delete coreTransform;
-                coreTransform = nullptr;
+                static_cast<Transform3DCore*>(native)->SetPosition(value.x, value.y, value.z);
             }
-            disposed = true;
         }
     }
 
-    void SetPosition(float x, float y, float z)
+    property Vec3Native Rotation
     {
-        if (disposed)
+        Vec3Native get() { return rotation; }
+        void set(Vec3Native value)
         {
-            throw gcnew System::ObjectDisposedException("Transform3D");
-        }
-
-        Console::WriteLine(String::Format("SetPosition called with: ({0}, {1}, {2})", x, y, z));
-        if (coreTransform == nullptr)
-        {
-            throw gcnew System::NullReferenceException("coreTransform is null");
-        }
-
-        try
-        {
-            coreTransform->SetPosition(x, y, z);
-            Console::WriteLine("SetPosition completed successfully");
-        }
-        catch (const std::exception& e)
-        {
-            throw gcnew System::Exception(gcnew String(e.what()));
+            rotation = value;
+            if (native)
+            {
+                static_cast<Transform3DCore*>(native)->SetRotation(value.x, value.y, value.z);
+            }
         }
     }
 
-    Vec3^ GetPosition()
+    property Vec3Native Scale
     {
-        if (disposed)
-        {
-            throw gcnew System::ObjectDisposedException("Transform3D");
-        }
-
-        Console::WriteLine("GetPosition called");
-        if (coreTransform == nullptr)
-        {
-            throw gcnew System::NullReferenceException("coreTransform is null");
-        }
-
-        try
-        {
-            Vec3Core& pos = coreTransform->GetPosition();
-            return gcnew Vec3(pos.x(), pos.y(), pos.z());
-        }
-        catch (const std::exception& e)
-        {
-            throw gcnew System::Exception(gcnew String(e.what()));
-        }
+        Vec3Native get() { return scale; }
+        void set(Vec3Native value) { scale = value; }
     }
 };
-
-// using namespace LumScripting::Script::Math;
-
-// namespace LumScripting
-// {
-//     namespace Script
-//     {
-//         namespace Transformations
-//         {
-//             
-// 
-//             // public ref class Transform3D
-//             // {
-//             // private:
-//             //     Transform3DCore* coreTransform; // Puntatore alla classe nativa
-//             // 
-//             // public:
-//             //     Transform3D()
-//             //     {
-//             //         Console::WriteLine("Tranform3D constructor.");
-//             // 
-//             //         // try
-//             //         // {
-//             //         //     coreTransform = new Transform3DCore(); // Allocazione nativa
-//             //         // }
-//             //         // catch (const std::exception& e)
-//             //         // {
-//             //         //     Console::WriteLine("Exception during Transform3DCore initialization: " + gcnew String(e.what()));
-//             //         //     coreTransform = nullptr;
-//             //         // }
-//             //     }
-//             // 
-//             //     Transform3D(Transform3D^ other) {
-//             //         try {
-//             //             if (other->coreTransform != nullptr) {
-//             //                 coreTransform = new Transform3DCore(*other->coreTransform);
-//             //             }
-//             //             else {
-//             //                 coreTransform = new Transform3DCore();
-//             //             }
-//             //         }
-//             //         catch (const std::exception& e) {
-//             //             Console::WriteLine("Exception in copy constructor: " + gcnew String(e.what()));
-//             //             coreTransform = nullptr;
-//             //         }
-//             //     }
-//             // 
-//             //     ~Transform3D() {
-//             //         this->!Transform3D(); // Distruzione manuale
-//             //     }
-//             // 
-//             //     !Transform3D() {
-//             //         try {
-//             //             if (coreTransform != nullptr) {
-//             //                 delete coreTransform;
-//             //                 coreTransform = nullptr;
-//             //             }
-//             //         }
-//             //         catch (const std::exception& e) {
-//             //             Console::WriteLine("Exception in finalizer: " + gcnew String(e.what()));
-//             //         }
-//             //     }
-//             // 
-//             //     void SetPosition(float x, float y, float z) {
-//             //         if (coreTransform == nullptr) {
-//             //             Console::WriteLine("coreTransform is null in SetPosition.");
-//             //             return;
-//             //         }
-//             //         Console::WriteLine(String::Format("Position updated to: ({0}, {1}, {2})", x, y, z));
-//             //         coreTransform->SetPosition(x, y, z);
-//             //     }
-//             // 
-//             //     Vec3^ GetPosition() {
-//             //         try {
-//             //             if (coreTransform == nullptr) {
-//             //                 Console::WriteLine("coreTransform is null in GetPosition.");
-//             //                 return nullptr;
-//             //             }
-//             //             return gcnew Vec3(coreTransform->GetPosition().x(),
-//             //                 coreTransform->GetPosition().y(),
-//             //                 coreTransform->GetPosition().z());
-//             //         }
-//             //         catch (const std::exception& e) {
-//             //             Console::WriteLine("Exception in GetPosition: " + gcnew String(e.what()));
-//             //             return nullptr;
-//             //         }
-//             //     }
-//             // 
-//             //     Transform3D^ operator=(Transform3D^ other)
-//             //     {
-//             //         if (this != other)
-//             //         {
-//             //             try {
-//             //                 if (coreTransform != nullptr) {
-//             //                     delete coreTransform;
-//             //                     coreTransform = nullptr;
-//             //                 }
-//             // 
-//             //                 if (other->coreTransform != nullptr) {
-//             //                     coreTransform = new Transform3DCore(*other->coreTransform);
-//             //                 }
-//             //             }
-//             //             catch (const std::exception& e) {
-//             //                 Console::WriteLine("Exception in assignment operator: " + gcnew String(e.what()));
-//             //                 coreTransform = nullptr;
-//             //             }
-//             //         }
-//             //         return this;
-//             //     }
-//             // };
-//         }
-//     }
-// }
