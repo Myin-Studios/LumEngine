@@ -90,7 +90,7 @@ namespace ScriptLoaderCore
             // Inserisci il nuovo blocco <ItemGroup> prima della chiusura di <Project>
             csprojContent.insert(projectEndPos, referenceBlock);
 
-            csprojContent.replace(csprojContent.find("net8.0"), 6, "net8.0-windows10.0.26100.0");
+            csprojContent.replace(csprojContent.find("net8.0"), 6, "net8.0-windows");
 
             // Scrivi il contenuto modificato nel file .csproj
             std::ofstream csprojFileOut(csprojPath);
@@ -105,13 +105,23 @@ namespace ScriptLoaderCore
             std::cout << ".csproj file created and modified successfully!" << std::endl;
 
             // Restore e build
+            clean(projPath);
             restore(projPath);
             build(projPath);
         }
 
+        void clean(std::string projPath)
+        {
+            std::string cleanCommand = "dotnet clean " + projPath;
+            if (std::system(cleanCommand.c_str()) != 0) {
+                std::cerr << "Error during NuGet package restore." << std::endl;
+                return;
+            }
+        }
+
         void restore(std::string projPath)
         {
-            std::string restoreCommand = "dotnet restore " + projPath;
+            std::string restoreCommand = "dotnet restore " + projPath + " --force";
             if (std::system(restoreCommand.c_str()) != 0) {
                 std::cerr << "Error during NuGet package restore." << std::endl;
                 return;

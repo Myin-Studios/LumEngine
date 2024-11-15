@@ -67,7 +67,7 @@ public class ScriptManager
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
-        string scriptBinPath = Path.Combine(assemblyPath, "bin", "x64", "Debug", "net8.0-windows10.0.26100.0"); ;
+        string scriptBinPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows"); ;
         string scriptDllPath = Path.Combine(scriptBinPath, $"{projectName}.dll");
 
         if (!File.Exists(scriptDllPath))
@@ -86,28 +86,9 @@ public class ScriptManager
             }
 
             // Carica lo script
-            byte[] scriptBytes = File.ReadAllBytes(scriptDllPath);
-            Assembly scriptAssembly = sharedContext.LoadFromStream(new MemoryStream(scriptBytes));
+            Assembly scriptAssembly = sharedContext.LoadFromAssemblyPath(scriptDllPath);
 
             // Verifica come lo script vede GameBehaviour
-            var scriptGameBehaviourType = scriptAssembly.GetType("TestTransform").BaseType;
-            Logger.Info($"Script's GameBehaviour type: {scriptGameBehaviourType.FullName} from {scriptGameBehaviourType.Assembly.Location}");
-
-            // Verifica i metodi disponibili su GameBehaviour dal punto di vista dello script
-            Logger.Info("Methods available on GameBehaviour (as seen by script):");
-            foreach (var method in scriptGameBehaviourType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-            {
-                Logger.Info($"- {method.Name} (Declaring Type: {method.DeclaringType.FullName}, Assembly: {method.DeclaringType.Assembly.GetName().Name})");
-            }
-
-            // Verifica le proprietà
-            Logger.Info("Properties available on GameBehaviour (as seen by script):");
-            foreach (var prop in scriptGameBehaviourType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-            {
-                Logger.Info($"- {prop.Name} (Type: {prop.PropertyType.FullName}, Declaring Type: {prop.DeclaringType.FullName})");
-                Logger.Info($"  Get Method: {prop.GetGetMethod()?.Name}, Assembly: {prop.DeclaringType.Assembly.GetName().Name}");
-            }
-
             var scriptTypes = scriptAssembly.GetTypes()
                 .Where(t => t.GetInterfaces().Any(i => i.FullName == "LumScripting.Script.Internal.IScript") && !t.IsAbstract)
                 .ToList();

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../LumEngine/Engine/GUI/Rendering/Meshes/Mesh.h"
+#include "../Entities/Properties/Properties.h"
+
+using namespace LumScripting::Script::Properties;
 
 namespace LumScripting
 {
@@ -8,7 +11,7 @@ namespace LumScripting
 	{
 		namespace Rendering
 		{
-			public ref class Mesh
+			public ref class Mesh : public Property
 			{
 			public:
 				Mesh(MeshCore* meshCore)

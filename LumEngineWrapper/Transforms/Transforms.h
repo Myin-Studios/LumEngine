@@ -32,11 +32,13 @@
 
 #include "Transformations/Transformations.h"
 #include "../Math/Math.h"
+#include "../Entities/Properties/Properties.h"
 
 using namespace System;
 using namespace System::Diagnostics;
+using namespace LumScripting::Script::Properties;
 
-public ref class Transform3D
+public ref class Transform3D : public Property
 {
 private:
     Transform3DCore* coreTransform;

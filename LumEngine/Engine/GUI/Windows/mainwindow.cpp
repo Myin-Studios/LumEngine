@@ -84,6 +84,8 @@ void MainWindow::loadProject()
             {
                 assemblyPath = dir;
 
+                splc->clean(assemblyPath.toStdString());
+                splc->restore(dir.toStdString());
                 splc->build(dir.toStdString());
 
                 emit assemblyPathProvided(dir);
@@ -104,6 +106,8 @@ void MainWindow::buildProject()
 
     emit assemblyPathProvided("");
 
+    splc->clean(assemblyPath.toStdString());
+    splc->restore(assemblyPath.toStdString());
     splc->build(assemblyPath.toStdString());
 
     emit assemblyPathProvided(QString(assemblyPath));
