@@ -56,9 +56,9 @@ namespace LumScripting
                     if (nativeProp == nullptr)
                         return {};
 
-                    return safe_cast<T>(System::Runtime::InteropServices::Marshal::PtrToStructure(
-                        System::IntPtr(nativeProp),
-                        T::typeid));
+                    // Creiamo prima una Property base e poi facciamo il cast
+                    Property^ baseProp = gcnew Property(nativeProp);
+                    return safe_cast<T>(baseProp);
                 }
             };
         }
