@@ -58,12 +58,14 @@ namespace LumScripting
                 where T : Property
                 T GetProperty()
                 {
-                    T temp;
+                    // Creiamo direttamente l'istanza usando Activator
+                    Property^ temp = Activator::CreateInstance<T>();
+
                     const type_info& expectedType = temp->GetNativeTypeInfo();
 
                     IProperty* nativeProp = internal->GetPropertyInternal(expectedType);
                     if (nativeProp == nullptr)
-                        return {};
+                        return T();
 
                     return safe_cast<T>(temp->CreateFromNative(nativeProp));
                 }
