@@ -17,8 +17,16 @@ namespace LumScripting
                 BaseEntity* native;
 
             public:
-                EntityInternal(BaseEntity* nativeEntity) : native(nativeEntity) {}
-                EntityInternal() : native(new BaseEntity()) {}
+                EntityInternal(BaseEntity* nativeEntity) : native(nativeEntity)
+                {
+                    System::Console::WriteLine("1. EntityInternal costruito con native: " +
+                        (native != nullptr ? "valido" : "null"));
+                }
+
+                EntityInternal() : native(new BaseEntity())
+                {
+                    System::Console::WriteLine("1. EntityInternal costruito con nuovo BaseEntity");
+                }
 
                 void AddPropertyInternal(IProperty* nativeProp)
                 {
@@ -27,11 +35,7 @@ namespace LumScripting
 
                 IProperty* GetPropertyInternal(const type_info& expectedType)
                 {
-                    IProperty* prop = native->GetProperty<IProperty>();
-                    if (prop && typeid(*prop) == expectedType) {
-                        return prop;
-                    }
-                    return nullptr;
+                    return native->GetProperty(expectedType);
                 }
             };
 
@@ -59,6 +63,7 @@ namespace LumScripting
                 T GetProperty()
                 {
                     // Creiamo direttamente l'istanza usando Activator
+					System::Console::WriteLine("1. Chiamata GetProperty nel wrapper Entity");
                     Property^ temp = Activator::CreateInstance<T>();
 
                     const type_info& expectedType = temp->GetNativeTypeInfo();

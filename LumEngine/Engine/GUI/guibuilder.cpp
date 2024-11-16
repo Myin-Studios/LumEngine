@@ -10,7 +10,7 @@ GuiBuilder::GuiBuilder()
     centralLayout = std::make_unique<QVBoxLayout>(nullptr);
     scene = std::make_unique<Renderer>(mainWindow->centralWidget());
     console = std::make_unique<Console>(mainWindow->centralWidget());
-    outputRedirector = std::make_unique<RedirectStreamBuf>(console.get());
+    // outputRedirector = std::make_unique<RedirectStreamBuf>(console.get());
     sceneConsoleSplitter = std::make_unique<QSplitter>();
     rightPanelSplitter = std::make_unique<QSplitter>();
     mainContainer = std::make_unique<QWidget>();
@@ -80,8 +80,8 @@ GuiBuilder::GuiBuilder()
     mainWindow->show();
     leftPanel->show();
 
-    std::cout.rdbuf(outputRedirector.get());
-    std::cerr.rdbuf(outputRedirector.get());
+    // std::cout.rdbuf(outputRedirector.get());
+    // std::cerr.rdbuf(outputRedirector.get());
 }
 
 GuiBuilder::~GuiBuilder()

@@ -149,22 +149,22 @@ void Renderer::paintGL()
     {
         for (auto& e : entities)
         {
-            if (e->GetProperty<MeshCore>() != nullptr)
+            if (e->GetCoreProperty<MeshCore>() != nullptr)
             {
-                e->GetProperty<MeshCore>()->Draw();
+                e->GetCoreProperty<MeshCore>()->Draw();
 
-                if (e->GetProperty<Transform3DCore>() != nullptr)
+                if (e->GetCoreProperty<Transform3DCore>() != nullptr)
                 {
-                    glm::mat4 tMat(e->GetProperty<Transform3DCore>()->scale.x(), 0.0f, 0.0f, e->GetProperty<Transform3DCore>()->position->x(),
-                        0.0f, e->GetProperty<Transform3DCore>()->scale.y(), 0.0f, e->GetProperty<Transform3DCore>()->position->y(),
-                        0.0f, 0.0f, e->GetProperty<Transform3DCore>()->scale.z(), e->GetProperty<Transform3DCore>()->position->z(),
+                    glm::mat4 tMat(e->GetCoreProperty<Transform3DCore>()->scale.x(), 0.0f, 0.0f, e->GetCoreProperty<Transform3DCore>()->position->x(),
+                        0.0f, e->GetCoreProperty<Transform3DCore>()->scale.y(), 0.0f, e->GetCoreProperty<Transform3DCore>()->position->y(),
+                        0.0f, 0.0f, e->GetCoreProperty<Transform3DCore>()->scale.z(), e->GetCoreProperty<Transform3DCore>()->position->z(),
                         0.0f, 0.0f, 0.0f, 1.0f);
 
-                    e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
+                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
                 }
                 else
                 {
-                    e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
+                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
                 }
 
                 glm::mat4 view = glm::lookAt(
@@ -182,9 +182,9 @@ void Renderer::paintGL()
                         editorCamera->GetTransform()->up.z())
                 );
 
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
                 
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
 
                 vector<glm::vec3> lightPositions;
                 vector<glm::vec3> lightColors;
@@ -203,16 +203,16 @@ void Renderer::paintGL()
                     intensities.push_back(light.GetIntensity());
                 }
 
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
-                e->GetProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
                     editorCamera->GetTransform()->GetPosition().x(),
                     editorCamera->GetTransform()->GetPosition().y(),
                     editorCamera->GetTransform()->GetPosition().z()
                 ));
 
-                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetProperty<MeshCore>()->GetMaterial())) {
+                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetCoreProperty<MeshCore>()->GetMaterial())) {
                     Color::Color c(1.0f, 0.5f, 0.0f);
                     pbrMat->SetAlbedo(c);
                     pbrMat->SetMetallic(1.0f);
