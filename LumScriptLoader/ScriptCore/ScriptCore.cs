@@ -131,7 +131,12 @@ public class ScriptManager
                     }
 
                     var wrapper = new ScriptWrapper(instance);
-                    ((IEntityContainer)wrapper).SetEntityInstance(new Entity());
+
+                    // IntPtr nativeEntityPtr = NativeEntityFactory.CreateNativeEntity(); // Questo metodo dovrebbe essere implementato nel wrapper C++/CLI
+                    // var entity = new Entity(nativeEntityPtr); // Modifichiamo il costruttore di Entity per accettare il puntatore
+                    // 
+                    // ((IEntityContainer)wrapper).SetEntityInstance(entity);
+                    
                     scripts.Add(wrapper);
                 }
                 catch (Exception ex)

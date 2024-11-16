@@ -11,21 +11,22 @@ namespace LumScripting
     {
         namespace Entities
         {
+            public ref class NativeEntityFactory {
+            public:
+                static IntPtr CreateNativeEntity() {
+                    BaseEntity* entity = new BaseEntity();
+                    return IntPtr(entity);
+                }
+            };
+
             private ref class EntityInternal
             {
             private:
                 BaseEntity* native;
 
             public:
-                EntityInternal(BaseEntity* nativeEntity) : native(nativeEntity)
-                {
-                    System::Console::WriteLine("1. EntityInternal costruito con native: " +
-                        (native != nullptr ? "valido" : "null"));
-                }
-
-                EntityInternal() : native(new BaseEntity())
-                {
-                    System::Console::WriteLine("1. EntityInternal costruito con nuovo BaseEntity");
+                EntityInternal(BaseEntity* existingEntity) : native(existingEntity) {
+                    System::Console::WriteLine("EntityInternal costruito con entity esistente");
                 }
 
                 void AddPropertyInternal(IProperty* nativeProp)
@@ -44,7 +45,9 @@ namespace LumScripting
                 EntityInternal^ internal;
 
             public:
-                Entity() : internal(gcnew EntityInternal()) {}
+                Entity(IntPtr nativePtr) {
+                    internal = gcnew EntityInternal(static_cast<BaseEntity*>(nativePtr.ToPointer()));
+                }
 
                 generic<typename T>
                 where T : LumScripting::Script::Properties::Property
