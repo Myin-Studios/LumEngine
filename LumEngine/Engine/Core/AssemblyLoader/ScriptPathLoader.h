@@ -77,6 +77,11 @@ namespace ScriptLoaderCore
                 return;
             }
 
+            std::string outputPathBlock =
+                "  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>\n"
+                "  <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>\n"
+                "  <OutputPath>Build\\$(Configuration)</OutputPath>\n";
+
             std::string referenceBlock =
                 "  <ItemGroup>\n"
                 "    <Reference Include=\"LumScripting\">\n"
@@ -87,8 +92,10 @@ namespace ScriptLoaderCore
                 "    </Reference>\n"
                 "  </ItemGroup>\n";
 
+
             // Inserisci il nuovo blocco <ItemGroup> prima della chiusura di <Project>
             csprojContent.insert(projectEndPos, referenceBlock);
+            csprojContent.insert(csprojContent.find("</PropertyGroup>"), outputPathBlock);
 
             csprojContent.replace(csprojContent.find("net8.0"), 6, "net8.0-windows");
 
@@ -105,7 +112,6 @@ namespace ScriptLoaderCore
             std::cout << ".csproj file created and modified successfully!" << std::endl;
 
             // Restore e build
-            clean(projPath);
             restore(projPath);
             build(projPath);
         }

@@ -19,6 +19,11 @@ public class SharedAssemblyLoadContext : AssemblyLoadContext
     private Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
     private string[] _sharedAssemblyNames = new[] { "LumScripting", "LumEngineWrapper" };
 
+    public Dictionary<string, Assembly> GetLoadedAssemblies()
+    {
+        return _loadedAssemblies;
+    }
+
     public SharedAssemblyLoadContext() : base("SharedLoader", isCollectible: false)
     {
         // Carica gli assembly condivisi
@@ -67,12 +72,25 @@ public class ScriptManager
     public void Load(string assemblyPath)
     {
         string projectName = Path.GetFileName(assemblyPath);
-        string scriptBinPath = Path.Combine(assemblyPath, "bin", "Debug", "net8.0-windows"); ;
+        string scriptBinPath = Path.Combine(assemblyPath, "Build", "Debug");
+
         string scriptDllPath = Path.Combine(scriptBinPath, $"{projectName}.dll");
 
         if (!File.Exists(scriptDllPath))
         {
-            Logger.Error($"Script DLL not found: {scriptDllPath}");
+            Logger.Error($"Script DLL not found: {scriptDllPath}. Searching for Release build.");
+            scriptBinPath = Path.Combine(assemblyPath, "Build", "Release");
+        }
+
+        if (sharedContext.GetLoadedAssemblies().ContainsKey(projectName))
+        {
+            Logger.Info($"Assembly {projectName} already loaded in shared context.");
+            return;
+        }
+        if (AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.Contains("LumScripting") && a.FullName.Contains("LumEngineWrapper")))
+        {
+            Logger.Info("LumScripting or LumEngineWrapper already loaded in current domain.");
             return;
         }
 

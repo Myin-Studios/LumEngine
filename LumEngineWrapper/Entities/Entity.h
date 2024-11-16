@@ -3,6 +3,8 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "Properties/Properties.h"
 
+using namespace LumScripting::Script::Properties;
+
 namespace LumScripting
 {
     namespace Script
@@ -23,9 +25,13 @@ namespace LumScripting
                     native->AddProperty(std::unique_ptr<IProperty>(nativeProp));
                 }
 
-                IProperty* GetPropertyInternal()
+                IProperty* GetPropertyInternal(const type_info& expectedType)
                 {
-                    return native->GetProperty<IProperty>();
+                    IProperty* prop = native->GetProperty<IProperty>();
+                    if (prop && typeid(*prop) == expectedType) {
+                        return prop;
+                    }
+                    return nullptr;
                 }
             };
 
@@ -49,16 +55,17 @@ namespace LumScripting
                 }
 
                 generic<typename T>
-                where T : LumScripting::Script::Properties::Property
+                where T : Property
                 T GetProperty()
                 {
-                    IProperty* nativeProp = internal->GetPropertyInternal();
+                    T temp;
+                    const type_info& expectedType = temp->GetNativeTypeInfo();
+
+                    IProperty* nativeProp = internal->GetPropertyInternal(expectedType);
                     if (nativeProp == nullptr)
                         return {};
 
-                    // Creiamo prima una Property base e poi facciamo il cast
-                    Property^ baseProp = gcnew Property(nativeProp);
-                    return safe_cast<T>(baseProp);
+                    return safe_cast<T>(temp->CreateFromNative(nativeProp));
                 }
             };
         }

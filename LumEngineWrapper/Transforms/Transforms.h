@@ -45,22 +45,34 @@ using namespace System::Runtime::InteropServices;
 public ref class Transform3D : public Property
 {
 private:
-    Vec3Native position;
-    Vec3Native rotation;
-    Vec3Native scale;
+    Vec3 position;
+    Vec3 rotation;
+    Vec3 scale;
 
 public:
     Transform3D() : Property(new Transform3DCore())  // Passa Transform3DCore come IProperty
     {
-        position = Vec3Native(0, 0, 0);
-        rotation = Vec3Native(0, 0, 0);
-        scale = Vec3Native(1, 1, 1);
+        position = Vec3(0, 0, 0);
+        rotation = Vec3(0, 0, 0);
+        scale = Vec3(1, 1, 1);
     }
 
-    property Vec3Native Position
+    Transform3D(Transform3DCore* t) : Property(t)
+	{
+		position = Vec3(t->position->x(), t->position->y(), t->position->z());
+		rotation = Vec3(t->rotation.x(), t->rotation.y(), t->rotation.z());
+		scale = Vec3(t->scale.x(), t->scale.y(), t->scale.z());
+    }
+
+	const System::Type^ GetNativeType() override
     {
-        Vec3Native get() { return position; }
-        void set(Vec3Native value)
+		return Transform3DCore::typeid;
+    }
+
+    property Vec3 Position
+    {
+        Vec3 get() { return position; }
+        void set(Vec3 value)
         {
             position = value;
             if (native)
@@ -70,10 +82,10 @@ public:
         }
     }
 
-    property Vec3Native Rotation
+    property Vec3 Rotation
     {
-        Vec3Native get() { return rotation; }
-        void set(Vec3Native value)
+        Vec3 get() { return rotation; }
+        void set(Vec3 value)
         {
             rotation = value;
             if (native)
@@ -83,9 +95,20 @@ public:
         }
     }
 
-    property Vec3Native Scale
+    property Vec3 Scale
     {
-        Vec3Native get() { return scale; }
-        void set(Vec3Native value) { scale = value; }
+        Vec3 get() { return scale; }
+        void set(Vec3 value) { scale = value; }
     }
+
+internal:
+	const type_info& GetNativeTypeInfo() override
+	{
+		return typeid(Transform3DCore);
+	}
+
+	virtual Property^ CreateFromNative(IProperty* prop) override
+	{
+		return gcnew Transform3D(static_cast<Transform3DCore*>(prop));
+	}
 };

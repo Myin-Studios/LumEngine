@@ -102,13 +102,18 @@ void MainWindow::loadProject()
 
 void MainWindow::buildProject()
 {
+    if (assemblyPath.isEmpty())
+    {
+        QMessageBox::warning(this, "Warning", "No project loaded before!");
+        return;
+    }
+
     connect(this, &MainWindow::assemblyPathProvided, loadingThread, &LoadingThread::LoadAssembly);
 
     emit assemblyPathProvided("");
 
-    splc->clean(assemblyPath.toStdString());
     splc->restore(assemblyPath.toStdString());
     splc->build(assemblyPath.toStdString());
 
-    emit assemblyPathProvided(QString(assemblyPath));
+	emit assemblyPathProvided(assemblyPath);
 }

@@ -10,7 +10,6 @@ namespace LumScriptLoader.Main
     {
         static GameCore gameCore = new GameCore();
         static Time time = new Time();
-        static Property propertyManager = new Property();
 
         public static void Example()
         {

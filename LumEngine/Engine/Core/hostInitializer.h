@@ -156,44 +156,43 @@ public:
 public slots:
     void LoadAssembly(QString path)
     {
-        if (path.isEmpty()) return;
+        if (!path.isEmpty())
+        {
+            assembly_path = L"LumScripting/LumScriptLoader.dll";
+            dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
+            const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
 
-        std::cout << "Loading project..." << std::endl;
-
-        assembly_path = L"LumScripting/LumScriptLoader.dll";
-        dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
-        const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
-
-        if (assembly_loader == nullptr) {
-            emit progressUpdated("Failed to get assembly loader.", 100 / 5);
-            return;
-        }
-
-        // Carica il metodo solo se non è stato già caricato
-        if (LoadAssemblyMethod == nullptr) {
-            int rc = assembly_loader(
-                assembly_path,
-                dotnet_type,
-                dotnet_type_method_LoadAssembly,
-                nullptr,
-                nullptr,
-                (void**)&LoadAssemblyMethod
-            );
-
-            if (rc != 0 || LoadAssemblyMethod == nullptr) {
-                std::cerr << "Failed to load LoadAssembly method. Error code: " << std::hex << rc << std::endl;
-                emit progressUpdated("Failed to load LoadAssembly method.", 100 / 5);
+            if (assembly_loader == nullptr) {
+                emit progressUpdated("Failed to get assembly loader.", 100 / 5);
                 return;
             }
+
+            // Carica il metodo solo se non è stato già caricato
+            if (LoadAssemblyMethod == nullptr) {
+                int rc = assembly_loader(
+                    assembly_path,
+                    dotnet_type,
+                    dotnet_type_method_LoadAssembly,
+                    nullptr,
+                    nullptr,
+                    (void**)&LoadAssemblyMethod
+                );
+
+                if (rc != 0 || LoadAssemblyMethod == nullptr) {
+                    std::cerr << "Failed to load LoadAssembly method. Error code: " << std::hex << rc << std::endl;
+                    emit progressUpdated("Failed to load LoadAssembly method.", 100 / 5);
+                    return;
+                }
+            }
+
+            // Convert QString a wchar_t*
+            std::wstring wpath = path.toStdWString();
+            const wchar_t* wpath_cstr = wpath.c_str();
+            int32_t path_size_in_bytes = static_cast<int32_t>((wpath.size() + 1) * sizeof(wchar_t));
+
+            // Chiama il metodo gestito
+            LoadAssemblyMethod((void*)wpath_cstr, path_size_in_bytes);
         }
-
-        // Convert QString a wchar_t*
-        std::wstring wpath = path.toStdWString();
-        const wchar_t* wpath_cstr = wpath.c_str();
-        int32_t path_size_in_bytes = static_cast<int32_t>((wpath.size() + 1) * sizeof(wchar_t));
-
-        // Chiama il metodo gestito
-        LoadAssemblyMethod((void*)wpath_cstr, path_size_in_bytes);
     }
 
 signals:
