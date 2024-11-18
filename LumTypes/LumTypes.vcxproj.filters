@@ -36,6 +36,9 @@
     <ClInclude Include="Rendering\Colors\Color.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Core\NativeInterface.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transformations\Transformations.cpp">

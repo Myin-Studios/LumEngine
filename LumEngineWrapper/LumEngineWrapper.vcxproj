@@ -149,6 +149,7 @@
     <ClInclude Include="Entities\Properties\Properties.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="Rendering\Meshes\Mesh.h" />
+    <ClInclude Include="Rendering\Renderer.h" />
     <ClInclude Include="ScriptLoader\ScriptLoader.h" />
     <ClInclude Include="Transforms\Transforms.h" />
   </ItemGroup>

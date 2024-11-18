@@ -2,6 +2,7 @@
 
 #include "../LumTypes/Entities/Entity.h"
 #include "Properties/Properties.h"
+#include "../LumEngineWrapper/Rendering/Renderer.h"
 
 using namespace LumScripting::Script::Properties;
 
@@ -16,6 +17,15 @@ namespace LumScripting
                 static IntPtr CreateNativeEntity() {
                     BaseEntity* entity = new BaseEntity();
                     return IntPtr(entity);
+                }
+
+                static IntPtr GetExistingEntity(int index) {
+                    BaseEntity* entity = Renderer::Instance->GetEntityAt(index);
+                    return IntPtr(entity);
+                }
+
+                static int GetEntityCount() {
+                    return Renderer::Instance->GetEntityCount();
                 }
             };
 

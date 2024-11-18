@@ -33,7 +33,7 @@ private:
     std::unique_ptr<QHBoxLayout> topLine;
     std::unique_ptr<QVBoxLayout> centralLayout;
 
-    std::unique_ptr<Renderer> scene;
+    std::unique_ptr<RendererCore> scene;
     std::unique_ptr<Console> console;
     std::unique_ptr<RedirectStreamBuf> outputRedirector;
 

@@ -30,9 +30,13 @@
 
 #include "renderer.h"
 
-Renderer::Renderer(QWidget *parent)
+RendererCore* RendererCore::s_instance = nullptr;
+
+RendererCore::RendererCore(QWidget *parent)
         : QOpenGLWidget(parent)
 {
+    RendererCore::RegisterInstance(this);
+
     setAcceptDrops(true);
 
     updateTimer = new QTimer(this);
@@ -40,12 +44,12 @@ Renderer::Renderer(QWidget *parent)
     updateTimer->setInterval(1000/60);
 }
 
-Renderer::~Renderer()
+RendererCore::~RendererCore()
 {
     cleanup();
 }
 
-void Renderer::initializeGL()
+void RendererCore::initializeGL()
 {
     initializeOpenGLFunctions();
 
@@ -82,7 +86,7 @@ void Renderer::initializeGL()
     setupSkysphere();
 }
 
-void Renderer::resizeGL(int w, int h)
+void RendererCore::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
 
@@ -95,7 +99,7 @@ void Renderer::resizeGL(int w, int h)
     update();
 }
 
-void Renderer::paintGL()
+void RendererCore::paintGL()
 {
     makeCurrent();
 
@@ -311,7 +315,7 @@ void Renderer::paintGL()
     RendererDebugger::checkOpenGLError("rendering");
 }
 
-void Renderer::UpdateCamera()
+void RendererCore::UpdateCamera()
 {
     if (keyPressed.find(Qt::Key_A) != keyPressed.end())
         editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->right.Normalize() * -0.1f));
@@ -327,12 +331,12 @@ void Renderer::UpdateCamera()
         editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->up.Normalize() * 0.05f));
 }
 
-void Renderer::setupSkysphere()
+void RendererCore::setupSkysphere()
 {
     skysphere = loadOBJ("Resources/Models/Skysphere.obj", std::make_shared<ProceduralSkybox>());
 }
 
-void Renderer::checkFrameBufferError()
+void RendererCore::checkFrameBufferError()
 {
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -368,7 +372,7 @@ void Renderer::checkFrameBufferError()
     }
 }
 
-void Renderer::setupFrameBuffer()
+void RendererCore::setupFrameBuffer()
 {
     makeCurrent();
 
@@ -414,14 +418,14 @@ void Renderer::setupFrameBuffer()
     fboShader = new Shader("Resources/Shaders/fboVertex.glsl", "Resources/Shaders/fboFragment.glsl");
 }
 
-void Renderer::cleanup()
+void RendererCore::cleanup()
 {
     makeCurrent();
 
     doneCurrent();
 }
 
-void Renderer::dragEnterEvent(QDragEnterEvent* event)
+void RendererCore::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasFormat("text/uri-list"))
     {
@@ -429,7 +433,7 @@ void Renderer::dragEnterEvent(QDragEnterEvent* event)
     }
 }
 
-void Renderer::dropEvent(QDropEvent *event) {
+void RendererCore::dropEvent(QDropEvent *event) {
     const QMimeData* mimeData = event->mimeData();
     if (mimeData->hasUrls())
     {
@@ -446,7 +450,7 @@ void Renderer::dropEvent(QDropEvent *event) {
     }
 }
 
-void Renderer::mousePressEvent(QMouseEvent* event)
+void RendererCore::mousePressEvent(QMouseEvent* event)
 {
     setFocus();
 
@@ -462,7 +466,7 @@ void Renderer::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void Renderer::mouseMoveEvent(QMouseEvent* event)
+void RendererCore::mouseMoveEvent(QMouseEvent* event)
 {
     QPoint currentPos = event->pos();
 
@@ -480,7 +484,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-void Renderer::mouseReleaseEvent(QMouseEvent* event)
+void RendererCore::mouseReleaseEvent(QMouseEvent* event)
 {
     setCursor(Qt::ArrowCursor);
 
@@ -493,7 +497,7 @@ void Renderer::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
-void Renderer::keyPressEvent(QKeyEvent* event)
+void RendererCore::keyPressEvent(QKeyEvent* event)
 {
     if (canUpdateCamera)
     {
@@ -526,7 +530,7 @@ void Renderer::keyPressEvent(QKeyEvent* event)
     }
 }
 
-void Renderer::keyReleaseEvent(QKeyEvent* event)
+void RendererCore::keyReleaseEvent(QKeyEvent* event)
 {
     if (canUpdateCamera)
     {
@@ -535,7 +539,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 }
 
 
-void Renderer::loadModel(const QString& path) {
+void RendererCore::loadModel(const QString& path) {
     if (path.endsWith(".obj"))
     {
         models.emplace_back(loadOBJ(path, std::make_shared<PBR>()));
@@ -546,7 +550,7 @@ void Renderer::loadModel(const QString& path) {
     }
 }
 
-std::unique_ptr<MeshCore> Renderer::loadOBJ(const QString& path, std::shared_ptr<Material> mat) {
+std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared_ptr<Material> mat) {
     QFile file(path);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

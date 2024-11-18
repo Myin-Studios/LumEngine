@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                                   ///
 ///                                      THIS CODE IS PART OF:                                        ///
-///                                       CryoMoon Engine (C)                                         ///
+///                                          LumEngine (C)                                            ///
 ///                                                                                                   ///
 ///                                     WHICH IS LICENSED UNDER                                       ///
 ///                                          MIT License                                              ///
@@ -58,13 +58,28 @@
 
 using namespace std;
 
-class Renderer : public QOpenGLWidget, protected QOpenGLFunctions
+class RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
 {
 Q_OBJECT
 
 public:
-    explicit Renderer(QWidget *parent = nullptr);
-    ~Renderer() override;
+    explicit RendererCore(QWidget *parent = nullptr);
+    ~RendererCore() override;
+
+    static void RegisterInstance(RendererCore* instance)
+    {
+        s_instance = instance;
+    }
+
+    static RendererCore* GetInstance()
+    {
+        return s_instance;
+    }
+
+    vector<shared_ptr<BaseEntity>> GetEntities()
+    {
+        return this->entities;
+    }
 
 protected:
     void initializeGL() override;
@@ -80,6 +95,7 @@ protected:
 
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
+
 private:
     
     void UpdateCamera();
@@ -90,6 +106,8 @@ private:
     void cleanup();
     void loadModel(const QString& path);
     std::unique_ptr<MeshCore> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
+
+    static RendererCore* s_instance;
 
     Camera* editorCamera;
     QPoint mousePos;
