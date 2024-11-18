@@ -53,15 +53,23 @@ void RendererCore::initializeGL()
 {
     initializeOpenGLFunctions();
 
+    RendererDebugger::checkOpenGLError("after initializeOpenGLFunctions");
+
     if (glewInit() != GLEW_OK) {
         std::cerr << "GLEW initialization failed!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
+    RendererDebugger::checkOpenGLError("after glewInit");
+
     editorCamera = new Camera();
+
+    RendererDebugger::checkOpenGLError("after camerea creation");
 
     mousePos = QPoint(0, 0);
     editorCamera->GetTransform()->SetPosition(0.0f, 0.0f, 3.0f);
+
+    RendererDebugger::checkOpenGLError("after camera position");
 
     Light* l1 = new Light();
     l1->GetTransform()->SetPosition(3.0f, 3.0f, 3.0f);
@@ -83,18 +91,12 @@ void RendererCore::initializeGL()
     lights.push_back(*l3);
 
     makeCurrent();
-    // setupSkysphere();
+    setupSkysphere();
 }
 
 void RendererCore::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
-
-    glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
 
     update();
 }
@@ -109,36 +111,36 @@ void RendererCore::paintGL()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
-    // if (skysphere != nullptr)
-    // {
-    //     glDisable(GL_DEPTH_TEST);
-    // 
-    //     skysphere->Draw();
-    // 
-    //     glm::mat4 skyboxView = glm::lookAt(
-    //         glm::vec3(
-    //             editorCamera->GetTransform()->GetPosition().x(),
-    //             editorCamera->GetTransform()->GetPosition().y(),
-    //             editorCamera->GetTransform()->GetPosition().z()),
-    //         glm::vec3(
-    //             editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
-    //             editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
-    //             editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
-    //         glm::vec3(
-    //             editorCamera->GetTransform()->up.x(),
-    //             editorCamera->GetTransform()->up.y(),
-    //             editorCamera->GetTransform()->up.z())
-    //     );
-    // 
-    //     skysphere->GetMaterial()->GetShader()->setMat4x4("model", &glm::translate(glm::mat4(1.0f), glm::vec3(
-    //         editorCamera->GetTransform()->GetPosition().x(),
-    //         editorCamera->GetTransform()->GetPosition().y(),
-    //         editorCamera->GetTransform()->GetPosition().z()
-    //     ))[0][0]);
-    //     skysphere->GetMaterial()->GetShader()->setMat4x4("view", &skyboxView[0][0]);
-    //     skysphere->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
-    // }
-    // 
+    if (skysphere != nullptr)
+    {
+        glDisable(GL_DEPTH_TEST);
+    
+        skysphere->Draw();
+    
+        glm::mat4 skyboxView = glm::lookAt(
+            glm::vec3(
+                editorCamera->GetTransform()->GetPosition().x(),
+                editorCamera->GetTransform()->GetPosition().y(),
+                editorCamera->GetTransform()->GetPosition().z()),
+            glm::vec3(
+                editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
+                editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
+                editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
+            glm::vec3(
+                editorCamera->GetTransform()->up.x(),
+                editorCamera->GetTransform()->up.y(),
+                editorCamera->GetTransform()->up.z())
+        );
+    
+        skysphere->GetMaterial()->GetShader()->setMat4x4("model", &glm::translate(glm::mat4(1.0f), glm::vec3(
+            editorCamera->GetTransform()->GetPosition().x(),
+            editorCamera->GetTransform()->GetPosition().y(),
+            editorCamera->GetTransform()->GetPosition().z()
+        ))[0][0]);
+        skysphere->GetMaterial()->GetShader()->setMat4x4("view", &skyboxView[0][0]);
+        skysphere->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+    }
+    
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -160,10 +162,17 @@ void RendererCore::paintGL()
 
                 if (e->GetCoreProperty<Transform3DCore>() != nullptr)
                 {
-                    glm::mat4 tMat(e->GetCoreProperty<Transform3DCore>()->scale.x(), 0.0f, 0.0f, e->GetCoreProperty<Transform3DCore>()->position->x(),
-                        0.0f, e->GetCoreProperty<Transform3DCore>()->scale.y(), 0.0f, e->GetCoreProperty<Transform3DCore>()->position->y(),
-                        0.0f, 0.0f, e->GetCoreProperty<Transform3DCore>()->scale.z(), e->GetCoreProperty<Transform3DCore>()->position->z(),
-                        0.0f, 0.0f, 0.0f, 1.0f);
+                    glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
+                    tMat = glm::translate(tMat, glm::vec3(
+                        e->GetCoreProperty<Transform3DCore>()->position->x(),
+                        e->GetCoreProperty<Transform3DCore>()->position->y(),
+                        e->GetCoreProperty<Transform3DCore>()->position->z()
+                    ));
+                    tMat = glm::scale(tMat, glm::vec3(
+                        e->GetCoreProperty<Transform3DCore>()->scale.x(),
+                        e->GetCoreProperty<Transform3DCore>()->scale.y(),
+                        e->GetCoreProperty<Transform3DCore>()->scale.z()
+                    ));
 
                     std::cout << "Position: (" << e->GetCoreProperty<Transform3DCore>()->position->x() << ", "
                         << e->GetCoreProperty<Transform3DCore>()->position->y() << ", "
