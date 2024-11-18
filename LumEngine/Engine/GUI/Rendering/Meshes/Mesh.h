@@ -67,7 +67,6 @@ class MeshCore : public IProperty
 {
 public:
     vector<Vertex> vertices;
-    Transform3DCore* transform;
     ~MeshCore()
     {
         glDeleteVertexArrays(1, &VAO);
@@ -78,22 +77,12 @@ public:
 
     MeshCore(vector<Vertex> vertices = {}) : vertices(std::move(vertices)) {
 
-        transform = new Transform3DCore();
         setupMesh();
     }
 
     void Draw() const
     {
         material->GetShader()->use();
-
-        // glm::mat4 tMat(transform->scale.x(), 0.0f, 0.0f, transform->position->x(),
-        //     0.0f, transform->scale.y(), 0.0f, transform->position->y(),
-        //     0.0f, 0.0f, transform->scale.z(), transform->position->z(),
-        //     0.0f, 0.0f, 0.0f, 1.0f);
-        // 
-        // material->GetShader()->setMat4x4("model", &tMat[0][0]);
-
-        // draw mesh
 
         RendererDebugger::checkOpenGLError("shader usage");
 

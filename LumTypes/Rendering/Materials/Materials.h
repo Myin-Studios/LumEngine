@@ -2,6 +2,7 @@
 
 #include "../Colors/Color.h"
 #include "../LumEngine/Engine/GUI/Rendering/Shaders/Shaders.h"
+#include <memory>
 
 namespace MaterialTypes
 {
@@ -18,23 +19,20 @@ class Material
 public:
 	Material() = default;
 
-	Material(Shader* s)
+	Material(std::unique_ptr<Shader> s)
 	{
-		shader = s;
-	}
-	virtual ~Material()
-	{
-		delete shader;
-		shader = nullptr;
+		shader = std::move(s);
 	}
 	
-	Shader* GetShader() const { return this->shader; }
+	virtual ~Material() {}
+
+	Shader* GetShader() const { return this->shader.get(); }
 
 protected:
-	void SetShader(Shader* s) { this->shader = s; }
+	void SetShader(std::unique_ptr<Shader> s) { this->shader = std::move(s); }
 
 private:
-	Shader* shader = nullptr;
+	std::unique_ptr<Shader> shader = nullptr;
 };
 
 class PBR : public Material
@@ -51,7 +49,7 @@ public:
 	{
 		_Albedo = Color::Color();
 
-		this->SetShader(new Shader("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
+		this->SetShader(std::make_unique<Shader>("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
 	}
 
 	const Color::Color GetAlbedo() { return this->_Albedo; }
@@ -98,8 +96,8 @@ public:
 class ProceduralSkybox : public Material
 {
 public:
-	ProceduralSkybox() : Material(new Shader("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"))
+	ProceduralSkybox()
 	{
-
+		this->SetShader(std::make_unique<Shader>("Resources/Shaders/baseVert.glsl", "Resources/Shaders/baseFrag.glsl"));
 	}
 };
