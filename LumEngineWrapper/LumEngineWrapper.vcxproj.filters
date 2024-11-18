@@ -36,9 +36,15 @@
     <ClInclude Include="Rendering\Renderer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Core\NativeInterface.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mainCLR.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\NativeInterface.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

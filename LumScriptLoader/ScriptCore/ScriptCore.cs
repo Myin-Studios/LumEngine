@@ -118,26 +118,19 @@ public class ScriptManager
                     Logger.Info($"Creating instance of {type.FullName}");
                     object instance = Activator.CreateInstance(type);
 
-                    // Verifica se l'istanza può vedere il metodo get_Entity
-                    var entityProperty = type.BaseType.GetProperty("Entity");
-                    if (entityProperty != null)
+                    // Otteniamo il riferimento a un'entity esistente
+                    int entityCount = NativeEntityFactory.GetEntityCount();
+                    if (entityCount > 0)
                     {
-                        var getMethod = entityProperty.GetGetMethod(true); // true per includere metodi non pubblici
-                        Logger.Info($"Entity property getter: {getMethod?.Name} from {getMethod?.DeclaringType.Assembly.GetName().Name}");
+                        IntPtr nativeEntityPtr = NativeEntityFactory.GetExistingEntity(entityCount - 1); // O l'indice appropriato
+                        if (nativeEntityPtr != IntPtr.Zero)
+                        {
+                            var entity = new Entity(nativeEntityPtr);
+                            var wrapper = new ScriptWrapper(instance);
+                            ((IEntityContainer)wrapper).SetEntityInstance(entity);
+                            scripts.Add(wrapper);
+                        }
                     }
-                    else
-                    {
-                        Logger.Error("Entity property not found on script's base type!");
-                    }
-
-                    var wrapper = new ScriptWrapper(instance);
-
-                    // IntPtr nativeEntityPtr = NativeEntityFactory.CreateNativeEntity(); // Questo metodo dovrebbe essere implementato nel wrapper C++/CLI
-                    // var entity = new Entity(nativeEntityPtr); // Modifichiamo il costruttore di Entity per accettare il puntatore
-                    // 
-                    // ((IEntityContainer)wrapper).SetEntityInstance(entity);
-                    
-                    scripts.Add(wrapper);
                 }
                 catch (Exception ex)
                 {

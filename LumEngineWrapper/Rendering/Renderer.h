@@ -5,8 +5,12 @@
 public ref class Renderer {
 private:
     static Renderer^ instance;
+    IntPtr nativeRenderer;  // Handle per il RendererCore nativo
 
-    Renderer() { }
+    Renderer() {
+        // Ottieni l'istanza nativa e salvala
+        nativeRenderer = IntPtr(Wrapper_GetRendererInstance());
+    }
 
 public:
     static property Renderer^ Instance {
@@ -19,10 +23,10 @@ public:
     }
 
     BaseEntity* GetEntityAt(int index) {
-        return ::GetEntityAt(index);
+        return Wrapper_GetEntityAt(index);
     }
 
     int GetEntityCount() {
-        return ::GetEntityCount();
+        return Wrapper_GetEntityCount();
     }
 };

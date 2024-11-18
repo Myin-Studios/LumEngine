@@ -630,3 +630,22 @@ std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared
 
     return m;
 }
+
+extern "C" {
+    RendererCore* GetEngineRenderer() {
+        return RendererCore::GetInstance();
+    }
+
+    BaseEntity* GetEngineEntityAt(int index) {
+        auto renderer = RendererCore::GetInstance();
+        if (renderer && index >= 0 && index < renderer->GetEntities().size()) {
+            return renderer->GetEntities()[index].get();
+        }
+        return nullptr;
+    }
+
+    int GetEngineEntityCount() {
+        auto renderer = RendererCore::GetInstance();
+        return renderer ? renderer->GetEntities().size() : 0;
+    }
+}

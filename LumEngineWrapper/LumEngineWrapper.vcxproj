@@ -92,12 +92,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;$(LibraryPath)</LibraryPath>
     <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;$(LibraryPath)</LibraryPath>
     <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -108,7 +108,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt6Cored.lib;Qt6Guid.lib;Qt6OpenGLd.lib;Qt6Widgetsd.lib;LumTypes.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Cored.lib;Qt6Guid.lib;Qt6OpenGLd.lib;Qt6Widgetsd.lib;LumTypes.lib;LumEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -141,10 +141,11 @@
       <CompileAsManaged>NetCore</CompileAsManaged>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt6Core.lib;Qt6Gui.lib;Qt6OpenGL.lib;Qt6Widgets.lib;LumTypes.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Core.lib;Qt6Gui.lib;Qt6OpenGL.lib;Qt6Widgets.lib;LumTypes.lib;LumEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Core\NativeInterface.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Properties\Properties.h" />
     <ClInclude Include="Math\Math.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Transforms\Transforms.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\NativeInterface.cpp" />
     <ClCompile Include="mainCLR.cpp" />
   </ItemGroup>
   <ItemGroup>

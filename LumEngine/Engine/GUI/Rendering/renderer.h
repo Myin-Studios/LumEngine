@@ -58,13 +58,13 @@
 
 using namespace std;
 
-#ifdef RENDERERCORE_EXPORTS
-#define RENDERERCORE_API __declspec(dllexport)
+#ifdef LUMENGINE_EXPORTS
+#define LUMENGINE_API __declspec(dllexport)
 #else
-#define RENDERERCORE_API __declspec(dllimport)
+#define LUMENGINE_API __declspec(dllimport)
 #endif
 
-class RENDERERCORE_API RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
+class LUMENGINE_API RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
 {
 Q_OBJECT
 
@@ -146,3 +146,9 @@ private:
     };
     Shader* fboShader = nullptr;
 };
+
+extern "C" {
+    LUMENGINE_API RendererCore* GetEngineRenderer();
+    LUMENGINE_API BaseEntity* GetEngineEntityAt(int index);
+    LUMENGINE_API int GetEngineEntityCount();
+}

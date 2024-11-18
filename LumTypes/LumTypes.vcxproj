@@ -144,7 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Core\NativeInterface.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Properties\Property.h" />
     <ClInclude Include="Mathematics\Math.h" />
