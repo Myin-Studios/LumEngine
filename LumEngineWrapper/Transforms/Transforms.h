@@ -36,32 +36,35 @@
 
 #include "../Math/Math.h"
 #include "../Entities/Properties/Properties.h"
+#include "../LumEngineWrapper/Entities/Entity.h"
+#include "../LumTypes/Entities/Entity.h"
 
 using namespace System;
 using namespace System::Diagnostics;
 using namespace LumScripting::Script::Properties;
+using namespace LumScripting::Script::Entities;
 using namespace System::Runtime::InteropServices;
 
 public ref class Transform3D : public Property
 {
 private:
-    Vec3 position;
-    Vec3 rotation;
-    Vec3 scale;
+    Vec3^ _position;
+    Vec3^ _rotation;
+    Vec3^ _scale;
 
 public:
     Transform3D() : Property(new Transform3DCore())  // Passa Transform3DCore come IProperty
     {
-        position = Vec3(0, 0, 0);
-        rotation = Vec3(0, 0, 0);
-        scale = Vec3(1, 1, 1);
+        _position = gcnew Vec3(0, 0, 0);
+        _rotation = gcnew Vec3(0, 0, 0);
+        _scale = gcnew Vec3(1, 1, 1);
     }
 
     Transform3D(Transform3DCore* t) : Property(t)
 	{
-		position = Vec3(t->position->x(), t->position->y(), t->position->z());
-		rotation = Vec3(t->rotation.x(), t->rotation.y(), t->rotation.z());
-		scale = Vec3(t->scale.x(), t->scale.y(), t->scale.z());
+		_position = gcnew Vec3(t->position->x(), t->position->y(), t->position->z());
+		_rotation = gcnew Vec3(t->rotation.x(), t->rotation.y(), t->rotation.z());
+		_scale = gcnew Vec3(t->scale.x(), t->scale.y(), t->scale.z());
     }
 
 	const System::Type^ GetNativeType() override
@@ -69,36 +72,37 @@ public:
 		return Transform3DCore::typeid;
     }
 
-    property Vec3 Position
+    property Vec3^ Position
     {
-        Vec3 get() { return position; }
-        void set(Vec3 value)
+        Vec3^ get() { return _position; }
+        void set(Vec3^ value)
         {
-            position = value;
+            _position = value;
             if (native)
             {
-                static_cast<Transform3DCore*>(native)->SetPosition(value.x, value.y, value.z);
+                System::Console::WriteLine("Native pointer exists");
+                static_cast<Transform3DCore*>(native)->SetPosition(value->x, value->y, value->z);
             }
         }
     }
 
-    property Vec3 Rotation
+    property Vec3^ Rotation
     {
-        Vec3 get() { return rotation; }
-        void set(Vec3 value)
+        Vec3^ get() { return _rotation; }
+        void set(Vec3^ value)
         {
-            rotation = value;
+            _rotation = value;
             if (native)
             {
-                static_cast<Transform3DCore*>(native)->SetRotation(value.x, value.y, value.z);
+                static_cast<Transform3DCore*>(native)->SetRotation(value->x, value->y, value->z);
             }
         }
     }
 
-    property Vec3 Scale
+    property Vec3^ Scale
     {
-        Vec3 get() { return scale; }
-        void set(Vec3 value) { scale = value; }
+        Vec3^ get() { return _scale; }
+        void set(Vec3^ value) { _scale = value; }
     }
 
 internal:

@@ -129,10 +129,14 @@ namespace LumScripting.Script.Scripting
 
         protected GameBehaviour()
         {
-            IntPtr nativeEntityPtr = NativeEntityFactory.CreateNativeEntity(); // Questo metodo dovrebbe essere implementato nel wrapper C++/CLI
-            var entity = new Entity(nativeEntityPtr); // Modifichiamo il costruttore di Entity per accettare il puntatore
+            int entityCount = NativeEntityFactory.GetEntityCount();
+            if (entityCount > 0)
+            {
+                IntPtr nativeEntityPtr = NativeEntityFactory.GetExistingEntity(entityCount - 1); // Questo metodo dovrebbe essere implementato nel wrapper C++/CLI
+                var entity = new Entity(nativeEntityPtr); // Modifichiamo il costruttore di Entity per accettare il puntatore
 
-            _entity = entity;
+                _entity = entity;
+            }
         }
 
         // Implementazione esplicita per l'interfaccia interna

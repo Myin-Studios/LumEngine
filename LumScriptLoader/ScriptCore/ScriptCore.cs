@@ -118,19 +118,8 @@ public class ScriptManager
                     Logger.Info($"Creating instance of {type.FullName}");
                     object instance = Activator.CreateInstance(type);
 
-                    // Otteniamo il riferimento a un'entity esistente
-                    int entityCount = NativeEntityFactory.GetEntityCount();
-                    if (entityCount > 0)
-                    {
-                        IntPtr nativeEntityPtr = NativeEntityFactory.GetExistingEntity(entityCount - 1); // O l'indice appropriato
-                        if (nativeEntityPtr != IntPtr.Zero)
-                        {
-                            var entity = new Entity(nativeEntityPtr);
-                            var wrapper = new ScriptWrapper(instance);
-                            ((IEntityContainer)wrapper).SetEntityInstance(entity);
-                            scripts.Add(wrapper);
-                        }
-                    }
+                    var wrapper = new ScriptWrapper(instance);
+                    scripts.Add(wrapper);
                 }
                 catch (Exception ex)
                 {
