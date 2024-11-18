@@ -8,7 +8,7 @@ GuiBuilder::GuiBuilder()
     tBtn = std::make_unique<TabsButton>(nullptr);
     playButton = std::make_unique<PlayButton>(nullptr);
     centralLayout = std::make_unique<QVBoxLayout>(nullptr);
-    scene = std::make_unique<RendererCore>(mainWindow->centralWidget());
+    scene = RendererCore::GetInstance(mainWindow->centralWidget());
     console = std::make_unique<Console>(mainWindow->centralWidget());
     // outputRedirector = std::make_unique<RedirectStreamBuf>(console.get());
     sceneConsoleSplitter = std::make_unique<QSplitter>();
@@ -61,7 +61,7 @@ GuiBuilder::GuiBuilder()
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     topPanel->getLayout()->addWidget(playButton.get(), 0, Qt::AlignLeft);
 
-    sceneConsoleSplitter->addWidget(scene.get());
+    sceneConsoleSplitter->addWidget(scene);
     sceneConsoleSplitter->addWidget(console.get());
     sceneConsoleSplitter->setOrientation(Qt::Vertical);
 

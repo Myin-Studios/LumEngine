@@ -58,12 +58,17 @@
 
 using namespace std;
 
-class RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
+#ifdef RENDERERCORE_EXPORTS
+#define RENDERERCORE_API __declspec(dllexport)
+#else
+#define RENDERERCORE_API __declspec(dllimport)
+#endif
+
+class RENDERERCORE_API RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
 {
 Q_OBJECT
 
 public:
-    explicit RendererCore(QWidget *parent = nullptr);
     ~RendererCore() override;
 
     static void RegisterInstance(RendererCore* instance)
@@ -71,8 +76,10 @@ public:
         s_instance = instance;
     }
 
-    static RendererCore* GetInstance()
-    {
+    static RendererCore* GetInstance(QWidget* parent = nullptr) {
+        if (s_instance == nullptr) {
+            s_instance = new RendererCore(parent);
+        }
         return s_instance;
     }
 
@@ -97,7 +104,9 @@ protected:
     void keyReleaseEvent(QKeyEvent* event) override;
 
 private:
-    
+    explicit RendererCore(QWidget* parent = nullptr);
+    static RendererCore* s_instance;
+
     void UpdateCamera();
 
     void setupSkysphere();
@@ -106,8 +115,6 @@ private:
     void cleanup();
     void loadModel(const QString& path);
     std::unique_ptr<MeshCore> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
-
-    static RendererCore* s_instance;
 
     Camera* editorCamera;
     QPoint mousePos;
