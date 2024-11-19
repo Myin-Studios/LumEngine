@@ -87,5 +87,9 @@ GuiBuilder::GuiBuilder()
 
 GuiBuilder::~GuiBuilder()
 {
-    
+    if (scene != nullptr)
+    {
+        delete scene;
+        scene = nullptr;
+    }
 }

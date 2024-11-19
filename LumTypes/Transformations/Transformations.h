@@ -75,7 +75,6 @@ public:
         position->setX(x);
         position->setY(y);
         position->setZ(z);
-        std::cout << "Position updated to: " << position->x() << ", " << position->y() << ", " << position->z() << std::endl;
     }
 
     void Move(float x, float y, float z);
@@ -109,7 +108,7 @@ public:
 
         if (file.good())
         {
-            file.write(reinterpret_cast<char*>(&position), sizeof(Vec3Core));
+            file.write(reinterpret_cast<char*>(position), sizeof(Vec3Core));
             file.write(reinterpret_cast<char*>(&rotation), sizeof(Vec3Core));
             file.write(reinterpret_cast<char*>(&scale), sizeof(Vec3Core));
         }
@@ -129,7 +128,7 @@ public:
 
         if (file.good())
         {
-            file.read(reinterpret_cast<char*>(&position), sizeof(Vec3Core));
+            file.read(reinterpret_cast<char*>(position), sizeof(Vec3Core));
             file.read(reinterpret_cast<char*>(&rotation), sizeof(Vec3Core));
             file.read(reinterpret_cast<char*>(&scale), sizeof(Vec3Core));
         }

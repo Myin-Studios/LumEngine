@@ -15,6 +15,11 @@ public:
 
     bool IsRunning() const { return running; }
 
+    void setScripts(component_entry_point_fn start, component_entry_point_fn update) {
+        StartScript = start;
+        UpdateScript = update;
+    }
+
 protected:
     void run() override {
 

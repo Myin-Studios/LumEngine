@@ -48,8 +48,8 @@ void PlayButton::mousePressEvent(QMouseEvent *eventPress)
         }
     } else {
         setIcon(QIcon(":/Icons/New/CMEngine_Pause"));
-        scriptRunnerThread = std::make_shared<ScriptRunnerThread>(StartScript, UpdateScript);
-        if (CanPlay() && StartScript != nullptr) {
+        scriptRunnerThread->setScripts(StartScript, UpdateScript);
+        if (StartScript != nullptr && UpdateScript != nullptr) {
             scriptRunnerThread->start(); // Avvia il thread
         }
     }

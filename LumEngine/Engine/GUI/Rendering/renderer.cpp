@@ -158,9 +158,9 @@ void RendererCore::paintGL()
         {
             if (!IsRunning())
             {
-                std::cout << "Deserializing..." << std::endl;
                 e->DeserializeProperties();
             }
+            else updateTimer->start();
 
             if (e->GetCoreProperty<MeshCore>() != nullptr)
             {
