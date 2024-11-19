@@ -41,9 +41,14 @@ namespace LumScripting
 					this->!Mesh();
 				}
 
-				const System::Type^ GetNativeType() override
+				virtual void OnSerialize() override
 				{
-					return MeshCore::typeid;
+
+				}
+
+				virtual void OnDeserialize() override
+				{
+
 				}
 
 			private:

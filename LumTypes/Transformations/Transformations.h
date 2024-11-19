@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                                   ///
 ///                                      THIS CODE IS PART OF:                                        ///
-///                                       CryoMoon Engine (C)                                         ///
+///                                          LumEngine (C)                                            ///
 ///                                                                                                   ///
 ///                                     WHICH IS LICENSED UNDER                                       ///
 ///                                          MIT License                                              ///
@@ -33,6 +33,8 @@
 #include "../Mathematics/Math.h"
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 
 #include "../Entities/Properties/Property.h"
 
@@ -88,6 +90,52 @@ public:
 
     void SetRotation(float yaw, float pitch, float roll);
     void Rotate(float yaw, float pitch, float roll);
+
+    /* --------------------------{ Serialization }--------------------------*/
+
+    void OnSerialize() override
+    {
+        if (!std::filesystem::exists("SerializedData")) {
+            std::filesystem::create_directory("SerializedData");
+        }
+
+        std::ofstream file("SerializedData/transform3d.bin", std::ios::binary);
+
+        if (!file.is_open())
+        {
+            std::cerr << "Error during file opening!" << std::endl;
+            return;
+        }
+
+        if (file.good())
+        {
+            file.write(reinterpret_cast<char*>(&position), sizeof(Vec3Core));
+            file.write(reinterpret_cast<char*>(&rotation), sizeof(Vec3Core));
+            file.write(reinterpret_cast<char*>(&scale), sizeof(Vec3Core));
+        }
+
+        file.close();
+    }
+
+    void OnDeserialize() override
+    {
+        std::ifstream file("SerializedData/transform3d.bin", std::ios::binary);
+
+        if (!file.is_open())
+        {
+            std::cerr << "Error during file opening!" << std::endl;
+            return;
+        }
+
+        if (file.good())
+        {
+            file.read(reinterpret_cast<char*>(&position), sizeof(Vec3Core));
+            file.read(reinterpret_cast<char*>(&rotation), sizeof(Vec3Core));
+            file.read(reinterpret_cast<char*>(&scale), sizeof(Vec3Core));
+        }
+
+        file.close();
+    }
 
 private:
     float _yaw = 0.0f;

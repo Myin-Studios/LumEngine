@@ -13,15 +13,21 @@ public:
         running = false; // Imposta il flag per fermare il loop
     }
 
+    bool IsRunning() const { return running; }
+
 protected:
     void run() override {
 
         running = true; // Imposta running su true
         
+        if (StartScript == nullptr) return;
+
         StartScript(nullptr, 0);
 
         while (running) {
-            // UpdateScript(nullptr, 0);
+            if (UpdateScript == nullptr) return;
+            
+            UpdateScript(nullptr, 0);
             QThread::msleep(1000 / 60);
         }
     }
@@ -29,5 +35,5 @@ protected:
 private:
     component_entry_point_fn StartScript; // Puntatore alla funzione StartScript
     component_entry_point_fn UpdateScript; // Puntatore alla funzione UpdateScript
-    bool running; // Flag per gestire l'esecuzione
+    std::atomic<bool> running = false; // Flag per gestire l'esecuzione
 };

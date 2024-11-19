@@ -2,6 +2,7 @@
 
 PlayButton::PlayButton(QWidget* parent) : BaseButton(parent)
 {
+    scriptRunnerThread = std::make_shared<ScriptRunnerThread>(StartScript, UpdateScript); // Crea il thread
     setIcon(QIcon(":/Icons/New/CMEngine_Play"));
 }
 
@@ -44,14 +45,11 @@ void PlayButton::mousePressEvent(QMouseEvent *eventPress)
         if (scriptRunnerThread) {
             scriptRunnerThread->stop(); // Ferma l'esecuzione
             scriptRunnerThread->wait(); // Aspetta che il thread finisca
-            delete scriptRunnerThread; // Libera le risorse
-            scriptRunnerThread = nullptr; // Imposta il puntatore a nullptr
         }
     } else {
         setIcon(QIcon(":/Icons/New/CMEngine_Pause"));
-
+        scriptRunnerThread = std::make_shared<ScriptRunnerThread>(StartScript, UpdateScript);
         if (CanPlay() && StartScript != nullptr) {
-            scriptRunnerThread = new ScriptRunnerThread(StartScript, UpdateScript); // Crea il thread
             scriptRunnerThread->start(); // Avvia il thread
         }
     }

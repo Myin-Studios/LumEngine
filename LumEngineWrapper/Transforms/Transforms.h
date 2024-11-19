@@ -40,6 +40,8 @@
 #include "../LumTypes/Entities/Entity.h"
 
 using namespace System;
+using namespace System::IO;
+using namespace System::Text;
 using namespace System::Diagnostics;
 using namespace LumScripting::Script::Properties;
 using namespace LumScripting::Script::Entities;
@@ -67,11 +69,6 @@ public:
 		_scale = gcnew Vec3(t->scale.x(), t->scale.y(), t->scale.z());
     }
 
-	const System::Type^ GetNativeType() override
-    {
-		return Transform3DCore::typeid;
-    }
-
     property Vec3^ Position
     {
         Vec3^ get() { return _position; }
@@ -80,7 +77,6 @@ public:
             _position = value;
             if (native)
             {
-                System::Console::WriteLine("Native pointer exists");
                 static_cast<Transform3DCore*>(native)->SetPosition(value->x, value->y, value->z);
             }
         }
@@ -103,6 +99,22 @@ public:
     {
         Vec3^ get() { return _scale; }
         void set(Vec3^ value) { _scale = value; }
+    }
+
+    virtual void OnSerialize() override
+    {
+        if (native)
+        {
+            static_cast<Transform3DCore*>(native)->OnSerialize();
+        }
+    }
+
+    virtual void OnDeserialize() override
+    {
+        if (native)
+        {
+            static_cast<Transform3DCore*>(native)->OnDeserialize();
+        }
     }
 
 internal:

@@ -15,6 +15,7 @@ public:
     PlayButton(QWidget* parent = nullptr);
     bool CanPlay();
     void SetScriptRunner(component_entry_point_fn StartScript, component_entry_point_fn UpdateScript);
+    std::shared_ptr<ScriptRunnerThread> GetScriptRunner() const { return scriptRunnerThread; }
 
 protected:
     virtual void enterEvent(QEnterEvent* event);
@@ -22,7 +23,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *eventPress);
 
 private:
-    ScriptRunnerThread* scriptRunnerThread;
+    std::shared_ptr<ScriptRunnerThread> scriptRunnerThread;
     QThread* scriptThread = nullptr;
     component_entry_point_fn StartScript = nullptr;
     component_entry_point_fn UpdateScript = nullptr;

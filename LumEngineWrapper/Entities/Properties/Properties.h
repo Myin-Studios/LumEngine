@@ -2,6 +2,8 @@
 
 #include "../LumTypes/Entities/Properties/Property.h"
 
+using namespace System;
+
 namespace LumScripting
 {
     namespace Script
@@ -10,14 +12,9 @@ namespace LumScripting
         {
 			public ref class Property abstract
             {
-            protected:  // Cambiato da private a protected per permettere l'accesso alle classi derivate
-                IProperty* native;
-
             public:
                 Property(IProperty* prop) : native(prop) {}
                 Property() : native(new IProperty()) {}
-
-				virtual const System::Type^ GetNativeType() = 0;
 
                 // Aggiungiamo un distruttore virtuale per la corretta pulizia
                 virtual ~Property()
@@ -25,7 +22,11 @@ namespace LumScripting
                     this->!Property();
                 }
 
+                virtual void OnSerialize() = 0;
+                virtual void OnDeserialize() = 0;
             protected:
+                IProperty* native;
+
                 !Property()
                 {
                     if (native != nullptr)

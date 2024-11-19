@@ -156,6 +156,12 @@ void RendererCore::paintGL()
     {
         for (auto& e : entities)
         {
+            if (!IsRunning())
+            {
+                std::cout << "Deserializing..." << std::endl;
+                e->DeserializeProperties();
+            }
+
             if (e->GetCoreProperty<MeshCore>() != nullptr)
             {
                 e->GetCoreProperty<MeshCore>()->Draw();
@@ -173,10 +179,6 @@ void RendererCore::paintGL()
                         e->GetCoreProperty<Transform3DCore>()->scale.y(),
                         e->GetCoreProperty<Transform3DCore>()->scale.z()
                     ));
-
-                    std::cout << "Position: (" << e->GetCoreProperty<Transform3DCore>()->position->x() << ", "
-                        << e->GetCoreProperty<Transform3DCore>()->position->y() << ", "
-                        << e->GetCoreProperty<Transform3DCore>()->position->z() << ")" << std::endl;
 
                     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
                 }
@@ -475,6 +477,8 @@ void RendererCore::loadModel(const QString& path) {
         entities.emplace_back(std::make_shared<BaseEntity>());
         entities.back()->AddProperty<MeshCore>(loadOBJ(path, std::make_shared<PBR>()));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
+
+        entities.back()->SerializeProperties();
     }
 }
 

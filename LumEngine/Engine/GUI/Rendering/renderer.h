@@ -34,6 +34,7 @@
 #include "Camera/camera.h"
 #include "../LumTypes/Entities/Entity.h"
 #include "Meshes/Mesh.h"
+#include "../LumEngine/Engine/Core/scriptingThreading.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
@@ -86,6 +87,16 @@ public:
     vector<shared_ptr<BaseEntity>> GetEntities()
     {
         return this->entities;
+    }
+
+    void SetRunningThread(std::shared_ptr<ScriptRunnerThread> rt)
+    {
+        this->runningThread = std::move(rt);
+    }
+
+    bool IsRunning() const
+    {
+        return this->runningThread && this->runningThread->IsRunning();
     }
 
 protected:
@@ -145,6 +156,8 @@ private:
             1.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
     };
     Shader* fboShader = nullptr;
+
+    std::shared_ptr<ScriptRunnerThread> runningThread = nullptr;
 };
 
 extern "C" {

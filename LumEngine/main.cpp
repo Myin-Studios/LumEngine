@@ -47,7 +47,6 @@ int main(int argc, char* argv[])
             builder->getMainWindow()->setThread(loadingThread);
 
             builder->getMainWindow()->setWindowTitle("LumE");
-
 #if defined(Q_OS_WIN)
             QApplication::setStyle(QStyleFactory::create("Fusion")); // Tema Fusion per Windows
             QIcon icon("Resources/Assets/LumEngine_Logo.ico");

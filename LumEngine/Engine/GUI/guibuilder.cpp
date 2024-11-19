@@ -9,6 +9,7 @@ GuiBuilder::GuiBuilder()
     playButton = std::make_unique<PlayButton>(nullptr);
     centralLayout = std::make_unique<QVBoxLayout>(nullptr);
     scene = RendererCore::GetInstance(mainWindow->centralWidget());
+    scene->SetRunningThread(playButton->GetScriptRunner());
     console = std::make_unique<Console>(mainWindow->centralWidget());
     // outputRedirector = std::make_unique<RedirectStreamBuf>(console.get());
     sceneConsoleSplitter = std::make_unique<QSplitter>();

@@ -25,6 +25,7 @@ public:
 
     MainWindow* getMainWindow() const { return mainWindow.get(); }
     PlayButton* getPlayButton() const { return playButton.get(); }
+    RendererCore* getScene() const { return scene; }
 
 private:
     std::unique_ptr<MainWindow> mainWindow;

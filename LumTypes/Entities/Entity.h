@@ -40,4 +40,16 @@ public:
 
         return it != properties.end() ? it->get() : nullptr;
     }
+
+    void SerializeProperties() {
+        for (auto& prop : properties) {
+            prop->OnSerialize();
+        }
+    }
+
+    void DeserializeProperties() {
+        for (auto& prop : properties) {
+            prop->OnDeserialize();
+        }
+    }
 };
