@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../LumTypes/Entities/Properties/Property.h"
+#include <vcclr.h>
 
 using namespace System;
 
@@ -10,17 +11,25 @@ namespace LumScripting
     {
         namespace Properties
         {
-            class DefaultProperty : public IProperty {
+            ref class Property;
+
+            class BridgeProperty : public IProperty {
+            private:
+                gcroot<Property^> managed;  // Reference all'oggetto managed
+
             public:
-                virtual void OnSerialize() override { }
-                virtual void OnDeserialize() override { }
+                BridgeProperty(Property^ owner) : managed(owner) {}
+
+                virtual void OnSerialize() override;
+
+                virtual void OnDeserialize() override;
             };
 
             public ref class Property abstract
             {
             public:
                 Property(IProperty* prop) : native(prop) {}
-                Property() : native(new DefaultProperty()) {}  // Usa DefaultProperty invece di IProperty
+                Property() : native(new BridgeProperty(this)) {}  // Usa DefaultProperty invece di IProperty
 
                 virtual ~Property()
                 {
@@ -47,6 +56,14 @@ namespace LumScripting
                 virtual const type_info& GetNativeTypeInfo() { return typeid(IProperty); }
                 virtual Property^ CreateFromNative(IProperty* prop) { return this; }
             };
+
+            void BridgeProperty::OnSerialize() {
+                managed->OnSerialize();
+            }
+
+            void BridgeProperty::OnDeserialize() {
+                managed->OnDeserialize();
+            }
         }
     }
 }

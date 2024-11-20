@@ -14,7 +14,10 @@ private:
 public:
     template<typename T>
     void AddProperty(std::unique_ptr<T> prop) {
+        IProperty* rawPtr = prop.get();
         properties.insert(std::move(prop));
+        std::cout << "C++ AddProperty: About to call OnSerialize" << std::endl;
+        rawPtr->OnSerialize();  // Is this definitely an IProperty*?
     }
 
     template<typename T>
