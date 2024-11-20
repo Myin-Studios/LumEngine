@@ -93,18 +93,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;$(LibraryPath)</LibraryPath>
-    <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
+    <IncludePath>../LumEngine;../LumTypes;$(NETHOST);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;$(LibraryPath)</LibraryPath>
-    <IncludePath>../LumEngine;../LumTypes;$(IncludePath)</IncludePath>
+    <IncludePath>../LumEngine;../LumTypes;$(NETHOST);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;EXCLUDE_CORECLR_HEADERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets;$(NETHOST)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -134,10 +134,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;EXCLUDE_CORECLR_HEADERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets;$(NETHOST)</AdditionalIncludeDirectories>
       <CompileAsManaged>NetCore</CompileAsManaged>
     </ClCompile>
     <Link>

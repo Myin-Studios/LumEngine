@@ -14,7 +14,7 @@ private:
 public:
     template<typename T>
     void AddProperty(std::unique_ptr<T> prop) {
-		properties.insert(std::move(prop));
+        properties.insert(std::move(prop));
     }
 
     template<typename T>

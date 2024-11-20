@@ -9,6 +9,7 @@ public:
     ScriptRunnerThread(component_entry_point_fn starter, component_entry_point_fn updater, QObject *parent = nullptr)
             : QThread(parent), StartScript(starter), UpdateScript(updater), running(false) {}
 
+
     void stop() {
         running = false; // Imposta il flag per fermare il loop
     }

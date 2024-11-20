@@ -17,12 +17,12 @@ namespace LumScripting
 			public ref class Mesh : public Property
 			{
 			public:
-				Mesh(MeshCore* meshCore)
+				Mesh(MeshCore* meshCore) : Property(meshCore)
 				{
 					this->nativeMesh = meshCore;
 				}
 
-				Mesh()
+				Mesh() : Property(new MeshCore())
 				{
 					this->nativeMesh = new MeshCore();
 				}

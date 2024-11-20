@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
     <ClInclude Include="Engine\Core\CMAPICore.h" />
+    <ClInclude Include="Engine\Core\LumEngineAPI.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />

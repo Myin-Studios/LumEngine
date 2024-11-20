@@ -35,6 +35,7 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "Meshes/Mesh.h"
 #include "../LumEngine/Engine/Core/scriptingThreading.h"
+#include "../LumEngine/Engine/Core/LumEngineAPI.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
@@ -59,13 +60,7 @@
 
 using namespace std;
 
-#ifdef LUMENGINE_EXPORTS
-#define LUMENGINE_API __declspec(dllexport)
-#else
-#define LUMENGINE_API __declspec(dllimport)
-#endif
-
-class LUMENGINE_API RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
+class RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
 {
 Q_OBJECT
 
@@ -159,9 +154,3 @@ private:
 
     std::shared_ptr<ScriptRunnerThread> runningThread = nullptr;
 };
-
-extern "C" {
-    LUMENGINE_API RendererCore* GetEngineRenderer();
-    LUMENGINE_API BaseEntity* GetEngineEntityAt(int index);
-    LUMENGINE_API int GetEngineEntityCount();
-}

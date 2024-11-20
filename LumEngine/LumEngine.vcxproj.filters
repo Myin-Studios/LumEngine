@@ -109,6 +109,9 @@
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Core\LumEngineAPI.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
