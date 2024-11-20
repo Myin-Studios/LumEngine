@@ -477,7 +477,6 @@ void RendererCore::loadModel(const QString& path) {
         entities.emplace_back(std::make_shared<BaseEntity>());
         entities.back()->AddProperty<MeshCore>(loadOBJ(path, std::make_shared<PBR>()));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
-        entities.back()->SerializeProperties();
     }
 }
 
