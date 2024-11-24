@@ -33,6 +33,7 @@
 #include "../LumTypes/Rendering/Lighting/Lighting.h"
 #include "Camera/camera.h"
 #include "../LumTypes/Entities/Entity.h"
+#include "../LumTypes/Physics/Collisions.h"
 #include "Meshes/Mesh.h"
 #include "../LumEngine/Engine/Core/scriptingThreading.h"
 #include "../LumEngine/Engine/Core/LumEngineAPI.h"

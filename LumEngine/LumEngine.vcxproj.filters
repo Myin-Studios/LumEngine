@@ -82,16 +82,10 @@
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\GUI\Panels\properties.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\GUI\guibuilder.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h">
@@ -110,6 +104,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\LumEngineAPI.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\guibuilder.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

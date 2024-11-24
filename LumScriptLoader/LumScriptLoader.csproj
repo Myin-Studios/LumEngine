@@ -19,5 +19,9 @@
 	<ItemGroup>
 		<ProjectReference Include="..\LumScripting\LumScripting.csproj" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Folder Include="ScriptCore\" />
+	</ItemGroup>
 
 </Project>

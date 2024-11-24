@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                                   ///
 ///                                      THIS CODE IS PART OF:                                        ///
-///                                       CryoMoon Engine (C)                                         ///
+///                                          LumEngine (C)                                            ///
 ///                                                                                                   ///
 ///                                     WHICH IS LICENSED UNDER                                       ///
 ///                                          MIT License                                              ///
@@ -31,11 +31,6 @@
 #pragma once
 
 #include "gl/glew.h"
-#include "glm/glm.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec2.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -43,20 +38,11 @@
 #include "../LumEngine/Engine/GUI/Rendering/Shaders/Shaders.h"
 #include "../LumTypes/Rendering/Materials/Materials.h"
 #include "../LumEngine/Engine/GUI/Rendering/rendererDebugger.h"
-
+#include "../Vertices/Vertices.h"
 #include "../LumTypes/Transformations/Transformations.h"
-
 #include "../LumTypes/Entities/Properties/Property.h"
 
 using namespace std;
-
-struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-
-    Vertex(glm::vec3 pos, glm::vec3 nor, glm::vec2 tex) : Position(pos), Normal(nor), TexCoords(tex) {}
-};
 
 struct Texture {
     unsigned int id;
@@ -79,6 +65,8 @@ public:
 
         setupMesh();
     }
+
+    const vector<Vertex> GetVertices() const { return this->vertices; }
 
     void Draw() const
     {

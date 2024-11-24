@@ -3,6 +3,7 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "Properties/Properties.h"
 #include "../LumEngineWrapper/Rendering/Renderer.h"
+#include "../LumTypes/GameBehaviour/GameBehaviour.h"
 
 using namespace LumScripting::Script::Properties;
 
@@ -47,6 +48,16 @@ namespace LumScripting
                 IProperty* GetPropertyInternal(const type_info& expectedType)
                 {
                     return native->GetProperty(expectedType);
+                }
+
+                void AddScriptInternal(IGameBehaviour* script)
+                {
+                    native->AddScript(std::unique_ptr<IGameBehaviour>(script));
+                }
+
+                void RemoveScriptInternal(IGameBehaviour* script)
+                {
+                    native->RemoveScript(script);
                 }
             };
 

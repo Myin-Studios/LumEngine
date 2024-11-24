@@ -152,6 +152,37 @@ void RendererCore::paintGL()
         UpdateCamera();
     }
 
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(
+            editorCamera->GetTransform()->GetPosition().x(),
+            editorCamera->GetTransform()->GetPosition().y(),
+            editorCamera->GetTransform()->GetPosition().z()),
+        glm::vec3(
+            editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
+            editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
+            editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
+        glm::vec3(
+            editorCamera->GetTransform()->up.x(),
+            editorCamera->GetTransform()->up.y(),
+            editorCamera->GetTransform()->up.z())
+    );
+
+    LumEngine::Physics::RayCast::SetViewMatrix(Mat4Core(
+        view[0][0], view[1][0], view[2][0], view[3][0],
+        view[0][1], view[1][1], view[2][1], view[3][1],
+        view[0][2], view[1][2], view[2][2], view[3][2],
+        view[0][3], view[1][3], view[2][3], view[3][3]
+    ));
+
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f);
+
+    LumEngine::Physics::RayCast::SetProjectionMatrix(Mat4Core(
+        proj[0][0], proj[1][0], proj[2][0], proj[3][0],
+        proj[0][1], proj[1][1], proj[2][1], proj[3][1],
+        proj[0][2], proj[1][2], proj[2][2], proj[3][2],
+        proj[0][3], proj[1][3], proj[2][3], proj[3][3]
+    ));
+
     if (!entities.empty())
     {
         for (auto& e : entities)
@@ -187,24 +218,9 @@ void RendererCore::paintGL()
                     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
                 }
 
-                glm::mat4 view = glm::lookAt(
-                    glm::vec3(
-                        editorCamera->GetTransform()->GetPosition().x(),
-                        editorCamera->GetTransform()->GetPosition().y(),
-                        editorCamera->GetTransform()->GetPosition().z()),
-                    glm::vec3(
-                        editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
-                        editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
-                        editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
-                    glm::vec3(
-                        editorCamera->GetTransform()->up.x(),
-                        editorCamera->GetTransform()->up.y(),
-                        editorCamera->GetTransform()->up.z())
-                );
-
                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
-                
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
 
                 vector<glm::vec3> lightPositions;
                 vector<glm::vec3> lightColors;
@@ -394,6 +410,24 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
 
         updateTimer->start();
     }
+    else if (event->button() == Qt::LeftButton)
+    {
+        Vec3Core rOrigin, rDirection;
+
+        LumEngine::Physics::RayCast::ScreenToRay(
+            event->pos().x(),
+            event->pos().y(),
+            width(), height(),
+            rOrigin,
+            rDirection);
+
+        LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(rOrigin, rDirection);
+
+        if (res.hit)
+        {
+            std::cout << "Hit!" << std::endl;
+        }
+    }
 }
 
 void RendererCore::mouseMoveEvent(QMouseEvent* event)
@@ -468,15 +502,18 @@ void RendererCore::keyReleaseEvent(QKeyEvent* event)
     }
 }
 
-
 void RendererCore::loadModel(const QString& path) {
     if (path.endsWith(".obj"))
     {
-        models.emplace_back(loadOBJ(path, std::make_shared<PBR>()));
-
         entities.emplace_back(std::make_shared<BaseEntity>());
         entities.back()->AddProperty<MeshCore>(loadOBJ(path, std::make_shared<PBR>()));
+        entities.back()->AddProperty(std::make_unique<LumEngine::Physics::Collider>(
+            entities.back()->GetEntityID(), entities.back()->GetCoreProperty<MeshCore>()->GetVertices()));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
+
+        LumEngine::Physics::RayCast::RegisterBoundingVolume(
+            entities.back()->GetCoreProperty<MeshCore>()->GetVertices()
+        );
     }
 }
 
@@ -567,9 +604,8 @@ extern "C" {
     }
 
     BaseEntity* GetEngineEntityAt(int index) {
-        auto renderer = RendererCore::GetInstance();
-        if (renderer && index >= 0 && index < renderer->GetEntities().size()) {
-            return renderer->GetEntities()[index].get();
+        if (RendererCore::GetInstance() && index >= 0 && index < RendererCore::GetInstance()->GetEntities().size()) {
+            return RendererCore::GetInstance()->GetEntities()[index].get();
         }
         return nullptr;
     }

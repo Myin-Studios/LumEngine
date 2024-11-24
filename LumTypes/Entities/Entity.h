@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Properties/Property.h"
+#include "../GameBehaviour/GameBehaviour.h"
 
 #include "set"
 #include <iostream>
@@ -10,14 +11,40 @@ class BaseEntity
 {
 private:
     std::set<std::unique_ptr<IProperty>> properties;
+    std::set<std::unique_ptr<IGameBehaviour>> scripts;
+    int ID = 0;
+    static inline int nextID = 0;
 
 public:
+    BaseEntity() : ID(nextID++) {}
+
+    const int GetEntityID() const { return ID; }
+
+    void AddScript(std::unique_ptr<IGameBehaviour> script)
+    {
+        scripts.insert(std::move(script));
+    }
+
+    void RemoveScript(IGameBehaviour* script)
+    {
+        scripts.erase(
+            std::find_if(scripts.begin(), scripts.end(),
+                [script](const auto& s) { return s.get() == script; })
+        );
+    }
+
+    IGameBehaviour* GetScript(const type_info& scriptType)
+    {
+        auto it = std::find_if(scripts.begin(), scripts.end(),
+            [&scriptType](const auto& s) { return typeid(*s) == scriptType; });
+        return it != scripts.end() ? it->get() : nullptr;
+    }
+
     template<typename T>
     void AddProperty(std::unique_ptr<T> prop) {
         IProperty* rawPtr = prop.get();
         properties.insert(std::move(prop));
-        std::cout << "C++ AddProperty: About to call OnSerialize" << std::endl;
-        rawPtr->OnSerialize();  // Is this definitely an IProperty*?
+        rawPtr->OnSerialize();
     }
 
     template<typename T>
