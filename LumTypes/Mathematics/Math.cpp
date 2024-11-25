@@ -196,15 +196,6 @@ float Mat4Core::Cofactor(int i0, int i1, int i2, int j0, int j1, int j2) const {
 		}
 	}
 
-	// Per debug
-	std::cout << "Submatrix 3x3:" << std::endl;
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			std::cout << m[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
-
 	return Det3x3(m[0][0], m[0][1], m[0][2],
 		m[1][0], m[1][1], m[1][2],
 		m[2][0], m[2][1], m[2][2]);
@@ -274,20 +265,20 @@ Mat4Core Mat4Core::operator*(const Mat4Core& other)
 Vec4Core Mat4Core::operator*(const Vec4Core& v) const
 {
 	return Vec4Core(
-		_m00 * v.x() + _m01 * v.y() + _m02 * v.z() + _m03 * v.w(),
-		_m10 * v.x() + _m11 * v.y() + _m12 * v.z() + _m13 * v.w(),
-		_m20 * v.x() + _m21 * v.y() + _m22 * v.z() + _m23 * v.w(),
-		_m30 * v.x() + _m31 * v.y() + _m32 * v.z() + _m33 * v.w()
+		m00() * v.x() + m01() * v.y() + m02() * v.z() + m03() * v.w(),
+		m10() * v.x() + m11() * v.y() + m12() * v.z() + m13() * v.w(),
+		m20() * v.x() + m21() * v.y() + m22() * v.z() + m23() * v.w(),
+		m30() * v.x() + m31() * v.y() + m32() * v.z() + m33() * v.w()
 	);
 }
 
 std::string Mat4Core::ToString() const
 {
 	return std::string("Mat4Core(") +
-		std::to_string(_m00) + ", " + std::to_string(_m01) + ", " + std::to_string(_m02) + ", " + std::to_string(_m03) + ",\n" +
-		std::to_string(_m10) + ", " + std::to_string(_m11) + ", " + std::to_string(_m12) + ", " + std::to_string(_m13) + ",\n" +
-		std::to_string(_m20) + ", " + std::to_string(_m21) + ", " + std::to_string(_m22) + ", " + std::to_string(_m23) + ",\n" +
-		std::to_string(_m30) + ", " + std::to_string(_m31) + ", " + std::to_string(_m32) + ", " + std::to_string(_m33) + ")";
+			    std::to_string(_m00) + ", " + std::to_string(_m01) + ", " + std::to_string(_m02) + ", " + std::to_string(_m03) + ",\n" +
+		"\t " + std::to_string(_m10) + ", " + std::to_string(_m11) + ", " + std::to_string(_m12) + ", " + std::to_string(_m13) + ",\n" +
+		"\t " + std::to_string(_m20) + ", " + std::to_string(_m21) + ", " + std::to_string(_m22) + ", " + std::to_string(_m23) + ",\n" +
+		"\t " + std::to_string(_m30) + ", " + std::to_string(_m31) + ", " + std::to_string(_m32) + ", " + std::to_string(_m33) + ")";
 
 }
 
@@ -311,9 +302,9 @@ std::string Vec4Core::ToString() const
 }
 
 const float Vec4Core::x() const { return _x; }
-const float Vec4Core::y() const { return _x; }
-const float Vec4Core::z() const { return _x; }
-const float Vec4Core::w() const { return _x; }
+const float Vec4Core::y() const { return _y; }
+const float Vec4Core::z() const { return _z; }
+const float Vec4Core::w() const { return _w; }
 
 Vec3Core::Vec3Core() : _x(0.0f), _y(0.0f), _z(0.0f) {}
 

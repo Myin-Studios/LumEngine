@@ -167,20 +167,23 @@ void RendererCore::paintGL()
             editorCamera->GetTransform()->up.z())
     );
 
+    glm::mat4 viewTransposed = glm::transpose(view);
+
     LumEngine::Physics::RayCast::SetViewMatrix(Mat4Core(
-        view[0][0], view[1][0], view[2][0], view[3][0],
-        view[0][1], view[1][1], view[2][1], view[3][1],
-        view[0][2], view[1][2], view[2][2], view[3][2],
-        view[0][3], view[1][3], view[2][3], view[3][3]
+        view[0][0], view[0][1], view[0][2], view[0][3],
+        view[1][0], view[1][1], view[1][2], view[1][3],
+        view[2][0], view[2][1], view[2][2], view[2][3],
+        view[3][0], view[3][1], view[3][2], view[3][3]
     ));
 
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f);
+    glm::mat4 projTransposed = glm::transpose(proj);
 
     LumEngine::Physics::RayCast::SetProjectionMatrix(Mat4Core(
-        proj[0][0], proj[1][0], proj[2][0], proj[3][0],
-        proj[0][1], proj[1][1], proj[2][1], proj[3][1],
-        proj[0][2], proj[1][2], proj[2][2], proj[3][2],
-        proj[0][3], proj[1][3], proj[2][3], proj[3][3]
+        proj[0][0], proj[0][1], proj[0][2], proj[0][3],
+        proj[1][0], proj[1][1], proj[1][2], proj[1][3],
+        proj[2][0], proj[2][1], proj[2][2], proj[2][3],
+        proj[3][0], proj[3][1], proj[3][2], proj[3][3]
     ));
 
     if (!entities.empty())
@@ -412,16 +415,17 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
     }
     else if (event->button() == Qt::LeftButton)
     {
-        Vec3Core rOrigin, rDirection;
+		Vec3Core rOrigin, rDirection;
 
         LumEngine::Physics::RayCast::ScreenToRay(
             event->pos().x(),
             event->pos().y(),
             width(), height(),
-            rOrigin,
-            rDirection);
+            rOrigin, rDirection);
 
-        LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(rOrigin, rDirection);
+        LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(
+            editorCamera->GetTransform()->GetPosition(),
+            rDirection);
 
         if (res.hit)
         {
@@ -510,6 +514,8 @@ void RendererCore::loadModel(const QString& path) {
         entities.back()->AddProperty(std::make_unique<LumEngine::Physics::Collider>(
             entities.back()->GetEntityID(), entities.back()->GetCoreProperty<MeshCore>()->GetVertices()));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
+
+        std::cout << entities.back()->GetCoreProperty<MeshCore>()->GetVertices().back().Position.x << std::endl;
 
         LumEngine::Physics::RayCast::RegisterBoundingVolume(
             entities.back()->GetCoreProperty<MeshCore>()->GetVertices()

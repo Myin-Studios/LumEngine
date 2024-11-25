@@ -44,10 +44,10 @@ namespace LumEngine::Physics
     {
     public:
 
-        static RayCastResult Cast(Vec3Core& origin, Vec3Core& direction);
+        static RayCastResult Cast(const Vec3Core& origin, const Vec3Core& direction);
         static void ScreenToRay(int mouseX, int mouseY, int width, int height, Vec3Core& origin, Vec3Core& direction);
         static bool IntersectRayBounds(const Vec3Core& origin, const Vec3Core& direction,
-            const AABB& bounds, float& distance, Vec3Core& hitPoint);
+            std::shared_ptr<AABB> bounds, float& distance, Vec3Core& hitPoint);
 
         static void SetProjectionMatrix(const Mat4Core& projection);
         static void SetViewMatrix(const Mat4Core& view);
@@ -57,8 +57,10 @@ namespace LumEngine::Physics
     private:
         static Mat4Core projectionMatrix;
         static Mat4Core viewMatrix;
+        static Vec3Core origin;
+        static Vec3Core direction;
 
-        static std::vector<AABB> boundingVolumes;
+        static std::vector<std::shared_ptr<AABB>> boundingVolumes;
     };
 
     class Collider : public IProperty

@@ -262,7 +262,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y C:\vcpkg\installed\x64-windows\bin\glew32.dll $(SolutionDir)$(Platform)\$(Configuration)\</Command>
+      <Command>xcopy /y "C:\vcpkg\installed\x64-windows\bin\glew32.dll" "$(SolutionDir)Output\$(Configuration)\"</Command>
     </PostBuildEvent>
     <PreLinkEvent>
       <Command>
