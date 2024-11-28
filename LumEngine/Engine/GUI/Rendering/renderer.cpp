@@ -117,20 +117,49 @@ void RendererCore::resizeGL(int w, int h)
 
 void RendererCore::paintGL()
 {
-    GLint previousFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFBO);
-    qDebug() << "Previous FBO binding:" << previousFBO;
+    // Prima fase: rendering nella texture
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glClearColor(0.1, 0.1, 0.3, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RendererDebugger::checkOpenGLError("FBO binding");
 
-	std::cout << "FBO: " << FBO << "\nRBO: " << RBO << "\nFBO Texture: " << fboTexture << std::endl;
+    // Qui inserisci il tuo rendering nella texture
+    // ...
 
+    // Seconda fase: rendering del quad sullo schermo
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        qDebug() << "Error unbinding FBO:" << error;
-    }
+
+	RendererDebugger::checkOpenGLError("FBO unbinding");
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Usa il shader per il FBO
+    fboShader->use();
+
+	RendererDebugger::checkOpenGLError("FBO shader usage");
+
+    // Bind del VAO per il quad
+    glBindVertexArray(screenVAO);
+
+    // Disabilita il depth test per il quad fullscreen
+    glDisable(GL_DEPTH_TEST);
+
+    // Bind della texture del FBO
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboTexture);
+
+    // Disegna il quad
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	RendererDebugger::checkOpenGLError("FBO quad drawing");
+
+    // Clean up
+    glBindVertexArray(0);
+    glUseProgram(0);
+
+	RendererDebugger::checkOpenGLError("cleanup");
 
     // Verifica che il FBO sia ancora valido
     // GLboolean isValidFBO = glIsFramebuffer(FBO);
