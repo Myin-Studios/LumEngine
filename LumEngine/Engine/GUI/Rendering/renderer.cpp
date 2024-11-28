@@ -29,6 +29,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "renderer.h"
+#include <QOpenGLDebugLogger>
 
 RendererCore* RendererCore::s_instance = nullptr;
 
@@ -51,6 +52,15 @@ RendererCore::~RendererCore()
 
 void RendererCore::initializeGL()
 {
+    QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
+    if (logger->initialize()) {
+        logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+        connect(logger, &QOpenGLDebugLogger::messageLogged, this,
+            [](const QOpenGLDebugMessage& msg) {
+                qDebug() << msg;
+            });
+    }
+
     RendererDebugger::checkOpenGLError("after initializeOpenGLFunctions");
 
 	glewExperimental = GL_TRUE;

@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
     format.setVersion(4, 5);
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setDepthBufferSize(24);
+	format.setOption(QSurfaceFormat::DebugContext);
     QSurfaceFormat::setDefaultFormat(format);
 
     loadingWindow->setProgress("Init GUI...", 100);
