@@ -51,14 +51,16 @@ RendererCore::~RendererCore()
 
 void RendererCore::initializeGL()
 {
-    initializeOpenGLFunctions();
-
     RendererDebugger::checkOpenGLError("after initializeOpenGLFunctions");
 
+	glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cerr << "GLEW initialization failed!" << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    qDebug() << "GLEW version:" << QString((const char*)glewGetString(GLEW_VERSION));
+    qDebug() << "OpenGL version:" << QString((const char*)glGetString(GL_VERSION));
 
     RendererDebugger::checkOpenGLError("after glewInit");
 
@@ -90,178 +92,241 @@ void RendererCore::initializeGL()
     lights.push_back(*l2);
     lights.push_back(*l3);
 
-    makeCurrent();
+    setupFrameBuffer();
     setupSkysphere();
 }
 
 void RendererCore::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+    
+    glBindTexture(GL_TEXTURE_2D, fboTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+
+	RendererDebugger::checkOpenGLError("resizing FBO");
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     update();
 }
 
 void RendererCore::paintGL()
 {
-    makeCurrent();
+    GLint previousFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFBO);
+    qDebug() << "Previous FBO binding:" << previousFBO;
 
     glClearColor(0.1, 0.1, 0.3, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    
-    if (skysphere != nullptr)
-    {
-        glDisable(GL_DEPTH_TEST);
-    
-        skysphere->Draw();
-    
-        glm::mat4 skyboxView = glm::lookAt(
-            glm::vec3(
-                editorCamera->GetTransform()->GetPosition().x(),
-                editorCamera->GetTransform()->GetPosition().y(),
-                editorCamera->GetTransform()->GetPosition().z()),
-            glm::vec3(
-                editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
-                editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
-                editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
-            glm::vec3(
-                editorCamera->GetTransform()->up.x(),
-                editorCamera->GetTransform()->up.y(),
-                editorCamera->GetTransform()->up.z())
-        );
-    
-        skysphere->GetMaterial()->GetShader()->setMat4x4("model", &glm::translate(glm::mat4(1.0f), glm::vec3(
-            editorCamera->GetTransform()->GetPosition().x(),
-            editorCamera->GetTransform()->GetPosition().y(),
-            editorCamera->GetTransform()->GetPosition().z()
-        ))[0][0]);
-        skysphere->GetMaterial()->GetShader()->setMat4x4("view", &skyboxView[0][0]);
-        skysphere->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	std::cout << "FBO: " << FBO << "\nRBO: " << RBO << "\nFBO Texture: " << fboTexture << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        qDebug() << "Error unbinding FBO:" << error;
     }
-    
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    
-    RendererDebugger::checkOpenGLError("FBO binding - rendering phase");
+    // Verifica che il FBO sia ancora valido
+    // GLboolean isValidFBO = glIsFramebuffer(FBO);
+    // qDebug() << "Is FBO valid:" << isValidFBO;
+    // 
+	// std::cout << "FBO: " << FBO << " RBO: " << RBO << " FBO Texture: " << fboTexture << std::endl;
+    // 
+    // // Enabling framebuffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    // 
+	// RendererDebugger::checkOpenGLError("FBO binding - rendering phase");
+    // 
+    // glClearColor(0.1, 0.1, 0.3, 1.0);
+    // 
+    // RendererDebugger::checkOpenGLError("glClearColor");
+    // 
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // 
+    // RendererDebugger::checkOpenGLError("glClear");
+    // 
+    // glEnable(GL_DEPTH_TEST);
+    // 
+    // RendererDebugger::checkOpenGLError("enabling depth test");
+    // 
+    // glEnable(GL_CULL_FACE);
+    // 
+    // RendererDebugger::checkOpenGLError("enabling face culling");
+    // 
+    // glCullFace(GL_BACK);
+    // 
+    // RendererDebugger::checkOpenGLError("back face culling function");
 
+	// Rendering phase
+    //if (skysphere != nullptr)
+    //{
+    //    glDisable(GL_DEPTH_TEST);
+    //
+    //    skysphere->Draw();
+    //
+    //    glm::mat4 skyboxView = glm::lookAt(
+    //        glm::vec3(
+    //            editorCamera->GetTransform()->GetPosition().x(),
+    //            editorCamera->GetTransform()->GetPosition().y(),
+    //            editorCamera->GetTransform()->GetPosition().z()),
+    //        glm::vec3(
+    //            editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
+    //            editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
+    //            editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
+    //        glm::vec3(
+    //            editorCamera->GetTransform()->up.x(),
+    //            editorCamera->GetTransform()->up.y(),
+    //            editorCamera->GetTransform()->up.z())
+    //    );
+    //
+    //    skysphere->GetMaterial()->GetShader()->setMat4x4("model", &glm::translate(glm::mat4(1.0f), glm::vec3(
+    //        editorCamera->GetTransform()->GetPosition().x(),
+    //        editorCamera->GetTransform()->GetPosition().y(),
+    //        editorCamera->GetTransform()->GetPosition().z()
+    //    ))[0][0]);
+    //    skysphere->GetMaterial()->GetShader()->setMat4x4("view", &skyboxView[0][0]);
+    //    skysphere->GetMaterial()->GetShader()->setMat4x4("projection", &glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f)[0][0]);
+    //}
+    
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LESS);
+    
     if (canUpdateCamera)
     {
         UpdateCamera();
     }
 
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(
-            editorCamera->GetTransform()->GetPosition().x(),
-            editorCamera->GetTransform()->GetPosition().y(),
-            editorCamera->GetTransform()->GetPosition().z()),
-        glm::vec3(
-            editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
-            editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
-            editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
-        glm::vec3(
-            editorCamera->GetTransform()->up.x(),
-            editorCamera->GetTransform()->up.y(),
-            editorCamera->GetTransform()->up.z())
-    );
-
-    glm::mat4 viewTransposed = glm::transpose(view);
-
-    LumEngine::Physics::RayCast::SetViewMatrix(Mat4Core(
-        view[0][0], view[0][1], view[0][2], view[0][3],
-        view[1][0], view[1][1], view[1][2], view[1][3],
-        view[2][0], view[2][1], view[2][2], view[2][3],
-        view[3][0], view[3][1], view[3][2], view[3][3]
-    ));
-
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f);
-    glm::mat4 projTransposed = glm::transpose(proj);
-
-    LumEngine::Physics::RayCast::SetProjectionMatrix(Mat4Core(
-        proj[0][0], proj[0][1], proj[0][2], proj[0][3],
-        proj[1][0], proj[1][1], proj[1][2], proj[1][3],
-        proj[2][0], proj[2][1], proj[2][2], proj[2][3],
-        proj[3][0], proj[3][1], proj[3][2], proj[3][3]
-    ));
-
-    if (!entities.empty())
-    {
-        for (auto& e : entities)
-        {
-            if (!IsRunning())
-            {
-                e->DeserializeProperties();
-            }
-            else updateTimer->start();
-
-            if (e->GetCoreProperty<MeshCore>() != nullptr)
-            {
-                e->GetCoreProperty<MeshCore>()->Draw();
-
-                if (e->GetCoreProperty<Transform3DCore>() != nullptr)
-                {
-                    glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
-                    tMat = glm::translate(tMat, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->position->x(),
-                        e->GetCoreProperty<Transform3DCore>()->position->y(),
-                        e->GetCoreProperty<Transform3DCore>()->position->z()
-                    ));
-                    tMat = glm::scale(tMat, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->scale.x(),
-                        e->GetCoreProperty<Transform3DCore>()->scale.y(),
-                        e->GetCoreProperty<Transform3DCore>()->scale.z()
-                    ));
-
-                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
-                }
-                else
-                {
-                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
-                }
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
-
-                vector<glm::vec3> lightPositions;
-                vector<glm::vec3> lightColors;
-                std::vector<float> intensities;
-                for (const auto& light : lights) {
-                    lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
-                        light.GetTransform()->GetPosition().y(),
-                        light.GetTransform()->GetPosition().z());
-
-                    lightColors.emplace_back(glm::vec3(
-                        light.color.r(),
-                        light.color.g(),
-                        light.color.b()
-                    ));
-
-                    intensities.push_back(light.GetIntensity());
-                }
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
-                    editorCamera->GetTransform()->GetPosition().x(),
-                    editorCamera->GetTransform()->GetPosition().y(),
-                    editorCamera->GetTransform()->GetPosition().z()
-                ));
-
-                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetCoreProperty<MeshCore>()->GetMaterial())) {
-                    Color::Color c(1.0f, 0.5f, 0.0f);
-                    pbrMat->SetAlbedo(c);
-                    pbrMat->SetMetallic(1.0f);
-                    pbrMat->SetRoughness(0.4f);
-                }
-            }
-        }
-    }
-
-    RendererDebugger::checkOpenGLError("after model loading");
+    // glm::mat4 view = glm::lookAt(
+    //     glm::vec3(
+    //         editorCamera->GetTransform()->GetPosition().x(),
+    //         editorCamera->GetTransform()->GetPosition().y(),
+    //         editorCamera->GetTransform()->GetPosition().z()),
+    //     glm::vec3(
+    //         editorCamera->GetTransform()->GetPosition().x() + editorCamera->GetTransform()->forward.x(),
+    //         editorCamera->GetTransform()->GetPosition().y() + editorCamera->GetTransform()->forward.y(),
+    //         editorCamera->GetTransform()->GetPosition().z() + editorCamera->GetTransform()->forward.z()),
+    //     glm::vec3(
+    //         editorCamera->GetTransform()->up.x(),
+    //         editorCamera->GetTransform()->up.y(),
+    //         editorCamera->GetTransform()->up.z())
+    // );
+    // 
+    // glm::mat4 viewTransposed = glm::transpose(view);
+    // 
+    // LumEngine::Physics::RayCast::SetViewMatrix(Mat4Core(
+    //     viewTransposed[0][0], viewTransposed[0][1], viewTransposed[0][2], viewTransposed[0][3],
+    //     viewTransposed[1][0], viewTransposed[1][1], viewTransposed[1][2], viewTransposed[1][3],
+    //     viewTransposed[2][0], viewTransposed[2][1], viewTransposed[2][2], viewTransposed[2][3],
+    //     viewTransposed[3][0], viewTransposed[3][1], viewTransposed[3][2], viewTransposed[3][3]
+    // ));
+    // 
+    // glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)this->width() / (float)this->height(), 0.1f, 100.0f);
+    // glm::mat4 projTransposed = glm::transpose(proj);
+    // 
+    // LumEngine::Physics::RayCast::SetProjectionMatrix(Mat4Core(
+    //     projTransposed[0][0], projTransposed[0][1], projTransposed[0][2], projTransposed[0][3],
+    //     projTransposed[1][0], projTransposed[1][1], projTransposed[1][2], projTransposed[1][3],
+    //     projTransposed[2][0], projTransposed[2][1], projTransposed[2][2], projTransposed[2][3],
+    //     projTransposed[3][0], projTransposed[3][1], projTransposed[3][2], projTransposed[3][3]
+    // ));
+    // 
+    // if (!entities.empty())
+    // {
+    //     for (auto& e : entities)
+    //     {
+    //         if (!IsRunning())
+    //         {
+    //             e->DeserializeProperties();
+    //         }
+    //         else updateTimer->start();
+    // 
+    //         if (e->GetCoreProperty<MeshCore>() != nullptr)
+    //         {
+    //             e->GetCoreProperty<MeshCore>()->Draw();
+    // 
+    //             if (e->GetCoreProperty<Transform3DCore>() != nullptr)
+    //             {
+    //                 glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
+    //                 tMat = glm::translate(tMat, glm::vec3(
+    //                     e->GetCoreProperty<Transform3DCore>()->position->x(),
+    //                     e->GetCoreProperty<Transform3DCore>()->position->y(),
+    //                     e->GetCoreProperty<Transform3DCore>()->position->z()
+    //                 ));
+    //                 tMat = glm::scale(tMat, glm::vec3(
+    //                     e->GetCoreProperty<Transform3DCore>()->scale.x(),
+    //                     e->GetCoreProperty<Transform3DCore>()->scale.y(),
+    //                     e->GetCoreProperty<Transform3DCore>()->scale.z()
+    //                 ));
+    // 
+    //                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
+    //             }
+    //             else
+    //             {
+    //                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
+    //             }
+    // 
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
+    // 
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
+    // 
+    //             vector<glm::vec3> lightPositions;
+    //             vector<glm::vec3> lightColors;
+    //             std::vector<float> intensities;
+    //             for (const auto& light : lights) {
+    //                 lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
+    //                     light.GetTransform()->GetPosition().y(),
+    //                     light.GetTransform()->GetPosition().z());
+    // 
+    //                 lightColors.emplace_back(glm::vec3(
+    //                     light.color.r(),
+    //                     light.color.g(),
+    //                     light.color.b()
+    //                 ));
+    // 
+    //                 intensities.push_back(light.GetIntensity());
+    //             }
+    // 
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
+    //             e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
+    //                 editorCamera->GetTransform()->GetPosition().x(),
+    //                 editorCamera->GetTransform()->GetPosition().y(),
+    //                 editorCamera->GetTransform()->GetPosition().z()
+    //             ));
+    // 
+    //             if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetCoreProperty<MeshCore>()->GetMaterial())) {
+    //                 Color::Color c(1.0f, 0.5f, 0.0f);
+    //                 pbrMat->SetAlbedo(c);
+    //                 pbrMat->SetMetallic(1.0f);
+    //                 pbrMat->SetRoughness(0.4f);
+    //             }
+    //         }
+    //     }
+    // }
+    // 
+    // RendererDebugger::checkOpenGLError("after model loading");
+    // 
+	// // Disabling framebuffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+    // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT);
+    // 
+	// fboShader->use();
+	// glBindVertexArray(screenVAO);
+    // glDisable(GL_DEPTH_TEST);
+	// glActiveTexture(GL_TEXTURE0);
+	// glBindTexture(GL_TEXTURE_2D, fboTexture);
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
+	// glBindVertexArray(0);
+    // 
+	// RendererDebugger::checkOpenGLError("after fbo rendering");
 }
 
 void RendererCore::UpdateCamera()
@@ -323,26 +388,42 @@ void RendererCore::checkFrameBufferError()
 
 void RendererCore::setupFrameBuffer()
 {
-    makeCurrent();
-
     glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    qDebug() << "Generated FBO:" << FBO;
 
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    
+	RendererDebugger::checkOpenGLError("setting up FBO");
+
+    // Create and attach texture
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
+	RendererDebugger::checkOpenGLError("setting up FBO texture");
+
+    // Create and attach RBO
     glGenRenderbuffers(1, &RBO);
     glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->width(), this->height());
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
+	RendererDebugger::checkOpenGLError("setting up RBO");
+
+    // Check FBO status
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    qDebug() << "FBO Status:" << status;
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        qDebug() << "Framebuffer is not complete!";
+    }
+
+    // Unbind everything
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     glGenVertexArrays(1, &screenVAO);
     glGenBuffers(1, &screenVBO);
@@ -351,7 +432,7 @@ void RendererCore::setupFrameBuffer()
     glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
 
     if (!screenQuad.empty())
-        glBufferData(GL_ARRAY_BUFFER, screenQuad.size(), &screenQuad[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(screenQuad), &screenQuad[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
@@ -424,7 +505,7 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
             rOrigin, rDirection);
 
         LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(
-            editorCamera->GetTransform()->GetPosition(),
+            rOrigin,
             rDirection);
 
         if (res.hit)

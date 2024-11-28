@@ -44,8 +44,6 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include <QtOpenGLWidgets/QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLFramebufferObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QtOpenGL/qopenglshaderprogram.h>
@@ -61,7 +59,7 @@
 
 using namespace std;
 
-class RendererCore : public QOpenGLWidget, protected QOpenGLFunctions
+class RendererCore : public QOpenGLWidget
 {
 Q_OBJECT
 
@@ -136,20 +134,17 @@ private:
 
     vector<Light> lights;
 
-    unsigned int FBO;
-    unsigned int fboTexture;
-    unsigned int RBO;
-    unsigned int screenVAO;
-    unsigned int screenVBO;
-    vector<GLfloat> screenQuad = {
-            // Coords    // texCoords
-            -1.0f, -1.0f, 0.0f, 0.0f, // Top-left
-            1.0f, -1.0f, 1.0f, 0.0f, // Top-right
-            1.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
-
-            -1.0f, 1.0f, 0.0f, 1.0f, // Bottom-left
-            -1.0f, -1.0f, 0.0f, 0.0f, // Top-left
-            1.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+    GLuint FBO = 0;
+    GLuint fboTexture = 0;
+    GLuint RBO = 0;
+    GLuint screenVAO = 0;
+    GLuint screenVBO = 0;
+    const std::vector<GLfloat> screenQuad = {
+        // positions   // texCoords
+        -1.0f, -1.0f, 0.0f, 0.0f, // Bottom-left
+         1.0f, -1.0f, 1.0f, 0.0f, // Bottom-right
+         1.0f,  1.0f, 1.0f, 1.0f, // Top-right
+        -1.0f,  1.0f, 0.0f, 1.0f  // Top-left
     };
     Shader* fboShader = nullptr;
 

@@ -104,7 +104,7 @@ void LumEngine::Physics::RayCast::ScreenToRay(int mouseX, int mouseY, int width,
     origin = Vec3Core(nearWorld);
     Vec3Core resultDirection = (Vec3Core(farWorld - nearWorld)).Normalize();
 
-    direction = Vec3Core(-resultDirection.x(), resultDirection.y(), -resultDirection.z());
+    direction = resultDirection;
 
     std::cout << "Ray origin: " << origin.ToString() << std::endl;
     std::cout << "Ray direction: " << direction.ToString() << std::endl;
