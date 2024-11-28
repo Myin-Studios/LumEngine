@@ -117,8 +117,22 @@ void RendererCore::resizeGL(int w, int h)
 
 void RendererCore::paintGL()
 {
+    if (!glIsFramebuffer(FBO)) {
+        qDebug() << "FBO non valido in paintGL()";
+        setupFrameBuffer(); // Ricrea il FBO se necessario
+        return;
+    }
+
+    if (!isValid()) {
+        qDebug() << "Contesto OpenGL non valido";
+        return;
+    }
+
     // Prima fase: rendering nella texture
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+    checkFrameBufferError();
+
     glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -432,6 +446,8 @@ void RendererCore::setupFrameBuffer()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
 
+    checkFrameBufferError();
+
 	RendererDebugger::checkOpenGLError("setting up FBO texture");
 
     // Create and attach RBO
@@ -442,12 +458,7 @@ void RendererCore::setupFrameBuffer()
 
 	RendererDebugger::checkOpenGLError("setting up RBO");
 
-    // Check FBO status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    qDebug() << "FBO Status:" << status;
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        qDebug() << "Framebuffer is not complete!";
-    }
+    checkFrameBufferError();
 
     // Unbind everything
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
