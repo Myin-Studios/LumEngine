@@ -44,9 +44,6 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include <QtOpenGLWidgets/QOpenGLWidget>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLTexture>
-#include <QtOpenGL/qopenglshaderprogram.h>
 #include <vector>
 #include <set>
 #include <QMimeData>
@@ -136,6 +133,7 @@ private:
 
     GLuint FBO = 0;
     GLuint fboTexture = 0;
+    GLuint depthTexture = 0;
     GLuint RBO = 0;
     GLuint screenVAO = 0;
     GLuint screenVBO = 0;
@@ -143,6 +141,9 @@ private:
         // positions   // texCoords
         -1.0f, -1.0f, 0.0f, 0.0f, // Bottom-left
          1.0f, -1.0f, 1.0f, 0.0f, // Bottom-right
+         1.0f,  1.0f, 1.0f, 1.0f, // Top-right
+
+        -1.0f, -1.0f, 0.0f, 0.0f, // Bottom-left
          1.0f,  1.0f, 1.0f, 1.0f, // Top-right
         -1.0f,  1.0f, 0.0f, 1.0f  // Top-left
     };

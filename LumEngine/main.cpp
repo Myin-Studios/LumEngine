@@ -7,6 +7,7 @@
 #include "Engine/GUI/Loading/loadingWindow.h"
 #include "Engine/Core/hostInitializer.h"
 #include <QMetaObject>
+#include <QOpenGLFramebufferObjectFormat>
 
 #include <filesystem>
 
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setDepthBufferSize(24);
 	format.setOption(QSurfaceFormat::DebugContext);
+	format.setSwapInterval(1); // VSync (1 = attivato, 0 = disattivato
     QSurfaceFormat::setDefaultFormat(format);
 
     loadingWindow->setProgress("Init GUI...", 100);
