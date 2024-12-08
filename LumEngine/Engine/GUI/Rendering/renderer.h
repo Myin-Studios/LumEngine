@@ -53,6 +53,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <iostream>
+#include <execution>
 
 using namespace std;
 
@@ -131,9 +132,12 @@ private:
 
     vector<Light> lights;
 
+    Shader* outlineShader;
+
     GLuint FBO = 0;
     GLuint fboTexture = 0;
     GLuint depthTexture = 0;
+    GLuint stencilTexture = 0;
     GLuint RBO = 0;
     GLuint screenVAO = 0;
     GLuint screenVBO = 0;

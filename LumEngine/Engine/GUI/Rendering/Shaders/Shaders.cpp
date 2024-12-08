@@ -1,6 +1,6 @@
 #include "Shaders.h"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const char* vertexPath, const char* fragmentPath) : vertPath(vertexPath), fragPath(fragmentPath)
 {
     std::string vertexCode;
     std::string fragmentCode;
@@ -21,6 +21,96 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         // open files
         vShaderFile.open(std::filesystem::absolute(std::filesystem::path(vertexPath)).string());
         fShaderFile.open(std::filesystem::absolute(std::filesystem::path(fragmentPath)).string());
+
+        std::stringstream vs;
+        vs << vShaderFile.rdbuf();
+
+        std::stringstream fs;
+        fs << fShaderFile.rdbuf();
+
+        vertexCode = vs.str();
+        fragmentCode = fs.str();
+
+        // close file handlers
+        vShaderFile.close();
+        fShaderFile.close();
+    }
+    catch (const std::ifstream::failure& e)
+    {
+        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+        return; // Esci dalla funzione se c'è un errore
+    }
+
+    // Compile Vertex Shader
+    GLuint vert = glCreateShader(GL_VERTEX_SHADER);
+    const char* vShaderCode = vertexCode.c_str();
+    glShaderSource(vert, 1, &vShaderCode, nullptr);
+    glCompileShader(vert);
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vert, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vert, 512, NULL, infoLog);
+        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    // Compile Fragment Shader
+    GLuint frag = glCreateShader(GL_FRAGMENT_SHADER);
+    const char* fShaderCode = fragmentCode.c_str();
+    glShaderSource(frag, 1, &fShaderCode, nullptr);
+    glCompileShader(frag);
+
+    glGetShaderiv(frag, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(frag, 512, NULL, infoLog);
+        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    // Link Shader Program
+    ID = glCreateProgram();
+    glAttachShader(ID, vert);
+    glAttachShader(ID, frag);
+    glLinkProgram(ID);
+
+    glGetProgramiv(ID, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(ID, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
+    // Clean up shaders
+    glDeleteShader(vert);
+    glDeleteShader(frag);
+}
+
+Shader::Shader(const Shader& s) : vertPath(s.vertPath), fragPath(s.fragPath), ID(s.ID)
+{
+    
+}
+
+Shader::Shader(Shader&& s) noexcept
+    : vertPath(std::move(s.vertPath)), fragPath(std::move(s.fragPath)), ID(std::move(s.ID))
+{
+    std::string vertexCode;
+    std::string fragmentCode;
+    std::ifstream vShaderFile;
+    std::ifstream fShaderFile;
+
+    if (!std::filesystem::exists(std::filesystem::absolute(std::filesystem::path(vertPath)))) {
+        std::cerr << "Vertex shader file does not exist: " << vertPath << std::endl;
+    }
+    if (!std::filesystem::exists(std::filesystem::absolute(std::filesystem::path(fragPath)))) {
+        std::cerr << "Fragment shader file does not exist: " << fragPath << std::endl;
+    }
+
+    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try
+    {
+        // open files
+        vShaderFile.open(std::filesystem::absolute(std::filesystem::path(vertPath)).string());
+        fShaderFile.open(std::filesystem::absolute(std::filesystem::path(fragPath)).string());
 
         std::stringstream vs;
         vs << vShaderFile.rdbuf();
@@ -150,4 +240,30 @@ void Shader::setVec3Array(const std::string& name, GLsizei count, const float* v
 
     if (loc < 0)
         std::cerr << "Uniform '" << name.c_str() << "' --- Value: " << loc << std::endl;
+}
+
+Shader& Shader::operator=(const Shader& s) {
+    // Verifica l'auto-assegnazione
+    if (this != &s) {
+        // Copia dei dati membri
+        vertPath = s.vertPath;
+        fragPath = s.fragPath;
+        ID = s.ID;
+
+        // Se ci sono risorse dinamiche o gestione delle risorse da copiare, aggiungi qui
+        // Ad esempio, se Shader gestisce risorse come i programmi OpenGL, dovresti copiare anche quelle.
+    }
+    return *this; // Restituisce *this per permettere l'assegnazione a catena
+}
+
+Shader& Shader::operator=(Shader&& s) noexcept {
+    if (this != &s) {
+        // Sposta i membri
+        vertPath = std::move(s.vertPath);
+        fragPath = std::move(s.fragPath);
+        ID = std::move(s.ID);
+
+        // Se ci sono risorse dinamiche, spostale anche qui
+    }
+    return *this;
 }

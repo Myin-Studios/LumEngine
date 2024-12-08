@@ -68,6 +68,11 @@
     <None Include="Output\Release\Resources\Shaders\fragmentShader.glsl" />
     <None Include="Output\Release\Resources\Shaders\PBRFrag.glsl" />
     <None Include="Output\Release\Resources\Shaders\PBRVert.glsl" />
+    <None Include="Engine\Resources\Shaders\depthFrag.glsl" />
+    <None Include="Engine\Resources\Shaders\outlineVert.glsl" />
+    <None Include="Engine\Resources\Shaders\outlineFrag.glsl" />
+    <None Include="Output\Debug\Resources\Shaders\outlineFrag.glsl" />
+    <None Include="Output\Debug\Resources\Shaders\outlineVert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">

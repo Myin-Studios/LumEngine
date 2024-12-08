@@ -15,6 +15,9 @@ public:
 
     // constructor reads and builds the shader
     Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const Shader& s);
+    Shader(Shader&& s) noexcept;
+
     // use/activate the shader
     void use() const;
     // utility uniform functions
@@ -25,4 +28,11 @@ public:
     void setVec3(const std::string& name, glm::vec3 v3) const;
     void setVec3Array(const std::string& name, GLsizei count, const float* value) const;
     void setMat4x4(const std::string& name, const float* value) const;
+
+    Shader& operator=(const Shader& s);
+    Shader& operator=(Shader&& s) noexcept;
+
+private:
+    const char* vertPath;
+    const char* fragPath;
 };

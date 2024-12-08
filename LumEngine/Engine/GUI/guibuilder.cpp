@@ -5,6 +5,7 @@ GuiBuilder::GuiBuilder()
     mainWindow = std::make_unique<MainWindow>();
     topPanel = std::make_unique<Panel>(mainWindow->centralWidget());
     leftPanel = std::make_unique<VerticalPanel>(mainWindow->centralWidget());
+    rightPanel = std::make_unique<BasePanel>("test");
     tBtn = std::make_unique<TabsButton>(nullptr);
     playButton = std::make_unique<PlayButton>(nullptr);
     centralLayout = std::make_unique<QVBoxLayout>(nullptr);
@@ -75,6 +76,7 @@ GuiBuilder::GuiBuilder()
 
     rightPanelSplitter->addWidget(leftPanel.get());
     rightPanelSplitter->addWidget(mainContainer.get());
+    rightPanelSplitter->addWidget(rightPanel.get());
 
     mainWindow->getMainLayout()->addWidget(rightPanelSplitter.get());
 

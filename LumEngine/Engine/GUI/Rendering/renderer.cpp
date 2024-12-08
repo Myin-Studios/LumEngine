@@ -115,6 +115,8 @@ void RendererCore::initializeGL()
     setupFrameBuffer();
     // setupSkysphere();
 
+    outlineShader = new Shader("Resources/Shaders/outlineVert.glsl", "Resources/Shaders/outlineFrag.glsl");
+
     RendererDebugger::checkOpenGLError("InitializeGL: Framebuffer setup");
 
     if (!GLEW_ARB_framebuffer_object) {
@@ -129,13 +131,17 @@ void RendererCore::resizeGL(int w, int h)
     
     glBindTexture(GL_TEXTURE_2D, fboTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
     
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+    glBindTexture(GL_TEXTURE_2D, stencilTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 	RendererDebugger::checkOpenGLError("resizing FBO");
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     update();
 }
@@ -150,7 +156,7 @@ void RendererCore::paintGL()
     }
 
     glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glm::mat4 view = glm::lookAt(
         glm::vec3(
@@ -188,9 +194,34 @@ void RendererCore::paintGL()
 
     glEnable(GL_DEPTH_TEST);
 
+    vector<glm::vec3> lightPositions;
+    vector<glm::vec3> lightColors;
+    std::vector<float> intensities;
+    for (const auto& light : lights) {
+        lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
+            light.GetTransform()->GetPosition().y(),
+            light.GetTransform()->GetPosition().z());
+
+        lightColors.emplace_back(glm::vec3(
+            light.color.r(),
+            light.color.g(),
+            light.color.b()
+        ));
+
+        intensities.push_back(light.GetIntensity());
+    }
+
     if (!entities.empty())
     {
-        for (auto& e : entities)
+        // Attiva stencil e depth test
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
+
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);  // Scrivi 1 nello stencil buffer
+        glStencilMask(0xFF);
+
+        for (const auto& e : entities)
         {
             if (!IsRunning())
             {
@@ -200,11 +231,13 @@ void RendererCore::paintGL()
 
             if (e->GetCoreProperty<MeshCore>() != nullptr)
             {
+                // Configura shader e materiale
+                e->GetCoreProperty<MeshCore>()->SetMaterial(std::make_shared<PBR>());
                 e->GetCoreProperty<MeshCore>()->Draw();
 
                 if (e->GetCoreProperty<Transform3DCore>() != nullptr)
                 {
-                    glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
+                    glm::mat4 tMat = glm::mat4(1.0f);
                     tMat = glm::translate(tMat, glm::vec3(
                         e->GetCoreProperty<Transform3DCore>()->position->x(),
                         e->GetCoreProperty<Transform3DCore>()->position->y(),
@@ -218,49 +251,237 @@ void RendererCore::paintGL()
 
                     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
                 }
-                else
-                {
-                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
-                }
 
+                // Configura altre uniformi per il rendering
                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
-
                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
-
-                vector<glm::vec3> lightPositions;
-                vector<glm::vec3> lightColors;
-                std::vector<float> intensities;
-                for (const auto& light : lights) {
-                    lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
-                        light.GetTransform()->GetPosition().y(),
-                        light.GetTransform()->GetPosition().z());
-
-                    lightColors.emplace_back(glm::vec3(
-                        light.color.r(),
-                        light.color.g(),
-                        light.color.b()
-                    ));
-
-                    intensities.push_back(light.GetIntensity());
-                }
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
-                    editorCamera->GetTransform()->GetPosition().x(),
-                    editorCamera->GetTransform()->GetPosition().y(),
-                    editorCamera->GetTransform()->GetPosition().z()
-                ));
-
-                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetCoreProperty<MeshCore>()->GetMaterial())) {
-                    Color::Color c(1.0f, 0.5f, 0.0f);
-                    pbrMat->SetAlbedo(c);
-                    pbrMat->SetMetallic(1.0f);
-                    pbrMat->SetRoughness(0.4f);
-                }
             }
         }
+
+        // Secondo passaggio: Disegno del contorno
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);  // Disegna solo dove lo stencil non è 1
+        glStencilMask(0x00);                  // Blocca aggiornamenti sullo stencil buffer
+        glDisable(GL_DEPTH_TEST);             // Disabilita il depth test per il contorno
+
+        for (const auto& e : entities)
+        {
+            if (!IsRunning())
+            {
+                e->DeserializeProperties();
+            }
+            else updateTimer->start();
+
+            if (e->GetCoreProperty<MeshCore>() != nullptr)
+            {
+                // Secondo passaggio: Renderizza l'outline
+                glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Renderizza solo dove lo stencil non è 1
+                glStencilMask(0x00);                 // Blocca aggiornamenti sul buffer stencil
+                glDisable(GL_DEPTH_TEST);            // Disabilita il test di profondità
+
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->SetShader(std::make_unique<Shader>(*outlineShader));
+
+                e->GetCoreProperty<MeshCore>()->Draw();
+
+                glm::mat4 outlineMat = glm::mat4(1.0f);
+                if (e->GetCoreProperty<Transform3DCore>() != nullptr)
+                {
+                    outlineMat = glm::translate(outlineMat, glm::vec3(
+                        e->GetCoreProperty<Transform3DCore>()->position->x(),
+                        e->GetCoreProperty<Transform3DCore>()->position->y(),
+                        e->GetCoreProperty<Transform3DCore>()->position->z()
+                    ));
+                    outlineMat = glm::scale(outlineMat, glm::vec3(
+                        e->GetCoreProperty<Transform3DCore>()->scale.x() * 1.05f,
+                        e->GetCoreProperty<Transform3DCore>()->scale.y() * 1.05f,
+                        e->GetCoreProperty<Transform3DCore>()->scale.z() * 1.05f
+                    ));
+                }
+
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &outlineMat[0][0]);
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
+            }
+        }
+
+        glDisable(GL_STENCIL_TEST);
+
+        // for (auto& e : entities)
+        // {
+        //     if (!IsRunning())
+        //     {
+        //         e->DeserializeProperties();
+        //     }
+        //     else updateTimer->start();
+        // 
+        //     // if (e->GetCoreProperty<MeshCore>() != nullptr)
+        //     // {
+        //     //     glEnable(GL_DEPTH_TEST);
+        //     //     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        //     // 
+        //     //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //     // 
+        //     //     glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        //     //     glStencilMask(0xFF);
+        //     // 
+        //     //     // rendering scene with framebuffer
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->SetShader(std::make_unique<Shader>(*outlineShader));
+        //     // 
+        //     //     outlineShader->use();
+        //     //     outlineShader->setMat4x4("view", &view[0][0]);
+        //     //     outlineShader->setMat4x4("projection", &proj[0][0]);
+        //     //     e->GetCoreProperty<MeshCore>()->Draw();
+        //     // 
+        //     //     if (e->GetCoreProperty<Transform3DCore>() != nullptr)
+        //     //     {
+        //     //         glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
+        //     //         tMat = glm::translate(tMat, glm::vec3(
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->x(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->y(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->z()
+        //     //         ));
+        //     //         tMat = glm::scale(tMat, glm::vec3(
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.x(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.y(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.z()
+        //     //         ));
+        //     // 
+        //     //         outlineShader->setMat4x4("model", &tMat[0][0]);
+        //     //     }
+        //     //     else
+        //     //     {
+        //     //         outlineShader->setMat4x4("model", &glm::mat4(1.0f)[0][0]);
+        //     //     }
+        //     // 
+        //     //     glDisable(GL_STENCIL_TEST);
+        //     // 
+        //     //     // rendering normal scene
+        //     //     e->GetCoreProperty<MeshCore>()->SetMaterial(std::make_shared<PBR>());
+        //     // 
+        //     //     e->GetCoreProperty<MeshCore>()->Draw();
+        //     // 
+        //     //     if (e->GetCoreProperty<Transform3DCore>() != nullptr)
+        //     //     {
+        //     //         glm::mat4 tMat = glm::mat4(1.0f); // Inizia con una matrice identità
+        //     //         tMat = glm::translate(tMat, glm::vec3(
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->x(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->y(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->position->z()
+        //     //         ));
+        //     //         tMat = glm::scale(tMat, glm::vec3(
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.x(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.y(),
+        //     //             e->GetCoreProperty<Transform3DCore>()->scale.z()
+        //     //         ));
+        //     // 
+        //     //         e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
+        //     //     }
+        //     //     else
+        //     //     {
+        //     //         e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0)[0][0]);
+        //     //     }
+        //     // 
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
+        //     // 
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
+        //     // 
+        //     //     vector<glm::vec3> lightPositions;
+        //     //     vector<glm::vec3> lightColors;
+        //     //     std::vector<float> intensities;
+        //     //     for (const auto& light : lights) {
+        //     //         lightPositions.emplace_back(light.GetTransform()->GetPosition().x(),
+        //     //             light.GetTransform()->GetPosition().y(),
+        //     //             light.GetTransform()->GetPosition().z());
+        //     // 
+        //     //         lightColors.emplace_back(glm::vec3(
+        //     //             light.color.r(),
+        //     //             light.color.g(),
+        //     //             light.color.b()
+        //     //         ));
+        //     // 
+        //     //         intensities.push_back(light.GetIntensity());
+        //     //     }
+        //     // 
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setFloatArray("lightIntensities", intensities.size(), intensities.data());
+        //     //     e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setVec3("camPos", glm::vec3(
+        //     //         editorCamera->GetTransform()->GetPosition().x(),
+        //     //         editorCamera->GetTransform()->GetPosition().y(),
+        //     //         editorCamera->GetTransform()->GetPosition().z()
+        //     //     ));
+        //     // 
+        //     //     if (auto pbrMat = std::dynamic_pointer_cast<PBR>(e->GetCoreProperty<MeshCore>()->GetMaterial())) {
+        //     //         Color::Color c(1.0f, 0.5f, 0.0f);
+        //     //         pbrMat->SetAlbedo(c);
+        //     //         pbrMat->SetMetallic(1.0f);
+        //     //         pbrMat->SetRoughness(0.4f);
+        //     //     }
+        //     // 
+        //     //     glUseProgram(0);
+        //     // }
+        // 
+        //     glEnable(GL_DEPTH_TEST);
+        //     glEnable(GL_STENCIL_TEST);
+        // 
+        //     // Pulizia dei buffer
+        //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        // 
+        //     // Disegno della mesh principale
+        //     if (e->GetCoreProperty<MeshCore>() != nullptr)
+        //     {
+        //         auto mesh = e->GetCoreProperty<MeshCore>();
+        //         auto transform = e->GetCoreProperty<Transform3DCore>();
+        // 
+        //         // STEP 1: Disegno normale della mesh
+        //         glStencilMask(0xFF); // Consenti aggiornamenti del buffer stencil
+        //         glStencilFunc(GL_ALWAYS, 1, 0xFF); // Ogni frammento aggiorna il buffer stencil
+        // 
+        //         auto shader = mesh->GetMaterial()->GetShader();
+        //         shader->use();
+        // 
+        //         // Calcolo della matrice di trasformazione
+        //         glm::mat4 modelMat = glm::mat4(1.0f);
+        //         if (transform != nullptr)
+        //         {
+        //             modelMat = glm::translate(modelMat, glm::vec3(
+        //                 transform->position->x(),
+        //                 transform->position->y(),
+        //                 transform->position->z()
+        //             ));
+        //             modelMat = glm::scale(modelMat, glm::vec3(
+        //                 transform->scale.x(),
+        //                 transform->scale.y(),
+        //                 transform->scale.z()
+        //             ));
+        //         }
+        //         shader->setMat4x4("model", &modelMat[0][0]);
+        //         shader->setMat4x4("view", &view[0][0]);
+        //         shader->setMat4x4("projection", &proj[0][0]);
+        // 
+        //         // Disegna la mesh principale
+        //         mesh->Draw();
+        // 
+        //         // STEP 2: Disegno del contorno
+        //         glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Disegna solo dove lo stencil buffer NON è 1
+        //         glStencilMask(0x00); // Blocca aggiornamenti del buffer stencil
+        //         glDisable(GL_DEPTH_TEST); // Disabilita il test di profondità per l'outline
+        // 
+        //         outlineShader->use();
+        // 
+        //         // Configurazione per il disegno dell'outline (leggermente ingrandito)
+        //         glm::mat4 outlineMat = glm::scale(modelMat, glm::vec3(1.1f, 1.1f, 1.1f));
+        //         outlineShader->setMat4x4("model", &outlineMat[0][0]);
+        //         outlineShader->setMat4x4("view", &view[0][0]);
+        //         outlineShader->setMat4x4("projection", &proj[0][0]);
+        // 
+        //         mesh->Draw();
+        // 
+        //         // Ripristina le impostazioni di default
+        //         glStencilMask(0xFF); // Consenti aggiornamenti del buffer stencil
+        //         glStencilFunc(GL_ALWAYS, 1, 0xFF); // Torna alla modalità di default
+        //         glEnable(GL_DEPTH_TEST); // Riattiva il test di profondità
+        //     }
+        // }
     }
 
     // Seconda fase: rendering del quad sullo schermo
@@ -312,13 +533,15 @@ void RendererCore::paintGL()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
+    // fboShader->setInt("inputTexture", 0);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
-    fboShader->setInt("depthTexture", 1);
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, depthTexture);
+    // fboShader->setInt("depthTexture", 1);
+    // 
+    // fboShader->setFloat("width", static_cast<float>(width()));
+    // fboShader->setFloat("height", static_cast<float>(height()));
 
-    fboShader->setFloat("width", width());
-    fboShader->setFloat("height", height());
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
     glUseProgram(0);
@@ -391,37 +614,33 @@ void RendererCore::setupFrameBuffer()
 
 	RendererDebugger::checkOpenGLError("setting up FBO");
 
-    // Create and attach texture
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(), height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     checkFrameBufferError();
-
+    
     glGenTextures(1, &depthTexture);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width(), height(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-    glDrawBuffer(GL_NONE); // No color buffer is drawn
-    glReadBuffer(GL_NONE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     checkFrameBufferError();
-
-    glGenRenderbuffers(1, &RBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+    
+    glGenTextures(1, &stencilTexture);
+    glBindTexture(GL_TEXTURE_2D, stencilTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width(), height(), 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, stencilTexture, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 	RendererDebugger::checkOpenGLError("setting up FBO texture");
 
@@ -611,80 +830,66 @@ void RendererCore::loadModel(const QString& path) {
 }
 
 std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared_ptr<Material> mat) {
-    QFile file(path);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    std::ifstream file(path.toStdString());
+    if (!file.is_open()) {
         qCritical() << "Unable to open the file:" << path;
-        return std::unique_ptr<MeshCore>();
+        return nullptr;
     }
 
-    QTextStream in(&file);
+    std::vector<Vertex> ver;
+    std::vector<glm::vec3> vertices, normals;
+    std::vector<glm::vec2> texCoords;
 
-    vector<Vertex> ver;
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue; // Salta linee vuote o commenti
 
-    vector<glm::vec3> vertices;
-    vector<glm::vec2> texCoords;
-    vector<glm::vec3> normals;
-    vector< unsigned int> indices;
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
 
-    glm::vec3 pos = glm::vec3(0, 0, 0);
-    glm::vec3 nor = glm::vec3(0, 0, 0);
-    glm::vec2 uvs = glm::vec2(0, 0);
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        QStringList tokens = line.split(" ");
-
-        if (tokens.isEmpty()) continue;
-
-        if (tokens[0] == "v") {
-            float x = tokens[1].toFloat();
-            float y = tokens[2].toFloat();
-            float z = tokens[3].toFloat();
-
-            pos = glm::vec3(x, y, z);
+        if (prefix == "v") {
+            glm::vec3 pos;
+            iss >> pos.x >> pos.y >> pos.z;
             vertices.push_back(pos);
+        }
+        else if (prefix == "vt") {
+            glm::vec2 uv;
+            iss >> uv.x >> uv.y;
+            texCoords.push_back(uv);
+        }
+        else if (prefix == "vn") {
+            glm::vec3 normal;
+            iss >> normal.x >> normal.y >> normal.z;
+            normals.push_back(normal);
+        }
+        else if (prefix == "f") {
+            for (int i = 0; i < 3; ++i) {
+                std::string vertexData;
+                iss >> vertexData;
 
-        } else if (tokens[0] == "vt") {
-            float u = tokens[1].toFloat();
-            float v = tokens[2].toFloat();
+                int vertexIndex = -1, uvIndex = -1, normalIndex = -1;
+                std::replace(vertexData.begin(), vertexData.end(), '/', ' '); // Sostituisce '/' con spazio
+                std::istringstream vertexStream(vertexData);
+                vertexStream >> vertexIndex >> uvIndex >> normalIndex;
 
-            uvs = glm::vec2(u, v);
-            texCoords.push_back(uvs);
-
-        } else if (tokens[0] == "vn") {
-            float nx = tokens[1].toFloat();
-            float ny = tokens[2].toFloat();
-            float nz = tokens[3].toFloat();
-
-            nor = glm::vec3(nx, ny, nz);
-            normals.push_back(nor);
-
-        } else if (tokens[0] == "f") {
-            for (int i = 1; i <= 3; i++) {
-                QStringList vertexData = tokens[i].split("/");
-
-                int vertexIndex = vertexData[0].toInt() - 1;
-                int uvIndex = vertexData.size() > 1 ? vertexData[1].toInt() - 1 : -1;
-                int normalIndex = vertexData.size() > 2 ? vertexData[2].toInt() - 1 : -1;
-
-                ver.emplace_back(vertexIndex > -1 ? vertices[vertexIndex] : glm::vec3(0, 0, 0),
-                                     normalIndex > -1 ? normals[normalIndex] : glm::vec3(0, 0, 0),
-                                     uvIndex > -1 ? texCoords[uvIndex] : glm::vec2(0, 0));
+                ver.emplace_back(
+                    vertexIndex > 0 ? vertices[vertexIndex - 1] : glm::vec3(0, 0, 0),
+                    normalIndex > 0 ? normals[normalIndex - 1] : glm::vec3(0, 0, 0),
+                    uvIndex > 0 ? texCoords[uvIndex - 1] : glm::vec2(0, 0)
+                );
             }
         }
     }
 
     file.close();
 
+    // Creazione della mesh
     makeCurrent();
-
-    std::unique_ptr<MeshCore> m = std::make_unique<MeshCore>(ver);
-
+    auto m = std::make_unique<MeshCore>(std::move(ver));
     m->SetMaterial(mat);
 
     RendererDebugger::checkOpenGLError("model loading");
-
     setFocus();
     update();
 

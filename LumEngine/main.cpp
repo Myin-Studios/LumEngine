@@ -56,6 +56,9 @@ int main(int argc, char* argv[])
             if (!icon.isNull()) {
                 builder->getMainWindow()->setWindowIcon(icon);
             }
+
+            builder->getMainWindow()->setWindowState(Qt::WindowMaximized);
+
 #elif defined(Q_OS_LINUX)
             if (QSysInfo::productVersion().startsWith("5")) {
                 QApplication::setStyle(QStyleFactory::create("Fusion")); // Cambia con "Plasma" se supportato

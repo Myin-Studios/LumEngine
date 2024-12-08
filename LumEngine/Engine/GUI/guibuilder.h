@@ -44,6 +44,7 @@ private:
 
     std::unique_ptr<Panel> topPanel;
     std::unique_ptr<VerticalPanel> leftPanel;
+    std::unique_ptr<BasePanel> rightPanel;
 
     std::unique_ptr<BaseButton> consoleButton;
     std::unique_ptr<BaseButton> lightingSettingsButton;

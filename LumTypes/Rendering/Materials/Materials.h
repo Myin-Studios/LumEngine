@@ -27,8 +27,6 @@ public:
 	virtual ~Material() {}
 
 	Shader* GetShader() const { return this->shader.get(); }
-
-protected:
 	void SetShader(std::unique_ptr<Shader> s) { this->shader = std::move(s); }
 
 private:

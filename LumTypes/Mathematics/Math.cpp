@@ -301,10 +301,10 @@ std::string Vec4Core::ToString() const
 	return std::string("Vec4Core(") + std::to_string(_x) + ", " + std::to_string(_y) + ", " + std::to_string(_z) + ", " + std::to_string(_w) + ")";
 }
 
-const float Vec4Core::x() const { return _x; }
-const float Vec4Core::y() const { return _y; }
-const float Vec4Core::z() const { return _z; }
-const float Vec4Core::w() const { return _w; }
+float Vec4Core::x() const { return _x; }
+float Vec4Core::y() const { return _y; }
+float Vec4Core::z() const { return _z; }
+float Vec4Core::w() const { return _w; }
 
 Vec3Core::Vec3Core() : _x(0.0f), _y(0.0f), _z(0.0f) {}
 
