@@ -6,20 +6,44 @@
 #include <QVBoxLayout>
 #include <QPropertyAnimation>
 #include <QAbstractAnimation>
+#include <QPainter>
 
 #include <iostream>
+#include <vector>
+
+class PanelHeader : public QFrame
+{
+public:
+    PanelHeader(const PanelHeader& other);
+    PanelHeader(const std::string& title = "", QWidget* parent = nullptr);
+    ~PanelHeader();
+
+protected:
+    void paintEvent(QPaintEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+private:
+    std::unique_ptr<QString> _title;
+};
+
 
 class BasePanel : public QWidget
 {
 public:
-    BasePanel(std::string title = "");
+    BasePanel(const std::string& title = "");
     ~BasePanel();
 
+    void addHeader(const std::string& title);
+
+protected:
+    void paintEvent(QPaintEvent* event) override;
+
 private:
-    std::unique_ptr<QFrame> _titleFrame;
-    std::unique_ptr<QLabel> _title;
+    std::vector<PanelHeader> _headers;
     std::unique_ptr<QFrame> _generalContainer;
 
+    std::unique_ptr<QHBoxLayout> _headersLayout;
     std::unique_ptr<QHBoxLayout> _titleLayout;
     std::unique_ptr<QVBoxLayout> _mainContainerLayout;
     std::unique_ptr<QVBoxLayout> _propertiesContainerLayout;

@@ -5,7 +5,7 @@ GuiBuilder::GuiBuilder()
     mainWindow = std::make_unique<MainWindow>();
     topPanel = std::make_unique<Panel>(mainWindow->centralWidget());
     leftPanel = std::make_unique<VerticalPanel>(mainWindow->centralWidget());
-    rightPanel = std::make_unique<BasePanel>("test");
+    rightPanel = std::make_unique<BasePanel>("PROPERTIES");
     tBtn = std::make_unique<TabsButton>(nullptr);
     playButton = std::make_unique<PlayButton>(nullptr);
     centralLayout = std::make_unique<QVBoxLayout>(nullptr);
@@ -58,6 +58,9 @@ GuiBuilder::GuiBuilder()
     leftPanel->getLayout()->addWidget(tBtn.get());
     leftPanel->getLayout()->addWidget(lightingSettingsButton.get(), 0, Qt::AlignCenter);
     leftPanel->getLayout()->addWidget(hierarchyButton.get());
+
+    rightPanel->addHeader("TEST");
+    rightPanel->addHeader("HIERARCHY");
 
     topPanel->setStyleSheet("background-color: rgb(20, 20, 20);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
