@@ -61,17 +61,17 @@ class LoadingWindow : public QWidget {
 public:
     LoadingWindow(QWidget *parent = nullptr) : QWidget(parent) {
         setWindowTitle("Loading...");
-        QVBoxLayout *layout = new QVBoxLayout(this);
+        QVBoxLayout *_mainLayout = new QVBoxLayout(this);
 
         label = new QLabel("Resources loading...", this);
-        layout->addWidget(label);
+        _mainLayout->addWidget(label);
 
         progressBar = new ColouredProgressBar(this);
         progressBar->setRange(0, 100);  // Barra di progresso da 0 a 100
 
-        layout->addWidget(progressBar);
+        _mainLayout->addWidget(progressBar);
 
-        setLayout(layout);
+        setLayout(_mainLayout);
         setFixedSize(300, 100);
     }
 

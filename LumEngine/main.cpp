@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
                 builder->getMainWindow()->setWindowIcon(icon);
             }
 #endif
-        }, Qt::QueuedConnection);  // Qt::QueuedConnection assicura che venga eseguito nel thread della GUI
+        }, Qt::QueuedConnection);
     });
 
     loadingThread->start();

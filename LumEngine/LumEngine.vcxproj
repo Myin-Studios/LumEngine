@@ -86,13 +86,14 @@
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
+    <ClInclude Include="Engine\GUI\Elements\Elements.h" />
     <ClInclude Include="Engine\GUI\guibuilder.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
     <QtMoc Include="Engine\GUI\Console\console.h" />
     <QtMoc Include="Engine\GUI\Console\consoleOutput.h" />
     <ClInclude Include="Engine\GUI\Console\redirectStreamBuf.h" />
-    <ClInclude Include="Engine\GUI\Panels\properties.h" />
+    <QtMoc Include="Engine\GUI\Panels\properties.h" />
     <ClInclude Include="Engine\GUI\Rendering\Camera\camera.h" />
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h" />
     <QtMoc Include="Engine\GUI\Windows\mainwindow.h" />
@@ -105,6 +106,7 @@
     <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\tabsbutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp" />
+    <ClCompile Include="Engine\GUI\Elements\Elements.cpp" />
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
@@ -267,7 +269,10 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y "C:\vcpkg\installed\x64-windows\bin\glew32.dll" "$(SolutionDir)Output\$(Configuration)\"</Command>
+      <Command>xcopy /y "C:\vcpkg\installed\x64-windows\bin\glew32.dll" "$(SolutionDir)Output\$(Configuration)\"
+xcopy /y /i /e "$(SolutionDir)Engine\Resources\LumScriptLoader.runtimeconfig.json" "$(OutDir)LumScripting"
+xcopy /y /i /e "$(SolutionDir)Engine\Resources" "$(OutDir)\Resources"
+xcopy /y /i /e "$(NETHOST_LIB)\nethost.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PreLinkEvent>
       <Command>
@@ -295,6 +300,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGL.lib;Qt6OpenGLWidgets.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "C:\vcpkg\installed\x64-windows\bin\glew32.dll" "$(SolutionDir)Output\$(Configuration)\"
+xcopy /y /i /e "$(SolutionDir)Engine\Resources\LumScriptLoader.runtimeconfig.json" "$(OutDir)LumScripting"
+xcopy /y /i /e "$(SolutionDir)Engine\Resources" "$(OutDir)\Resources"
+xcopy /y /i /e "$(NETHOST_LIB)\nethost.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

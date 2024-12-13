@@ -42,7 +42,7 @@ private:
     std::unique_ptr<QSplitter> rightPanelSplitter;
     std::unique_ptr<QWidget> mainContainer;
 
-    std::unique_ptr<Panel> topPanel;
+    std::unique_ptr<VPanel> topPanel;
     std::unique_ptr<VerticalPanel> leftPanel;
     std::unique_ptr<BasePanel> rightPanel;
 

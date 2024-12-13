@@ -533,7 +533,7 @@ void RendererCore::paintGL()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
-    // fboShader->setInt("inputTexture", 0);
+    fboShader->setInt("screenTexture", 0);
 
     // glActiveTexture(GL_TEXTURE1);
     // glBindTexture(GL_TEXTURE_2D, depthTexture);

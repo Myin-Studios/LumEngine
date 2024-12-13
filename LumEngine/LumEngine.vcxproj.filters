@@ -87,9 +87,6 @@
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI\Panels\properties.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\GUI\Rendering\rendererDebugger.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -117,6 +114,9 @@
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\GUI\Elements\Elements.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
@@ -138,6 +138,9 @@
       <Filter>File di intestazione</Filter>
     </QtMoc>
     <QtMoc Include="Engine\Core\hostInitializer.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Panels\properties.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
   </ItemGroup>
@@ -173,6 +176,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Elements\Elements.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

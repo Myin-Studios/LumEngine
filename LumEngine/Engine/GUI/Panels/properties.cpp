@@ -2,60 +2,48 @@
 
 Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
 {
-    xTextFrame = new QFrame(this);
-    yTextFrame = new QFrame(this);
-    zTextFrame = new QFrame(this);
+    this->setStyleSheet(
+        "background-color: rgb(30, 30, 30);"
+    );
+
+    xTextFrame = new CoordinateFrame("X", this);
+    yTextFrame = new CoordinateFrame("Y", this);
+    zTextFrame = new CoordinateFrame("Z", this);
 
     xTextFrame->setStyleSheet(
-    "background-color: rgb(255, 0, 0); "
-    "border-radius: 2px;");
+    "border: 1 solid rgb(255, 0, 0);"
+        "border-radius: 7px;");
 
     yTextFrame->setStyleSheet(
-        "background-color: rgb(0, 255, 0); "
-        "border-radius: 2px;");
+        "border: 1 solid rgb(0, 255, 0); "
+        "border-radius: 7px;");
 
     zTextFrame->setStyleSheet(
-        "background-color: rgb(0, 0, 255); "
-        "border-radius: 2px;");
+        "border: 1 solid rgb(0, 0, 255); "
+        "border-radius: 7px;");
 
-    xLabel = new QLabel("X", xTextFrame);
-    yLabel = new QLabel("Y", yTextFrame);
-    zLabel = new QLabel("Z", zTextFrame);
+    xValue = new NumberOperatorLineEdit(this);
+    yValue = new NumberOperatorLineEdit(this);
+    zValue = new NumberOperatorLineEdit(this);
 
-    QFont font = xLabel->font();
-    font.setPointSize(10); // Imposta la dimensione del font
-    xLabel->setFont(font);
-    yLabel->setFont(font);
-    zLabel->setFont(font);
-
-    xLabel->setAlignment(Qt::AlignCenter);
-    yLabel->setAlignment(Qt::AlignCenter);
-    zLabel->setAlignment(Qt::AlignCenter);
-
-    xLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    yLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    zLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    // Crea layout per centrare i QLabel nei rispettivi QFrame
-    xLayout = new QVBoxLayout(xTextFrame);
-    yLayout = new QVBoxLayout(yTextFrame);
-    zLayout = new QVBoxLayout(zTextFrame);
-
-    xLayout->addWidget(xLabel, 0, Qt::AlignCenter);
-    yLayout->addWidget(yLabel, 0, Qt::AlignCenter);
-    zLayout->addWidget(zLabel, 0, Qt::AlignCenter);
-
-    xLayout->setContentsMargins(0, 0, 0, 0);
-    yLayout->setContentsMargins(0, 0, 0, 0);
-    zLayout->setContentsMargins(0, 0, 0, 0);
-
-    xTextFrame->setLayout(xLayout);
-    yTextFrame->setLayout(yLayout);
-    zTextFrame->setLayout(zLayout);
-
-    xValue = new QDoubleSpinBox(this);
-    yValue = new QDoubleSpinBox(this);
-    zValue = new QDoubleSpinBox(this);
+    xValue->setStyleSheet(
+        "QDoubleSpinBox {"
+        "background-color: rgb(25, 25, 25);"
+        "border-color: rgb(35, 35, 35);"
+		"}"
+    );
+    yValue->setStyleSheet(
+        "QDoubleSpinBox {"
+        "background-color: rgb(25, 25, 25);"
+        "border-color: rgb(35, 35, 35);"
+        "}"
+    );
+    zValue->setStyleSheet(
+        "QDoubleSpinBox {"
+        "background-color: rgb(25, 25, 25);"
+        "border-color: rgb(35, 35, 35);"
+        "}"
+    );
 
     xTextFrame->setFixedSize(20, 20);
     yTextFrame->setFixedSize(20, 20);
@@ -65,14 +53,14 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
     yValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     zValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    layout = new QHBoxLayout(parent);
+    _mainLayout = new QHBoxLayout(parent);
 
-    layout->addWidget(xTextFrame);
-    layout->addWidget(xValue);
-    layout->addWidget(yTextFrame);
-    layout->addWidget(yValue);
-    layout->addWidget(zTextFrame);
-    layout->addWidget(zValue);
+    _mainLayout->addWidget(xTextFrame);
+    _mainLayout->addWidget(xValue);
+    _mainLayout->addWidget(yTextFrame);
+    _mainLayout->addWidget(yValue);
+    _mainLayout->addWidget(zTextFrame);
+    _mainLayout->addWidget(zValue);
 
     xTextFrame->show();
     yTextFrame->show();
@@ -82,7 +70,7 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
     yValue->show();
     zValue->show();
 
-    setLayout(layout);
+    setLayout(_mainLayout);
 }
 
 Vec3Property::~Vec3Property()
@@ -96,5 +84,246 @@ Vec3Property::~Vec3Property()
     delete xTextFrame;
     delete yTextFrame;
     delete zTextFrame;
-    delete layout;
+    delete _mainLayout;
 }
+
+CoordinateFrame::CoordinateFrame(std::string text, QWidget* parent) : QFrame(parent)
+{
+	this->_text = text;
+}
+
+CoordinateFrame::~CoordinateFrame()
+{
+}
+
+void CoordinateFrame::paintEvent(QPaintEvent* event)
+{
+	QPainter painter(this);
+    QRect rect(0, 0, width(), height());
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(QColor(255, 255, 255), 1));
+
+    painter.drawText(rect, Qt::AlignCenter, QString(this->_text.c_str()));
+}
+
+NumberOperatorLineEdit::NumberOperatorLineEdit(QWidget* parent) : QLineEdit(parent) {
+	QLocale::setDefault(QLocale(QLocale::English));
+    setPlaceholderText("0.0");
+    setMaxLength(50);
+}
+
+void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
+{
+    QString currentText = text();
+    QChar inputChar = event->text().isEmpty() ? QChar() : event->text().at(0);
+
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right || event->key() == Qt::Key_Down || event->key() == Qt::Key_Up)
+    {
+        QLineEdit::keyPressEvent(event);
+        return;
+    }
+
+    if (inputChar.isDigit() || QString("+-*/.").contains(inputChar)) {
+        QLineEdit::keyPressEvent(event); // Accetta l'input
+    }
+    else if (event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period) {
+        // Permetti la virgola o il punto come separatori decimali
+        if (text().contains(QRegularExpression("[+\\-*/]$"))) {
+            // Se l'ultimo carattere è un operatore, permetti di inserire un numero con la virgola
+            QLineEdit::keyPressEvent(event);
+        }
+    }
+    else if (event->key() == Qt::Key_Backspace) {
+        // Gestisci il tasto Backspace per rimuovere correttamente
+        QLineEdit::keyPressEvent(event);
+    }
+    else if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        // Gestisci il tasto Invio per validare l'espressione (opzionale)
+        evaluateExpression();
+    }
+    else if (event->key() == Qt::Key_Escape) {
+		// Gestisci il tasto Esc per annullare l'input
+		clear();
+	}
+    else {
+        event->ignore();
+    }
+}
+
+void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
+{
+	QLineEdit::paintEvent(event);
+
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	setStyleSheet(
+		"QLineEdit {"
+		"background-color: rgb(25, 25, 25);"
+		"border: 1 solid rgb(50, 50, 50);"
+		"border-radius: 7px;"
+		"color: rgb(255, 255, 255);"
+		"}"
+	);
+
+	// Disegna un bordo rosso se l'espressione è vuota
+	if (hasFocus()) {
+        setStyleSheet(
+            "QLineEdit {"
+            "background-color: rgb(25, 25, 25);"
+            "border: 1 solid rgb(3, 102, 252);"
+            "border-radius: 7px;"
+            "color: rgb(255, 255, 255);"
+            "}"
+		);
+	}
+	else {
+		setStyleSheet(
+            "QLineEdit {"
+            "background-color: rgb(25, 25, 25);"
+            "border: 1 solid rgb(50, 50, 50);"
+            "border-radius: 7px;"
+            "color: rgb(255, 255, 255);"
+            "}"
+		);
+	}
+}
+
+void NumberOperatorLineEdit::evaluateExpression()
+{
+    QString input = text();
+    input.replace(",", "."); // Supporta numeri con la virgola
+
+    // Espressione regolare per tokenizzare numeri e operatori
+    QRegularExpression regex("[+-]?(?:\\d+\\.\\d+|\\.\\d+|\\d+)|[-+*/]");
+
+    QRegularExpressionMatchIterator it = regex.globalMatch(input);
+
+    QVector<QString> tokens;
+    while (it.hasNext()) {
+        QRegularExpressionMatch match = it.next();
+        tokens.append(match.captured(0)); // Usa captured(0) per prendere l'intero match
+    }
+
+    if (tokens.isEmpty()) {
+        qDebug() << "Espressione vuota";
+		setText(QString::number(0));
+        return;
+    }
+
+    // Calcolo dell'espressione
+    double result = 0.0;
+    bool expectOperator = false;
+    QString lastOperator = "+";
+
+    qDebug() << "Tokens: " << tokens;
+
+    for (const QString& token : tokens) {
+        if (expectOperator) {
+            if (token == "+" || token == "-" || token == "*" || token == "/") {
+                lastOperator = token;
+                expectOperator = false;
+            }
+            else {
+                qDebug() << "Operatore mancante!";
+                return;
+            }
+        }
+        else {
+            bool ok = false;
+            double value = token.toDouble(&ok);
+            if (!ok) {
+                qDebug() << "Numero non valido: " << token;
+                return;
+            }
+
+            // Applica l'operatore precedente
+            if (lastOperator == "+") result += value;
+            else if (lastOperator == "-") result -= value;
+            else if (lastOperator == "*") result *= value;
+            else if (lastOperator == "/") {
+                if (value == 0) {
+                    qDebug() << "Errore: divisione per zero!";
+                    return;
+                }
+                result /= value;
+            }
+
+            expectOperator = true;
+        }
+    }
+
+    if (!expectOperator) {
+        qDebug() << "Espressione incompleta!";
+        return;
+    }
+
+    // Mostra il risultato
+    setText(QString::number(result, 'g', 10));
+    qDebug() << "Risultato: " << result;
+}
+
+PropertyGroupHeader::PropertyGroupHeader(const PropertyGroupHeader& other) : QFrame(other.parentWidget())
+{
+	this->_title = std::make_unique<QString>(*other._title);
+}
+
+PropertyGroupHeader::PropertyGroupHeader(const std::string& title, QWidget* parent) : QFrame(parent)
+{
+	this->_title = std::make_unique<QString>(QString(title.c_str()));
+}
+
+PropertyGroupHeader::~PropertyGroupHeader()
+{
+}
+
+std::unique_ptr<QString> PropertyGroupHeader::getTitle() const { return std::make_unique<QString>(*_title); }
+
+void PropertyGroupHeader::paintEvent(QPaintEvent* event)
+{
+	QFrame::paintEvent(event);
+
+	QPainter painter(this);
+	QRect rect(0, 0, width(), height());
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(QColor(255, 255, 255), 1));
+
+	painter.drawText(rect, Qt::AlignCenter, *_title);
+}
+
+PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidget(parent)
+{
+	this->_mainLayout = new QVBoxLayout(parent);
+	this->_header = new PropertyGroupHeader(title, parent);
+	this->_content = new QFrame(parent);
+	this->_contentLayout = new QVBoxLayout(_content);
+
+	this->_mainLayout->addWidget(_header, Qt::AlignTop);
+	this->_mainLayout->addWidget(_content, Qt::AlignTop);
+	this->_mainLayout->setContentsMargins(0, 0, 0, 0);
+    this->_mainLayout->setSpacing(10);
+    this->setLayout(_mainLayout);
+
+    this->_contentLayout->setSpacing(0);
+
+    this->_header->setStyleSheet(
+        "QFrame {"
+        "background-color: rgb(30, 30, 30);"
+        "border-top-left-radius: 10px;"
+        "border-top-right-radius: 10px;"
+        "}"
+    );
+
+    this->_header->setFixedHeight(30);
+    this->setBaseSize(300, height());
+
+    this->_content->setStyleSheet(
+        "QFrame {"
+        "background-color: rgb(30, 30, 30);"
+		"border-bottom-left-radius: 10px;"
+		"border-bottom-right-radius: 10px;"
+        "}"
+    );
+}
+
+QVBoxLayout* PropertyGroup::getLayout() const { return this->_contentLayout; }
