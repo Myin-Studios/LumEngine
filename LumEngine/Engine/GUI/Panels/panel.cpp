@@ -18,12 +18,54 @@ BasePanel::BasePanel(const std::string& title)
     QScrollArea* scrollable = new QScrollArea();
     QWidget* scrollContent = new QWidget();
     QVBoxLayout* scrollContentLayout = new QVBoxLayout(scrollContent);
+    QScrollBar* scrollBar = new QScrollBar();
 
     // Configura lo scroll area
     scrollable->setWidget(scrollContent);
     scrollable->setWidgetResizable(true); // Permette il ridimensionamento
     scrollable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    scrollBar->setStyleSheet(
+        "QScrollBar:vertical {"
+        "    border: none;"
+        "    background: rgb(25, 25, 25);"
+        "    width: 10px;" // Questo controlla la larghezza del contenitore
+        "    margin: 0px 0px 0px 0px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background: rgb(50, 50, 50);"
+        "    min-height: 20px;"
+		"    border-radius: 3px;"
+        "    width: 5px;" // Larghezza iniziale del gestore
+        "    margin-left: 2px;" // Centrare il gestore
+        "    margin-right: 2px;"
+        "}"
+        "QScrollBar::handle:vertical:hover {"
+        "    background: rgb(70, 70, 70);"
+        "    width: 10px;" // Larghezza al passaggio del mouse
+        "    margin-left: 1px;" // Regola per centrare
+        "    margin-right: 1px;"
+        "}"
+        "QScrollBar::add-line:vertical {"
+        "    height: 0px;"
+        "    subcontrol-position: bottom;"
+        "    subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::sub-line:vertical {"
+        "    height: 0px;"
+        "    subcontrol-position: top;"
+        "    subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+        "    background: none;"
+        "}"
+        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+        "    background: none;"
+        "}"
+    );
+
+	scrollable->setVerticalScrollBar(scrollBar);
 
     // Configurazione del layout interno
     scrollContentLayout->addWidget(this->_stackedWidget);
@@ -79,31 +121,25 @@ void BasePanel::addPage(const std::string& title, QWidget* elem)
     }
 }
 
-void BasePanel::addElement(const std::string& title, QWidget* elem)
-{
-    for (const auto& _header : _headers) {
-        if (_header->getTitle()->toStdString() == title) {
-            // Trova l'indice della pagina esistente
-            int pageIndex = _headers.indexOf(_header);
-            QWidget* page = _stackedWidget->widget(pageIndex);
+void BasePanel::addElement(const std::string& title, QWidget* elem) {
+    auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
+        return header->getTitle()->toStdString() == title;
+        });
 
-            if (page) {
-                // Aggiungi il nuovo elemento al layout della pagina
-                QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(page->layout());
-                if (layout) {
-                    layout->addWidget(elem);
-                    return;
-                }
-                else {
-                    qDebug() << "Errore: la pagina esistente non ha un layout valido!";
-                    return;
-                }
+    if (it != _headers.end()) {
+        int pageIndex = _headers.indexOf(*it);
+        QWidget* page = _stackedWidget->widget(pageIndex);
+        if (page) {
+            QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(page->layout());
+            if (layout) {
+                layout->addWidget(elem);
+                return;
             }
         }
     }
-
-    // Se la pagina non esiste, crea una nuova pagina e aggiungila
-    addPage(title, elem);
+    else {
+        addPage(title, elem);
+    }
 }
 
 void BasePanel::paintEvent(QPaintEvent* event)

@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 #include <QLocale>
 #include <QPaintEvent>
+#include <QPainterPath>
 
 class PropertyGroupHeader : public QFrame
 {
@@ -26,6 +27,20 @@ private:
     std::unique_ptr<QString> _title;
 };
 
+class PropertyGroupContainer : public QFrame
+{
+public:
+    PropertyGroupContainer(QWidget* parent = nullptr);
+
+    QVBoxLayout* getLayout() const;
+
+protected:
+	void paintEvent(QPaintEvent* event) override;
+
+private:
+	QVBoxLayout* _mainLayout = nullptr;
+};
+
 class PropertyGroup : public QWidget
 {
 	Q_OBJECT
@@ -37,7 +52,7 @@ public:
 private:
 	QVBoxLayout* _mainLayout = nullptr;
 	PropertyGroupHeader* _header = nullptr;
-	QFrame* _content = nullptr;
+    PropertyGroupContainer* _content = nullptr;
 	QVBoxLayout* _contentLayout = nullptr;
 };
 
@@ -51,9 +66,13 @@ public:
 
 protected:
 	void paintEvent(QPaintEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+	void focusOutEvent(QFocusEvent* event) override;
 
 private:
     void evaluateExpression();
+    QString normalStyle;
+    QString focusStyle;
 };
 
 class CoordinateFrame : public QFrame

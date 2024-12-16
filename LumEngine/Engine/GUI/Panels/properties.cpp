@@ -107,9 +107,26 @@ void CoordinateFrame::paintEvent(QPaintEvent* event)
 }
 
 NumberOperatorLineEdit::NumberOperatorLineEdit(QWidget* parent) : QLineEdit(parent) {
+    normalStyle = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 1 solid rgb(50, 50, 50);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    focusStyle = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 1 solid rgb(3, 102, 252);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
 	QLocale::setDefault(QLocale(QLocale::English));
     setPlaceholderText("0.0");
     setMaxLength(50);
+
+    setStyleSheet(normalStyle);
+    setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
 void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
@@ -156,37 +173,18 @@ void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
+}
 
-	setStyleSheet(
-		"QLineEdit {"
-		"background-color: rgb(25, 25, 25);"
-		"border: 1 solid rgb(50, 50, 50);"
-		"border-radius: 7px;"
-		"color: rgb(255, 255, 255);"
-		"}"
-	);
+void NumberOperatorLineEdit::focusInEvent(QFocusEvent* event)
+{
+    QLineEdit::focusInEvent(event);
+    setStyleSheet(focusStyle);
+}
 
-	// Disegna un bordo rosso se l'espressione è vuota
-	if (hasFocus()) {
-        setStyleSheet(
-            "QLineEdit {"
-            "background-color: rgb(25, 25, 25);"
-            "border: 1 solid rgb(3, 102, 252);"
-            "border-radius: 7px;"
-            "color: rgb(255, 255, 255);"
-            "}"
-		);
-	}
-	else {
-		setStyleSheet(
-            "QLineEdit {"
-            "background-color: rgb(25, 25, 25);"
-            "border: 1 solid rgb(50, 50, 50);"
-            "border-radius: 7px;"
-            "color: rgb(255, 255, 255);"
-            "}"
-		);
-	}
+void NumberOperatorLineEdit::focusOutEvent(QFocusEvent* event)
+{
+    QLineEdit::focusOutEvent(event);
+    setStyleSheet(normalStyle);
 }
 
 void NumberOperatorLineEdit::evaluateExpression()
@@ -295,16 +293,13 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
 {
 	this->_mainLayout = new QVBoxLayout(parent);
 	this->_header = new PropertyGroupHeader(title, parent);
-	this->_content = new QFrame(parent);
-	this->_contentLayout = new QVBoxLayout(_content);
+	this->_content = new PropertyGroupContainer(parent);
 
 	this->_mainLayout->addWidget(_header, Qt::AlignTop);
 	this->_mainLayout->addWidget(_content, Qt::AlignTop);
 	this->_mainLayout->setContentsMargins(0, 0, 0, 0);
     this->_mainLayout->setSpacing(10);
     this->setLayout(_mainLayout);
-
-    this->_contentLayout->setSpacing(0);
 
     this->_header->setStyleSheet(
         "QFrame {"
@@ -314,16 +309,53 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
         "}"
     );
 
-    this->_header->setFixedHeight(30);
-    this->setBaseSize(300, height());
-
     this->_content->setStyleSheet(
-        "QFrame {"
-        "background-color: rgb(30, 30, 30);"
-		"border-bottom-left-radius: 10px;"
-		"border-bottom-right-radius: 10px;"
-        "}"
-    );
+		"QFrame {"
+		"background-color: rgb(30, 30, 30);"
+		"}"
+	);
+
+    this->_header->setFixedHeight(30);
 }
 
-QVBoxLayout* PropertyGroup::getLayout() const { return this->_contentLayout; }
+QVBoxLayout* PropertyGroup::getLayout() const { return this->_content->getLayout(); }
+
+PropertyGroupContainer::PropertyGroupContainer(QWidget* parent) : QFrame(parent)
+{
+	this->_mainLayout = new QVBoxLayout(this);
+	this->setLayout(_mainLayout);
+
+    setAttribute(Qt::WA_OpaquePaintEvent);
+}
+
+QVBoxLayout* PropertyGroupContainer::getLayout() const
+{
+    return this->_mainLayout;
+}
+
+void PropertyGroupContainer::paintEvent(QPaintEvent* event)
+{
+	QFrame::paintEvent(event);
+
+    QPainterPath path;
+    path.moveTo(0, 0); // Inizia dal punto superiore sinistro
+    path.lineTo(width(), 0); // Linea orizzontale sopra
+    path.lineTo(width(), height() - 10); // Linea verticale destra fino alla curva
+
+    // Curva in basso a destra
+    path.quadTo(width(), height(), width() - 10, height());
+
+    path.lineTo(10, height()); // Linea orizzontale inferiore fino alla curva
+
+    // Curva in basso a sinistra
+    path.quadTo(0, height(), 0, height() - 10);
+
+    path.lineTo(0, 0); // Linea verticale a sinistra
+    path.closeSubpath(); // Chiude il percorso
+
+	QPainter painter(this);
+	QRect rect(0, 0, width(), height());
+	painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(rect, QColor(30, 30, 30, 0));
+    painter.fillPath(path, QColor(30, 30, 30, 0));
+}

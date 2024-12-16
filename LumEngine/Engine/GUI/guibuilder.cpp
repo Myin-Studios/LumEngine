@@ -81,128 +81,19 @@ GuiBuilder::GuiBuilder()
 	group->getLayout()->addWidget(widgetContainer);
 
 	PropertyGroup* group2 = new PropertyGroup("RigidBody");
-	group2->getLayout()->addWidget(new QLabel("Constraits"));
-	group2->getLayout()->addWidget(new QLabel("Mass"));
-	group2->getLayout()->addWidget(new QLabel("Friction"));
-	group2->getLayout()->addWidget(new QLabel("Restitution"));
-	group2->getLayout()->addWidget(new QLabel("Linear Damping"));
-	group2->getLayout()->addWidget(new QLabel("Angular Damping"));
-	group2->getLayout()->addWidget(new QLabel("Linear Factor"));
-	group2->getLayout()->addWidget(new QLabel("Angular Factor"));
-	group2->getLayout()->addWidget(new QLabel("Gravity"));
-	group2->getLayout()->addWidget(new QLabel("Kinematic"));
-	group2->getLayout()->addWidget(new QLabel("Sleeping"));
-	group2->getLayout()->addWidget(new QLabel("Collision Group"));
-	group2->getLayout()->addWidget(new QLabel("Collision Mask"));
-	group2->getLayout()->addWidget(new QLabel("Collision Response"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Type"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Size"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Offset"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Rotation"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Mass"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Friction"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Restitution"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Linear Damping"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Angular Damping"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Linear Factor"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Angular Factor"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Gravity"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Kinematic"));
-	group2->getLayout()->addWidget(new QLabel("Collision Shape Sleeping"));
+    QStringList labels = { "Constraits", "Mass", "Friction", "Restitution", "Linear Damping",
+                          "Angular Damping", "Linear Factor", "Angular Factor", "Gravity",
+                          "Kinematic", "Sleeping", "Collision Group", "Collision Mask",
+                          "Collision Response", "Collision Shape", "Collision Shape Type",
+                          "Collision Shape Size", "Collision Shape Offset", "Collision Shape Rotation",
+                          "Collision Shape Mass", "Collision Shape Friction", "Collision Shape Restitution",
+                          "Collision Shape Linear Damping", "Collision Shape Angular Damping",
+                          "Collision Shape Linear Factor", "Collision Shape Angular Factor",
+                          "Collision Shape Gravity", "Collision Shape Kinematic", "Collision Shape Sleeping" };
 
-	PropertyGroup* group3 = new PropertyGroup("RigidBody");
-    group3->getLayout()->addWidget(new QLabel("Constraits"));
-    group3->getLayout()->addWidget(new QLabel("Mass"));
-    group3->getLayout()->addWidget(new QLabel("Friction"));
-    group3->getLayout()->addWidget(new QLabel("Restitution"));
-    group3->getLayout()->addWidget(new QLabel("Linear Damping"));
-    group3->getLayout()->addWidget(new QLabel("Angular Damping"));
-    group3->getLayout()->addWidget(new QLabel("Linear Factor"));
-    group3->getLayout()->addWidget(new QLabel("Angular Factor"));
-    group3->getLayout()->addWidget(new QLabel("Gravity"));
-    group3->getLayout()->addWidget(new QLabel("Kinematic"));
-    group3->getLayout()->addWidget(new QLabel("Sleeping"));
-    group3->getLayout()->addWidget(new QLabel("Collision Group"));
-    group3->getLayout()->addWidget(new QLabel("Collision Mask"));
-    group3->getLayout()->addWidget(new QLabel("Collision Response"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Type"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Size"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Offset"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Rotation"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Mass"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Friction"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Restitution"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Linear Damping"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Angular Damping"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Linear Factor"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Angular Factor"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Gravity"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Kinematic"));
-    group3->getLayout()->addWidget(new QLabel("Collision Shape Sleeping"));
-
-	PropertyGroup* group4 = new PropertyGroup("RigidBody");
-    group4->getLayout()->addWidget(new QLabel("Constraits"));
-    group4->getLayout()->addWidget(new QLabel("Mass"));
-    group4->getLayout()->addWidget(new QLabel("Friction"));
-    group4->getLayout()->addWidget(new QLabel("Restitution"));
-    group4->getLayout()->addWidget(new QLabel("Linear Damping"));
-    group4->getLayout()->addWidget(new QLabel("Angular Damping"));
-    group4->getLayout()->addWidget(new QLabel("Linear Factor"));
-    group4->getLayout()->addWidget(new QLabel("Angular Factor"));
-    group4->getLayout()->addWidget(new QLabel("Gravity"));
-    group4->getLayout()->addWidget(new QLabel("Kinematic"));
-    group4->getLayout()->addWidget(new QLabel("Sleeping"));
-    group4->getLayout()->addWidget(new QLabel("Collision Group"));
-    group4->getLayout()->addWidget(new QLabel("Collision Mask"));
-    group4->getLayout()->addWidget(new QLabel("Collision Response"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Type"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Size"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Offset"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Rotation"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Mass"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Friction"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Restitution"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Linear Damping"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Angular Damping"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Linear Factor"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Angular Factor"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Gravity"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Kinematic"));
-    group4->getLayout()->addWidget(new QLabel("Collision Shape Sleeping"));
-
-	PropertyGroup* group5 = new PropertyGroup("RigidBody");
-    group5->getLayout()->addWidget(new QLabel("Constraits"));
-    group5->getLayout()->addWidget(new QLabel("Mass"));
-    group5->getLayout()->addWidget(new QLabel("Friction"));
-    group5->getLayout()->addWidget(new QLabel("Restitution"));
-    group5->getLayout()->addWidget(new QLabel("Linear Damping"));
-    group5->getLayout()->addWidget(new QLabel("Angular Damping"));
-    group5->getLayout()->addWidget(new QLabel("Linear Factor"));
-    group5->getLayout()->addWidget(new QLabel("Angular Factor"));
-    group5->getLayout()->addWidget(new QLabel("Gravity"));
-    group5->getLayout()->addWidget(new QLabel("Kinematic"));
-    group5->getLayout()->addWidget(new QLabel("Sleeping"));
-    group5->getLayout()->addWidget(new QLabel("Collision Group"));
-    group5->getLayout()->addWidget(new QLabel("Collision Mask"));
-    group5->getLayout()->addWidget(new QLabel("Collision Response"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Type"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Size"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Offset"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Rotation"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Mass"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Friction"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Restitution"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Linear Damping"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Angular Damping"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Linear Factor"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Angular Factor"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Gravity"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Kinematic"));
-    group5->getLayout()->addWidget(new QLabel("Collision Shape Sleeping"));
+    for (const QString& label : labels) {
+        group2->getLayout()->addWidget(new QLabel(label));
+    }
 
     rightPanel->addPage("PROPERTIES", group);
     rightPanel->addPage("TEST", testFrame.release());
@@ -210,9 +101,6 @@ GuiBuilder::GuiBuilder()
     rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
     
 	rightPanel->addElement("PROPERTIES", group2);
-	// rightPanel->addElement("PROPERTIES", group3);
-	// rightPanel->addElement("PROPERTIES", group4);
-	// rightPanel->addElement("PROPERTIES", group5);
 
     topPanel->setStyleSheet("background-color: rgb(25, 25, 25);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

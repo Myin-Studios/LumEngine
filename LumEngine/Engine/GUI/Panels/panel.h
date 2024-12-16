@@ -11,6 +11,7 @@
 #include <QStackedWidget>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QScrollBar>
 
 #include "../Elements/Elements.h"
 
