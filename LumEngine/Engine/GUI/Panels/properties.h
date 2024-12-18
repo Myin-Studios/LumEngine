@@ -11,6 +11,7 @@
 #include <QLocale>
 #include <QPaintEvent>
 #include <QPainterPath>
+#include <QStyleOption>
 
 class PropertyGroupHeader : public QFrame
 {
@@ -33,6 +34,7 @@ public:
     PropertyGroupContainer(QWidget* parent = nullptr);
 
     QVBoxLayout* getLayout() const;
+    void addElement(QWidget* elem, Qt::AlignmentFlag flag = Qt::AlignTop);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;
@@ -48,6 +50,7 @@ public:
     PropertyGroup(const std::string& title, QWidget* parent = nullptr);
 
     QVBoxLayout* getLayout() const;
+    void addElement(QWidget* elem, Qt::AlignmentFlag flag = Qt::AlignTop);
 
 private:
 	QVBoxLayout* _mainLayout = nullptr;

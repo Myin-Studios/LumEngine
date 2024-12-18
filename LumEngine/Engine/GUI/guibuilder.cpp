@@ -66,41 +66,35 @@ GuiBuilder::GuiBuilder()
     std::unique_ptr<QFrame> testFrame2 = std::make_unique<QFrame>();
     testFrame2->setStyleSheet("QFrame { background-color: rgb(0, 255, 255); }");
 
-    QWidget* widgetContainer = new QWidget();
-    QVBoxLayout* _mainLayout = new QVBoxLayout(widgetContainer);
-    _mainLayout->addWidget(new QLabel("Position"));
-    _mainLayout->addWidget(new Vec3Property());
-    _mainLayout->addWidget(new QLabel("Rotation"));
-    _mainLayout->addWidget(new Vec3Property());
-    _mainLayout->addWidget(new QLabel("Scale"));
-    _mainLayout->addWidget(new Vec3Property());
-    _mainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    _mainLayout->setSpacing(0);
-
 	PropertyGroup* group = new PropertyGroup("Transform");
-	group->getLayout()->addWidget(widgetContainer);
+    group->addElement(new QLabel("Position"), Qt::AlignTop);
+    group->addElement(new Vec3Property(), Qt::AlignTop);
+    group->addElement(new QLabel("Rotation"), Qt::AlignTop);
+    group->addElement(new Vec3Property(), Qt::AlignTop);
+    group->addElement(new QLabel("Scale"), Qt::AlignTop);
+    group->addElement(new Vec3Property(), Qt::AlignTop);
 
-	PropertyGroup* group2 = new PropertyGroup("RigidBody");
-    QStringList labels = { "Constraits", "Mass", "Friction", "Restitution", "Linear Damping",
-                          "Angular Damping", "Linear Factor", "Angular Factor", "Gravity",
-                          "Kinematic", "Sleeping", "Collision Group", "Collision Mask",
-                          "Collision Response", "Collision Shape", "Collision Shape Type",
-                          "Collision Shape Size", "Collision Shape Offset", "Collision Shape Rotation",
-                          "Collision Shape Mass", "Collision Shape Friction", "Collision Shape Restitution",
-                          "Collision Shape Linear Damping", "Collision Shape Angular Damping",
-                          "Collision Shape Linear Factor", "Collision Shape Angular Factor",
-                          "Collision Shape Gravity", "Collision Shape Kinematic", "Collision Shape Sleeping" };
-
-    for (const QString& label : labels) {
-        group2->getLayout()->addWidget(new QLabel(label));
-    }
+	// PropertyGroup* group2 = new PropertyGroup("RigidBody");
+    // QStringList labels = { "Constraits", "Mass", "Friction", "Restitution", "Linear Damping",
+    //                       "Angular Damping", "Linear Factor", "Angular Factor", "Gravity",
+    //                       "Kinematic", "Sleeping", "Collision Group", "Collision Mask",
+    //                       "Collision Response", "Collision Shape", "Collision Shape Type",
+    //                       "Collision Shape Size", "Collision Shape Offset", "Collision Shape Rotation",
+    //                       "Collision Shape Mass", "Collision Shape Friction", "Collision Shape Restitution",
+    //                       "Collision Shape Linear Damping", "Collision Shape Angular Damping",
+    //                       "Collision Shape Linear Factor", "Collision Shape Angular Factor",
+    //                       "Collision Shape Gravity", "Collision Shape Kinematic", "Collision Shape Sleeping" };
+    // 
+    // for (const QString& label : labels) {
+    //     group2->addElement(new QLabel(label));
+    // }
 
     rightPanel->addPage("PROPERTIES", group);
-    rightPanel->addPage("TEST", testFrame.release());
-    rightPanel->addPage("TEST2", testFrame2.release());
-    rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
+    // rightPanel->addPage("TEST", testFrame.release());
+    // rightPanel->addPage("TEST2", testFrame2.release());
+    // rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
     
-	rightPanel->addElement("PROPERTIES", group2);
+	// rightPanel->addElement("PROPERTIES", group2);
 
     topPanel->setStyleSheet("background-color: rgb(25, 25, 25);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -113,7 +107,7 @@ GuiBuilder::GuiBuilder()
     centralLayout->addWidget(topPanel.get(), 0, Qt::AlignTop);
     centralLayout->addWidget(sceneConsoleSplitter.get());
 
-    centralLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+    centralLayout->setContentsMargins(0, 0, 0, 0);
 
     mainContainer->setLayout(centralLayout.get());
 

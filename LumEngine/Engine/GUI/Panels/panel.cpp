@@ -36,7 +36,7 @@ BasePanel::BasePanel(const std::string& title)
         "QScrollBar::handle:vertical {"
         "    background: rgb(50, 50, 50);"
         "    min-height: 20px;"
-		"    border-radius: 3px;"
+        "    border-radius: 3px;"
         "    width: 5px;" // Larghezza iniziale del gestore
         "    margin-left: 2px;" // Centrare il gestore
         "    margin-right: 2px;"
@@ -65,23 +65,38 @@ BasePanel::BasePanel(const std::string& title)
         "}"
     );
 
-	scrollable->setVerticalScrollBar(scrollBar);
+    scrollable->setVerticalScrollBar(scrollBar);
+    scrollable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    scrollable->setMinimumHeight(0);
 
     // Configurazione del layout interno
+    scrollContentLayout->setSpacing(0);
+    scrollContentLayout->setAlignment(Qt::AlignTop);
     scrollContentLayout->addWidget(this->_stackedWidget);
+    scrollContentLayout->setSizeConstraint(QLayout::SetMinimumSize);
+
     scrollContent->setLayout(scrollContentLayout);
+    scrollContent->setContentsMargins(0, 0, 0, 0);
+    scrollContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    this->_stackedWidget->setContentsMargins(0, 0, 0, 0);
+    this->_stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    this->_stackedWidget->setMinimumHeight(0);
+    this->_stackedWidget->setMinimumWidth(0);
 
     // Imposta il layout principale
     this->_mainContainerLayout->setSpacing(0);
     this->_mainContainerLayout->addLayout(this->_headersLayout);
     this->_mainContainerLayout->addWidget(scrollable);
+    this->_mainContainerLayout->addStretch();
 
     this->_headersLayout->setContentsMargins(10, 10, 10, 10);
     this->_headersLayout->setSpacing(2);
 
     // Configura il layout del pannello
     this->setLayout(this->_mainContainerLayout);
-    this->setMinimumSize(300, this->height());
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    this->setMinimumSize(300, 0);
 }
 
 BasePanel::~BasePanel()
@@ -204,13 +219,12 @@ PanelHeader::PanelHeader(const std::string& title, QWidget* parent) : QPushButto
 {
     this->_title = std::make_unique<QString>(QString(title.c_str()));
 
-    // Impostiamo lo stile con bordi arrotondati
     this->setStyleSheet(
         "QPushButton {"
         "border-top-left-radius: 10px;"
         "border-top-right-radius: 10px;"
         "background-color: rgb(25, 25, 25);"
-        "border: none;" // Rimuove i bordi predefiniti del QPushButton
+        "border: none;"
         "}"
     );
 
@@ -289,36 +303,11 @@ void PanelHeader::paintEvent(QPaintEvent* event)
 void PanelHeader::focusInEvent(QFocusEvent* event)
 {
     update();
-
-    // this->setStyleSheet(
-    //     "QFrame {"
-    //     "    border-top-left-radius: 10px;"
-    //     "    border-top-right-radius: 10px;"
-    //     "    background-color: rgb(20, 20, 20);"
-    //     "    border: none;"
-    //     "    border-top: 2px solid linear-gradient(to right, "
-    //     "                      rgba(3, 102, 252, 0), "
-    //     "                      #0366fc, "
-    //     "                      rgba(3, 102, 252, 0));"
-    //     "    background-position: top;"
-    //     "}"
-    // );
-
 }
 
 void PanelHeader::focusOutEvent(QFocusEvent* event)
 {
     update();
-
-    // this->setStyleSheet(
-    //     "QFrame{"
-    //     "border: none;"
-    //     "border-top: 2px solid rgb(150, 150, 150);"
-    //     "border-top-left-radius: 10px;"
-    //     "border-top-right-radius: 10px;"
-    //     "background-color: rgb(20, 20, 20);"
-    //     "}"
-    // );
 }
 
 ContainerPanel::ContainerPanel(QWidget* parent)

@@ -2,6 +2,8 @@
 
 Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
 {
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    this->setMinimumSize(0, 0);
     this->setStyleSheet(
         "background-color: rgb(30, 30, 30);"
     );
@@ -126,7 +128,6 @@ NumberOperatorLineEdit::NumberOperatorLineEdit(QWidget* parent) : QLineEdit(pare
     setMaxLength(50);
 
     setStyleSheet(normalStyle);
-    setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
 void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
@@ -169,6 +170,15 @@ void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
 
 void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 {
+    if (this->hasFocus())
+    {
+        this->setStyleSheet(focusStyle);
+    }
+    else
+    {
+        this->setStyleSheet(normalStyle);
+    }
+
 	QLineEdit::paintEvent(event);
 
 	QPainter painter(this);
@@ -291,15 +301,14 @@ void PropertyGroupHeader::paintEvent(QPaintEvent* event)
 
 PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidget(parent)
 {
-	this->_mainLayout = new QVBoxLayout(parent);
-	this->_header = new PropertyGroupHeader(title, parent);
-	this->_content = new PropertyGroupContainer(parent);
+    this->_mainLayout = new QVBoxLayout(this);
+    this->_header = new PropertyGroupHeader(title, this);
+    this->_content = new PropertyGroupContainer(this);
 
-	this->_mainLayout->addWidget(_header, Qt::AlignTop);
-	this->_mainLayout->addWidget(_content, Qt::AlignTop);
-	this->_mainLayout->setContentsMargins(0, 0, 0, 0);
+    this->_mainLayout->addWidget(_header, 0, Qt::AlignTop);
+    this->_mainLayout->addWidget(_content, 0, Qt::AlignTop);
+    this->_mainLayout->setContentsMargins(0, 0, 0, 0);
     this->_mainLayout->setSpacing(10);
-    this->setLayout(_mainLayout);
 
     this->_header->setStyleSheet(
         "QFrame {"
@@ -310,52 +319,90 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
     );
 
     this->_content->setStyleSheet(
-		"QFrame {"
-		"background-color: rgb(30, 30, 30);"
-		"}"
-	);
+        "QFrame {"
+        "background-color: rgb(30, 30, 30);"
+        "border-bottom-left-radius: 10px;"
+        "border-bottom-right-radius: 10px;"
+        "}"
+    );
 
     this->_header->setFixedHeight(30);
+
+    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
+
 
 QVBoxLayout* PropertyGroup::getLayout() const { return this->_content->getLayout(); }
 
+void PropertyGroup::addElement(QWidget* elem, Qt::AlignmentFlag flag)
+{
+    this->_content->addElement(elem, flag);
+
+    this->adjustSize();
+}
+
 PropertyGroupContainer::PropertyGroupContainer(QWidget* parent) : QFrame(parent)
 {
-	this->_mainLayout = new QVBoxLayout(this);
-	this->setLayout(_mainLayout);
+    this->_mainLayout = new QVBoxLayout(this);
+    this->_mainLayout->setContentsMargins(10, 10, 10, 10);
+    this->_mainLayout->setSpacing(0);
+    this->_mainLayout->setAlignment(Qt::AlignTop);
 
-    setAttribute(Qt::WA_OpaquePaintEvent);
+    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 QVBoxLayout* PropertyGroupContainer::getLayout() const
 {
+    qDebug() << "Current size:" << this->size();
     return this->_mainLayout;
+}
+
+void PropertyGroupContainer::addElement(QWidget* elem, Qt::AlignmentFlag flag)
+{
+    this->_mainLayout->addWidget(elem, flag);
 }
 
 void PropertyGroupContainer::paintEvent(QPaintEvent* event)
 {
 	QFrame::paintEvent(event);
-
+    
     QPainterPath path;
     path.moveTo(0, 0); // Inizia dal punto superiore sinistro
     path.lineTo(width(), 0); // Linea orizzontale sopra
     path.lineTo(width(), height() - 10); // Linea verticale destra fino alla curva
-
+    
     // Curva in basso a destra
     path.quadTo(width(), height(), width() - 10, height());
-
+    
     path.lineTo(10, height()); // Linea orizzontale inferiore fino alla curva
-
+    
     // Curva in basso a sinistra
     path.quadTo(0, height(), 0, height() - 10);
-
+    
     path.lineTo(0, 0); // Linea verticale a sinistra
     path.closeSubpath(); // Chiude il percorso
-
+    
 	QPainter painter(this);
 	QRect rect(0, 0, width(), height());
 	painter.setRenderHint(QPainter::Antialiasing);
-    painter.fillRect(rect, QColor(30, 30, 30, 0));
-    painter.fillPath(path, QColor(30, 30, 30, 0));
+    painter.fillPath(path, QColor(30, 30, 30));
+
+    //QPolygon polygon;
+    //for (int i = 0; i < path.elementCount(); ++i)
+    //{
+    //    QPainterPath::Element element = path.elementAt(i);
+    //    polygon << QPoint(static_cast<int>(element.x), static_cast<int>(element.y));
+    //}
+    //
+    //QRegion region(polygon);
+    //
+    //if (this->testAttribute(Qt::WA_StyledBackground))
+    //{
+    //    painter.setClipRegion(region);
+    //    QStyleOption opt;
+    //    opt.initFrom(this);
+    //    style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
+    //}
 }
