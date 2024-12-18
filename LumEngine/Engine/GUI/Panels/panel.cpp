@@ -66,23 +66,16 @@ BasePanel::BasePanel(const std::string& title)
     );
 
     scrollable->setVerticalScrollBar(scrollBar);
-    scrollable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    scrollable->setMinimumHeight(0);
-
+    
     // Configurazione del layout interno
     scrollContentLayout->setSpacing(0);
     scrollContentLayout->setAlignment(Qt::AlignTop);
     scrollContentLayout->addWidget(this->_stackedWidget);
-    scrollContentLayout->setSizeConstraint(QLayout::SetMinimumSize);
 
     scrollContent->setLayout(scrollContentLayout);
     scrollContent->setContentsMargins(0, 0, 0, 0);
-    scrollContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     this->_stackedWidget->setContentsMargins(0, 0, 0, 0);
-    this->_stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    this->_stackedWidget->setMinimumHeight(0);
-    this->_stackedWidget->setMinimumWidth(0);
 
     // Imposta il layout principale
     this->_mainContainerLayout->setSpacing(0);
@@ -95,8 +88,6 @@ BasePanel::BasePanel(const std::string& title)
 
     // Configura il layout del pannello
     this->setLayout(this->_mainContainerLayout);
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    this->setMinimumSize(300, 0);
 }
 
 BasePanel::~BasePanel()
