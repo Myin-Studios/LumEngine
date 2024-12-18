@@ -309,6 +309,7 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
     this->_mainLayout->addWidget(_content, 0, Qt::AlignTop);
     this->_mainLayout->setContentsMargins(0, 0, 0, 0);
     this->_mainLayout->setSpacing(10);
+    this->_mainLayout->addStretch();
 
     this->_header->setStyleSheet(
         "QFrame {"
@@ -328,9 +329,6 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
 
     this->_header->setFixedHeight(30);
 
-    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    this->setMinimumHeight(0);
-    this->setMaximumHeight(0);
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
@@ -351,7 +349,9 @@ PropertyGroupContainer::PropertyGroupContainer(QWidget* parent) : QFrame(parent)
     this->_mainLayout->setSpacing(0);
     this->_mainLayout->setAlignment(Qt::AlignTop);
 
-    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    this->setMinimumHeight(0);
+    this->setMaximumHeight(0);
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 

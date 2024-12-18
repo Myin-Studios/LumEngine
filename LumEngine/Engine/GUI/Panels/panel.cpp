@@ -20,67 +20,67 @@ BasePanel::BasePanel(const std::string& title)
     QVBoxLayout* scrollContentLayout = new QVBoxLayout(scrollContent);
     QScrollBar* scrollBar = new QScrollBar();
 
-    // Configura lo scroll area
-    scrollable->setWidget(scrollContent);
-    scrollable->setWidgetResizable(true); // Permette il ridimensionamento
-    scrollable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-    scrollBar->setStyleSheet(
-        "QScrollBar:vertical {"
-        "    border: none;"
-        "    background: rgb(25, 25, 25);"
-        "    width: 10px;" // Questo controlla la larghezza del contenitore
-        "    margin: 0px 0px 0px 0px;"
-        "}"
-        "QScrollBar::handle:vertical {"
-        "    background: rgb(50, 50, 50);"
-        "    min-height: 20px;"
-        "    border-radius: 3px;"
-        "    width: 5px;" // Larghezza iniziale del gestore
-        "    margin-left: 2px;" // Centrare il gestore
-        "    margin-right: 2px;"
-        "}"
-        "QScrollBar::handle:vertical:hover {"
-        "    background: rgb(70, 70, 70);"
-        "    width: 10px;" // Larghezza al passaggio del mouse
-        "    margin-left: 1px;" // Regola per centrare
-        "    margin-right: 1px;"
-        "}"
-        "QScrollBar::add-line:vertical {"
-        "    height: 0px;"
-        "    subcontrol-position: bottom;"
-        "    subcontrol-origin: margin;"
-        "}"
-        "QScrollBar::sub-line:vertical {"
-        "    height: 0px;"
-        "    subcontrol-position: top;"
-        "    subcontrol-origin: margin;"
-        "}"
-        "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
-        "    background: none;"
-        "}"
-        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
-        "    background: none;"
-        "}"
-    );
-
-    scrollable->setVerticalScrollBar(scrollBar);
-    
-    // Configurazione del layout interno
-    scrollContentLayout->setSpacing(0);
-    scrollContentLayout->setAlignment(Qt::AlignTop);
-    scrollContentLayout->addWidget(this->_stackedWidget);
-
-    scrollContent->setLayout(scrollContentLayout);
-    scrollContent->setContentsMargins(0, 0, 0, 0);
+    // // Configura lo scroll area
+    // scrollable->setWidget(scrollContent);
+    // scrollable->setWidgetResizable(true); // Permette il ridimensionamento
+    // scrollable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // scrollable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    // 
+    // scrollBar->setStyleSheet(
+    //     "QScrollBar:vertical {"
+    //     "    border: none;"
+    //     "    background: rgb(25, 25, 25);"
+    //     "    width: 10px;" // Questo controlla la larghezza del contenitore
+    //     "    margin: 0px 0px 0px 0px;"
+    //     "}"
+    //     "QScrollBar::handle:vertical {"
+    //     "    background: rgb(50, 50, 50);"
+    //     "    min-height: 20px;"
+    //     "    border-radius: 3px;"
+    //     "    width: 5px;" // Larghezza iniziale del gestore
+    //     "    margin-left: 2px;" // Centrare il gestore
+    //     "    margin-right: 2px;"
+    //     "}"
+    //     "QScrollBar::handle:vertical:hover {"
+    //     "    background: rgb(70, 70, 70);"
+    //     "    width: 10px;" // Larghezza al passaggio del mouse
+    //     "    margin-left: 1px;" // Regola per centrare
+    //     "    margin-right: 1px;"
+    //     "}"
+    //     "QScrollBar::add-line:vertical {"
+    //     "    height: 0px;"
+    //     "    subcontrol-position: bottom;"
+    //     "    subcontrol-origin: margin;"
+    //     "}"
+    //     "QScrollBar::sub-line:vertical {"
+    //     "    height: 0px;"
+    //     "    subcontrol-position: top;"
+    //     "    subcontrol-origin: margin;"
+    //     "}"
+    //     "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+    //     "    background: none;"
+    //     "}"
+    //     "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+    //     "    background: none;"
+    //     "}"
+    // );
+    // 
+    // scrollable->setVerticalScrollBar(scrollBar);
+    // 
+    // // Configurazione del layout interno
+    // scrollContentLayout->setSpacing(0);
+    // scrollContentLayout->setAlignment(Qt::AlignTop);
+    // scrollContentLayout->addWidget(this->_stackedWidget);
+    // 
+    // scrollContent->setLayout(scrollContentLayout);
+    // scrollContent->setContentsMargins(0, 0, 0, 0);
 
     this->_stackedWidget->setContentsMargins(0, 0, 0, 0);
 
     // Imposta il layout principale
-    this->_mainContainerLayout->setSpacing(0);
+    this->_mainContainerLayout->setSpacing(10);
     this->_mainContainerLayout->addLayout(this->_headersLayout);
-    this->_mainContainerLayout->addWidget(scrollable);
+    this->_mainContainerLayout->addWidget(this->_stackedWidget);
     this->_mainContainerLayout->addStretch();
 
     this->_headersLayout->setContentsMargins(10, 10, 10, 10);
@@ -88,6 +88,9 @@ BasePanel::BasePanel(const std::string& title)
 
     // Configura il layout del pannello
     this->setLayout(this->_mainContainerLayout);
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Aggiungi questa linea
+    this->setMinimumSize(300, 0); // Assicurati che la dimensione minima sia corretta
+
 }
 
 BasePanel::~BasePanel()
