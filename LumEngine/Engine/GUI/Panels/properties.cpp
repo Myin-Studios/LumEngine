@@ -302,8 +302,8 @@ void PropertyGroupHeader::paintEvent(QPaintEvent* event)
 PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidget(parent)
 {
     this->_mainLayout = new QVBoxLayout(this);
-    this->_header = new PropertyGroupHeader(title, this);
-    this->_content = new PropertyGroupContainer(this);
+    this->_header = new PropertyGroupHeader(title);
+    this->_content = new PropertyGroupContainer();
 
     this->_mainLayout->addWidget(_header, 0, Qt::AlignTop);
     this->_mainLayout->addWidget(_content, 0, Qt::AlignTop);
@@ -329,6 +329,8 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
     this->_header->setFixedHeight(30);
 
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    this->setMinimumHeight(0);
+    this->setMaximumHeight(0);
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
