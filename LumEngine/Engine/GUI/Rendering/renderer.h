@@ -132,7 +132,10 @@ private:
 
     vector<Light> lights;
 
+	Outline* outline;
+
     Shader* outlineShader;
+    Shader* backupShader;
 
     GLuint FBO = 0;
     GLuint fboTexture = 0;

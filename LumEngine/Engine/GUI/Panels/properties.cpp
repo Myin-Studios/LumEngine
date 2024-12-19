@@ -8,48 +8,33 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
         "background-color: rgb(30, 30, 30);"
     );
 
-    xTextFrame = new CoordinateFrame("X", this);
-    yTextFrame = new CoordinateFrame("Y", this);
-    zTextFrame = new CoordinateFrame("Z", this);
-
-    xTextFrame->setStyleSheet(
-    "border: 1 solid rgb(255, 0, 0);"
-        "border-radius: 7px;");
-
-    yTextFrame->setStyleSheet(
-        "border: 1 solid rgb(0, 255, 0); "
-        "border-radius: 7px;");
-
-    zTextFrame->setStyleSheet(
-        "border: 1 solid rgb(0, 0, 255); "
-        "border-radius: 7px;");
+    // xTextFrame = new CoordinateFrame("X", this);
+    // yTextFrame = new CoordinateFrame("Y", this);
+    // zTextFrame = new CoordinateFrame("Z", this);
+    // 
+    // xTextFrame->setStyleSheet(
+    // "border: 1 solid rgb(255, 0, 0);"
+    //     "border-radius: 7px;");
+    // 
+    // yTextFrame->setStyleSheet(
+    //     "border: 1 solid rgb(0, 255, 0); "
+    //     "border-radius: 7px;");
+    // 
+    // zTextFrame->setStyleSheet(
+    //     "border: 1 solid rgb(0, 0, 255); "
+    //     "border-radius: 7px;");
 
     xValue = new NumberOperatorLineEdit(this);
     yValue = new NumberOperatorLineEdit(this);
     zValue = new NumberOperatorLineEdit(this);
 
-    xValue->setStyleSheet(
-        "QDoubleSpinBox {"
-        "background-color: rgb(25, 25, 25);"
-        "border-color: rgb(35, 35, 35);"
-		"}"
-    );
-    yValue->setStyleSheet(
-        "QDoubleSpinBox {"
-        "background-color: rgb(25, 25, 25);"
-        "border-color: rgb(35, 35, 35);"
-        "}"
-    );
-    zValue->setStyleSheet(
-        "QDoubleSpinBox {"
-        "background-color: rgb(25, 25, 25);"
-        "border-color: rgb(35, 35, 35);"
-        "}"
-    );
+    xValue->setCoordinate(Coordinate::X);
+    yValue->setCoordinate(Coordinate::Y);
+    zValue->setCoordinate(Coordinate::Z);
 
-    xTextFrame->setFixedSize(20, 20);
-    yTextFrame->setFixedSize(20, 20);
-    zTextFrame->setFixedSize(20, 20);
+    // xTextFrame->setFixedSize(20, 20);
+    // yTextFrame->setFixedSize(20, 20);
+    // zTextFrame->setFixedSize(20, 20);
 
     xValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     yValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -57,16 +42,18 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
 
     _mainLayout = new QHBoxLayout(parent);
 
-    _mainLayout->addWidget(xTextFrame);
+    // _mainLayout->addWidget(xTextFrame);
     _mainLayout->addWidget(xValue);
-    _mainLayout->addWidget(yTextFrame);
+    // _mainLayout->addWidget(yTextFrame);
     _mainLayout->addWidget(yValue);
-    _mainLayout->addWidget(zTextFrame);
+    // _mainLayout->addWidget(zTextFrame);
     _mainLayout->addWidget(zValue);
+    
+    _mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    xTextFrame->show();
-    yTextFrame->show();
-    zTextFrame->show();
+    // xTextFrame->show();
+    // yTextFrame->show();
+    // zTextFrame->show();
 
     xValue->show();
     yValue->show();
@@ -109,25 +96,91 @@ void CoordinateFrame::paintEvent(QPaintEvent* event)
 }
 
 NumberOperatorLineEdit::NumberOperatorLineEdit(QWidget* parent) : QLineEdit(parent) {
-    normalStyle = "QLineEdit {"
+    normalStyleX = "QLineEdit {"
         "background-color: rgb(25, 25, 25);"
-        "border: 1 solid rgb(50, 50, 50);"
+        "border: 2 solid rgb(127, 0, 0);"
         "border-radius: 7px;"
         "color: rgb(255, 255, 255);"
         "}";
 
-    focusStyle = "QLineEdit {"
+    focusStyleX = "QLineEdit {"
         "background-color: rgb(25, 25, 25);"
-        "border: 1 solid rgb(3, 102, 252);"
+        "border: 2 solid rgb(255, 0, 0);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    normalStyleY = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(0, 127, 0);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    focusStyleY = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(0, 255, 0);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    normalStyleZ = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(0, 0, 127);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    focusStyleZ = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(0, 0, 255);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    normalStyleW = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(127, 0, 127);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+    focusStyleW = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(255, 0, 255);"
         "border-radius: 7px;"
         "color: rgb(255, 255, 255);"
         "}";
 
 	QLocale::setDefault(QLocale(QLocale::English));
-    setPlaceholderText("0.0");
-    setMaxLength(50);
+    this->setPlaceholderText("0.0");
+    this->setMaxLength(50);
 
-    setStyleSheet(normalStyle);
+    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    this->setMinimumSize(0, 0);
+}
+
+void NumberOperatorLineEdit::setCoordinate(Coordinate c)
+{
+    this->_coord = c;
+
+    switch (c)
+    {
+    case X:
+        this->setPlaceholderText("X");
+        break;
+    case Y:
+        this->setPlaceholderText("Y");
+        break;
+    case Z:
+        this->setPlaceholderText("Z");
+        break;
+    case W:
+        this->setPlaceholderText("W");
+        break;
+    default:
+        break;
+    }
 }
 
 void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
@@ -172,11 +225,59 @@ void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 {
     if (this->hasFocus())
     {
-        this->setStyleSheet(focusStyle);
+        switch (this->_coord)
+        {
+        case X:
+        {
+            this->setStyleSheet(focusStyleX);
+            break;
+        }
+        case Y:
+        {
+            this->setStyleSheet(focusStyleY);
+            break;
+        }
+        case Z:
+        {
+            this->setStyleSheet(focusStyleZ);
+            break;
+        }
+        case W:
+        {
+            this->setStyleSheet(focusStyleW);
+            break;
+        }
+        default:
+            break;
+        }
     }
     else
     {
-        this->setStyleSheet(normalStyle);
+        switch (this->_coord)
+        {
+        case X:
+        {
+            this->setStyleSheet(normalStyleX);
+            break;
+        }
+        case Y:
+        {
+            this->setStyleSheet(normalStyleY);
+            break;
+        }
+        case Z:
+        {
+            this->setStyleSheet(normalStyleZ);
+            break;
+        }
+        case W:
+        {
+            this->setStyleSheet(normalStyleW);
+            break;
+        }
+        default:
+            break;
+        }
     }
 
 	QLineEdit::paintEvent(event);
@@ -188,13 +289,11 @@ void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 void NumberOperatorLineEdit::focusInEvent(QFocusEvent* event)
 {
     QLineEdit::focusInEvent(event);
-    setStyleSheet(focusStyle);
 }
 
 void NumberOperatorLineEdit::focusOutEvent(QFocusEvent* event)
 {
     QLineEdit::focusOutEvent(event);
-    setStyleSheet(normalStyle);
 }
 
 void NumberOperatorLineEdit::evaluateExpression()
@@ -203,7 +302,7 @@ void NumberOperatorLineEdit::evaluateExpression()
     input.replace(",", "."); // Supporta numeri con la virgola
 
     // Espressione regolare per tokenizzare numeri e operatori
-    QRegularExpression regex("[+-]?(?:\\d+\\.\\d+|\\.\\d+|\\d+)|[-+*/]");
+    QRegularExpression regex("(?:\\d+\\.\\d+|\\.\\d+|\\d+)|[-+*/]");
 
     QRegularExpressionMatchIterator it = regex.globalMatch(input);
 
@@ -238,6 +337,14 @@ void NumberOperatorLineEdit::evaluateExpression()
             }
         }
         else {
+            if (token == "+")
+                break;
+            if (token == "-")
+            {
+                lastOperator = "-";
+                continue;
+            }
+
             bool ok = false;
             double value = token.toDouble(&ok);
             if (!ok) {
@@ -329,6 +436,8 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
 
     this->_header->setFixedHeight(30);
 
+    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    this->setMinimumSize(0, 0);
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
@@ -346,11 +455,11 @@ PropertyGroupContainer::PropertyGroupContainer(QWidget* parent) : QFrame(parent)
 {
     this->_mainLayout = new QVBoxLayout(this);
     this->_mainLayout->setContentsMargins(10, 10, 10, 10);
-    this->_mainLayout->setSpacing(0);
+    this->_mainLayout->setSpacing(5);
     this->_mainLayout->setAlignment(Qt::AlignTop);
 
-    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    this->setMinimumHeight(0);
+    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    this->setMinimumSize(0, 0);
     this->setMaximumHeight(0);
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }

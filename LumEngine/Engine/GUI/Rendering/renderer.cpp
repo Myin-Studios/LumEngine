@@ -115,6 +115,7 @@ void RendererCore::initializeGL()
     setupFrameBuffer();
     // setupSkysphere();
 
+	outline = new Outline();
     outlineShader = new Shader("Resources/Shaders/outlineVert.glsl", "Resources/Shaders/outlineFrag.glsl");
 
     RendererDebugger::checkOpenGLError("InitializeGL: Framebuffer setup");
@@ -213,31 +214,33 @@ void RendererCore::paintGL()
 
     if (!entities.empty())
     {
-        // Attiva stencil e depth test
+        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_STENCIL_TEST);
 
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);  // Scrivi 1 nello stencil buffer
-        glStencilMask(0xFF);
-
-        for (const auto& e : entities)
-        {
-            if (!IsRunning())
-            {
+        for (const auto& e : entities) {
+            if (!IsRunning()) {
                 e->DeserializeProperties();
             }
             else updateTimer->start();
 
-            if (e->GetCoreProperty<MeshCore>() != nullptr)
-            {
-                // Configura shader e materiale
-                e->GetCoreProperty<MeshCore>()->SetMaterial(std::make_shared<PBR>());
+            if (e->GetCoreProperty<MeshCore>() != nullptr) {
+                // PRIMO PASSAGGIO - Disegno della mesh normale
+                glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+                glStencilFunc(GL_ALWAYS, 1, 0xFF);
+                glStencilMask(0xFF);
+                glEnable(GL_DEPTH_TEST);
+
+                auto originalMat = e->GetCoreProperty<MeshCore>()->GetMaterial();
+                auto shader = originalMat->GetShader();
+                
+                // Un solo Draw per il primo passaggio
                 e->GetCoreProperty<MeshCore>()->Draw();
 
-                if (e->GetCoreProperty<Transform3DCore>() != nullptr)
-                {
-                    glm::mat4 tMat = glm::mat4(1.0f);
+                glm::mat4 tMat = glm::mat4(1.0f);
+
+                // Imposta le trasformazioni per la mesh principale
+                if (e->GetCoreProperty<Transform3DCore>() != nullptr) {
                     tMat = glm::translate(tMat, glm::vec3(
                         e->GetCoreProperty<Transform3DCore>()->position->x(),
                         e->GetCoreProperty<Transform3DCore>()->position->y(),
@@ -248,61 +251,65 @@ void RendererCore::paintGL()
                         e->GetCoreProperty<Transform3DCore>()->scale.y(),
                         e->GetCoreProperty<Transform3DCore>()->scale.z()
                     ));
-
-                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &tMat[0][0]);
+                    shader->setMat4x4("model", &tMat[0][0]);
+                }
+                
+                shader->setMat4x4("view", &view[0][0]);
+                shader->setMat4x4("projection", &proj[0][0]);
+                
+                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(originalMat)) {
+                    shader->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
+                    shader->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
+                    shader->setFloatArray("lightIntensities", intensities.size(), intensities.data());
+                    shader->setVec3("camPos", glm::vec3(
+                        editorCamera->GetTransform()->GetPosition().x(),
+                        editorCamera->GetTransform()->GetPosition().y(),
+                        editorCamera->GetTransform()->GetPosition().z()));
+                
+                    Color::Color c(1.0f, 0.5f, 0.0f);
+                    pbrMat->SetAlbedo(c);
+                    pbrMat->SetMetallic(1.0f);
+                    pbrMat->SetRoughness(0.4f);
                 }
 
-                // Configura altre uniformi per il rendering
+                // SECONDO PASSAGGIO - Disegno dell'outline
+                glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+                glStencilMask(0x00);
+                glDisable(GL_DEPTH_TEST);
+
+                // Imposta il materiale dell'outline
+                e->GetCoreProperty<MeshCore>()->SetMaterial(std::make_shared<Outline>());
+
+                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->use();
+
+				glm::mat4 outlineMat = glm::scale(tMat, glm::vec3(
+                    e->GetCoreProperty<Transform3DCore>()->scale.x() * 1.0001f,
+                    e->GetCoreProperty<Transform3DCore>()->scale.y() * 1.0001f,
+                    e->GetCoreProperty<Transform3DCore>()->scale.z() * 1.0001f
+                ));
+
+                // Calcola e imposta le trasformazioni per l'outline
+                if (e->GetCoreProperty<Transform3DCore>() != nullptr) {
+                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &outlineMat[0][0]);
+				}
+				else {
+					e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0f)[0][0]);
+				}
+
                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
                 e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
-            }
-        }
 
-        // Secondo passaggio: Disegno del contorno
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);  // Disegna solo dove lo stencil non è 1
-        glStencilMask(0x00);                  // Blocca aggiornamenti sullo stencil buffer
-        glDisable(GL_DEPTH_TEST);             // Disabilita il depth test per il contorno
-
-        for (const auto& e : entities)
-        {
-            if (!IsRunning())
-            {
-                e->DeserializeProperties();
-            }
-            else updateTimer->start();
-
-            if (e->GetCoreProperty<MeshCore>() != nullptr)
-            {
-                // Secondo passaggio: Renderizza l'outline
-                glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Renderizza solo dove lo stencil non è 1
-                glStencilMask(0x00);                 // Blocca aggiornamenti sul buffer stencil
-                glDisable(GL_DEPTH_TEST);            // Disabilita il test di profondità
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->SetShader(std::make_unique<Shader>(*outlineShader));
-
+                // Un solo Draw per il secondo passaggio
                 e->GetCoreProperty<MeshCore>()->Draw();
 
-                glm::mat4 outlineMat = glm::mat4(1.0f);
-                if (e->GetCoreProperty<Transform3DCore>() != nullptr)
-                {
-                    outlineMat = glm::translate(outlineMat, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->position->x(),
-                        e->GetCoreProperty<Transform3DCore>()->position->y(),
-                        e->GetCoreProperty<Transform3DCore>()->position->z()
-                    ));
-                    outlineMat = glm::scale(outlineMat, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->scale.x() * 1.05f,
-                        e->GetCoreProperty<Transform3DCore>()->scale.y() * 1.05f,
-                        e->GetCoreProperty<Transform3DCore>()->scale.z() * 1.05f
-                    ));
-                }
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &outlineMat[0][0]);
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
+                // Ripristina il materiale originale
+                e->GetCoreProperty<MeshCore>()->SetMaterial(originalMat);
             }
         }
 
+        // Ripristina gli stati OpenGL alla fine
+        glStencilMask(0xFF);
+        glEnable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
 
         // for (auto& e : entities)

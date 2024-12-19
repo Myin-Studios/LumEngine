@@ -89,6 +89,17 @@ public:
 	BlinnPhong() = default;
 };
 
+//--------------------------------{ Outline }--------------------------------
+
+class Outline : public Material
+{
+public:
+	Outline()
+	{
+		this->SetShader(std::make_unique<Shader>("Resources/Shaders/outlineVert.glsl", "Resources/Shaders/outlineFrag.glsl"));
+	}
+};
+
 //--------------------------------{ SKYBOX }--------------------------------
 
 class ProceduralSkybox : public Material

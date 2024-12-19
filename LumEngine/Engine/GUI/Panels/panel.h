@@ -70,7 +70,6 @@ protected:
 
 private:
     QVector<PanelHeader*> _headers;
-    ContainerPanel* _generalContainer;
     QStackedWidget* _stackedWidget;
 
     QHBoxLayout* _headersLayout;

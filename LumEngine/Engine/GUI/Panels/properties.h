@@ -59,23 +59,40 @@ private:
 	QVBoxLayout* _contentLayout = nullptr;
 };
 
+enum Coordinate
+{
+    X,
+    Y,
+    Z,
+    W
+};
+
 class NumberOperatorLineEdit : public QLineEdit {
     Q_OBJECT
 
 public:
     NumberOperatorLineEdit(QWidget* parent = nullptr);
-
-    void keyPressEvent(QKeyEvent* event) override;
+    void setCoordinate(Coordinate c = Coordinate::X);
 
 protected:
-	void paintEvent(QPaintEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
     void focusInEvent(QFocusEvent* event) override;
 	void focusOutEvent(QFocusEvent* event) override;
 
 private:
     void evaluateExpression();
-    QString normalStyle;
-    QString focusStyle;
+
+    Coordinate _coord = Coordinate::X;
+
+    QString normalStyleX;
+    QString normalStyleY;
+    QString normalStyleZ;
+    QString normalStyleW;
+    QString focusStyleX;
+    QString focusStyleY;
+    QString focusStyleZ;
+    QString focusStyleW;
 };
 
 class CoordinateFrame : public QFrame

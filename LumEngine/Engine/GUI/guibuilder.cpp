@@ -90,13 +90,11 @@ GuiBuilder::GuiBuilder()
     }
 
     rightPanel->addPage("PROPERTIES", group);
-    // rightPanel->addPage("TEST", testFrame.release());
+    rightPanel->addPage("TEST", testFrame.release());
     // rightPanel->addPage("TEST2", testFrame2.release());
     // rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
     
-    rightPanel->addElement("PROPERTIES", group2);
-
-    qDebug() << group->size() << group2->size();
+    // rightPanel->addElement("PROPERTIES", group2);
 
     topPanel->setStyleSheet("background-color: rgb(25, 25, 25);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
