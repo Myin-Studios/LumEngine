@@ -14,7 +14,7 @@ public:
     unsigned int ID;
 
     // constructor reads and builds the shader
-    Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "");
     Shader(const Shader& s);
     Shader(Shader&& s) noexcept;
 
@@ -27,6 +27,8 @@ public:
     void setFloatArray(const std::string& name, GLsizei count, const float* value) const;
     void setVec3(const std::string& name, glm::vec3 v3) const;
     void setVec3Array(const std::string& name, GLsizei count, const float* value) const;
+    void setVec4(const std::string& name, glm::vec4 v4) const;
+    void setVec4Array(const std::string& name, GLsizei count, const float* value) const;
     void setMat4x4(const std::string& name, const float* value) const;
 
     Shader& operator=(const Shader& s);
@@ -35,4 +37,5 @@ public:
 private:
     const char* vertPath;
     const char* fragPath;
+    const char* geomPath;
 };

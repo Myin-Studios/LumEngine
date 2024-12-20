@@ -37,6 +37,7 @@
 #include "Meshes/Mesh.h"
 #include "../LumEngine/Engine/Core/scriptingThreading.h"
 #include "../LumEngine/Engine/Core/LumEngineAPI.h"
+#include "Engine/Core/Rendering/RenderQueue/RenderQueue.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
@@ -155,6 +156,8 @@ private:
         -1.0f,  1.0f, 0.0f, 1.0f  // Top-left
     };
     Shader* fboShader = nullptr;
+
+    RenderQueue renderQueue;
 
     std::shared_ptr<ScriptRunnerThread> runningThread = nullptr;
 };

@@ -2,16 +2,23 @@
 
 out vec4 FragColor;
 
-in vec3 FragPos;  // Ricevi la posizione del vertice dal vertex shader
-in vec3 Normal;   // Ricevi la normale dal vertex shader
-in vec2 TexCoord; // Ricevi le coordinate texture dal vertex shader
-in vec3 WorldPos;
+// Input dal geometry shader
+in GS_OUT{
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoord;
+    vec3 WorldPos;
+    bool isOutline;
+} fs_in;
 
 uniform vec3  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
 uniform float alpha;
+
+uniform bool isOutline;
+uniform vec4 outlineColor;
 
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
@@ -61,24 +68,27 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 void main()
 {
-    vec3 N = normalize(Normal);
-    vec3 V = normalize(camPos - WorldPos);
+    // Check per l'outline all'inizio
+    if (isOutline || fs_in.isOutline) {
+        FragColor = outlineColor;
+        return;
+    }
 
+    // Il resto del codice rimane invariato, ma usa fs_in invece degli input diretti
+    vec3 N = normalize(fs_in.Normal);
+    vec3 V = normalize(camPos - fs_in.WorldPos);
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
-    // reflectance equation
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < 4; ++i)
     {
-        // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - WorldPos);
+        vec3 L = normalize(lightPositions[i] - fs_in.WorldPos);
         vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - WorldPos);
+        float distance = length(lightPositions[i] - fs_in.WorldPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = lightColors[i] * attenuation * lightIntensities[i];
 
-        // cook-torrance brdf
         float NDF = DistributionGGX(N, H, roughness);
         float G = GeometrySmith(N, V, L, roughness);
         vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
@@ -91,16 +101,14 @@ void main()
         float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
         vec3 specular = numerator / denominator;
 
-        // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
-
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(color, alpha);
 }

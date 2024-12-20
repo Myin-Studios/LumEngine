@@ -15,8 +15,13 @@ private:
     int ID = 0;
     static inline int nextID = 0;
 
+    bool isSelected = false;
+
 public:
     BaseEntity() : ID(nextID++) {}
+
+    bool IsSelected() const { return isSelected; }
+    void SetSelected(bool selected) { isSelected = selected; }
 
     const int GetEntityID() const { return ID; }
 

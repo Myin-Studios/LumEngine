@@ -73,6 +73,7 @@
     <None Include="Engine\Resources\Shaders\outlineFrag.glsl" />
     <None Include="Output\Debug\Resources\Shaders\outlineFrag.glsl" />
     <None Include="Output\Debug\Resources\Shaders\outlineVert.glsl" />
+    <None Include="Engine\Resources\Shaders\outline.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">
@@ -115,6 +116,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GUI\Elements\Elements.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\Rendering\RenderCommand\RenderCommand.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,6 +186,12 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Elements\Elements.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\Rendering\RenderCommand\RenderCommand.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\Rendering\RenderQueue\RenderQueue.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

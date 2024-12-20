@@ -57,6 +57,7 @@
     <None Include="Engine\Resources\Shaders\fboFragment.glsl" />
     <None Include="Engine\Resources\Shaders\fboVertex.glsl" />
     <None Include="Engine\Resources\Shaders\fragmentShader.glsl" />
+    <None Include="Engine\Resources\Shaders\outline.glsl" />
     <None Include="Engine\Resources\Shaders\outlineFrag.glsl" />
     <None Include="Engine\Resources\Shaders\outlineVert.glsl" />
     <None Include="Engine\Resources\Shaders\PBRFrag.glsl" />
@@ -82,6 +83,8 @@
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
     <ClInclude Include="Engine\Core\CMAPICore.h" />
     <ClInclude Include="Engine\Core\LumEngineAPI.h" />
+    <ClInclude Include="Engine\Core\Rendering\RenderCommand\RenderCommand.h" />
+    <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
@@ -103,6 +106,8 @@
     <QtMoc Include="Engine\Core\hostInitializer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Core\Rendering\RenderCommand\RenderCommand.cpp" />
+    <ClCompile Include="Engine\Core\Rendering\RenderQueue\RenderQueue.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\tabsbutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp" />

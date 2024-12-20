@@ -214,103 +214,39 @@ void RendererCore::paintGL()
 
     if (!entities.empty())
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_STENCIL_TEST);
-
         for (const auto& e : entities) {
-            if (!IsRunning()) {
-                e->DeserializeProperties();
-            }
-            else updateTimer->start();
-
             if (e->GetCoreProperty<MeshCore>() != nullptr) {
-                // PRIMO PASSAGGIO - Disegno della mesh normale
-                glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-                glStencilFunc(GL_ALWAYS, 1, 0xFF);
-                glStencilMask(0xFF);
-                glEnable(GL_DEPTH_TEST);
+                RenderCommand cmd;
+                cmd.entity = e.get();
+                cmd.mesh = e->GetCoreProperty<MeshCore>();
+                cmd.material = e->GetCoreProperty<MeshCore>()->GetMaterial();
 
-                auto originalMat = e->GetCoreProperty<MeshCore>()->GetMaterial();
-                auto shader = originalMat->GetShader();
-                
-                // Un solo Draw per il primo passaggio
-                e->GetCoreProperty<MeshCore>()->Draw();
-
-                glm::mat4 tMat = glm::mat4(1.0f);
-
-                // Imposta le trasformazioni per la mesh principale
+                glm::mat4 transform = glm::mat4(1.0f);
                 if (e->GetCoreProperty<Transform3DCore>() != nullptr) {
-                    tMat = glm::translate(tMat, glm::vec3(
+                    transform = glm::translate(transform, glm::vec3(
                         e->GetCoreProperty<Transform3DCore>()->position->x(),
                         e->GetCoreProperty<Transform3DCore>()->position->y(),
                         e->GetCoreProperty<Transform3DCore>()->position->z()
                     ));
-                    tMat = glm::scale(tMat, glm::vec3(
+                    transform = glm::scale(transform, glm::vec3(
                         e->GetCoreProperty<Transform3DCore>()->scale.x(),
                         e->GetCoreProperty<Transform3DCore>()->scale.y(),
                         e->GetCoreProperty<Transform3DCore>()->scale.z()
                     ));
-                    shader->setMat4x4("model", &tMat[0][0]);
                 }
-                
-                shader->setMat4x4("view", &view[0][0]);
-                shader->setMat4x4("projection", &proj[0][0]);
-                
-                if (auto pbrMat = std::dynamic_pointer_cast<PBR>(originalMat)) {
-                    shader->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
-                    shader->setVec3Array("lightColors", lightColors.size(), glm::value_ptr(lightColors[0]));
-                    shader->setFloatArray("lightIntensities", intensities.size(), intensities.data());
-                    shader->setVec3("camPos", glm::vec3(
-                        editorCamera->GetTransform()->GetPosition().x(),
-                        editorCamera->GetTransform()->GetPosition().y(),
-                        editorCamera->GetTransform()->GetPosition().z()));
-                
-                    Color::Color c(1.0f, 0.5f, 0.0f);
-                    pbrMat->SetAlbedo(c);
-                    pbrMat->SetMetallic(1.0f);
-                    pbrMat->SetRoughness(0.4f);
-                }
-
-                // SECONDO PASSAGGIO - Disegno dell'outline
-                glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-                glStencilMask(0x00);
-                glDisable(GL_DEPTH_TEST);
-
-                // Imposta il materiale dell'outline
-                e->GetCoreProperty<MeshCore>()->SetMaterial(std::make_shared<Outline>());
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->use();
-
-				glm::mat4 outlineMat = glm::scale(tMat, glm::vec3(
-                    e->GetCoreProperty<Transform3DCore>()->scale.x() * 1.0001f,
-                    e->GetCoreProperty<Transform3DCore>()->scale.y() * 1.0001f,
-                    e->GetCoreProperty<Transform3DCore>()->scale.z() * 1.0001f
-                ));
-
-                // Calcola e imposta le trasformazioni per l'outline
-                if (e->GetCoreProperty<Transform3DCore>() != nullptr) {
-                    e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &outlineMat[0][0]);
-				}
-				else {
-					e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("model", &glm::mat4(1.0f)[0][0]);
-				}
-
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("view", &view[0][0]);
-                e->GetCoreProperty<MeshCore>()->GetMaterial()->GetShader()->setMat4x4("projection", &proj[0][0]);
-
-                // Un solo Draw per il secondo passaggio
-                e->GetCoreProperty<MeshCore>()->Draw();
-
-                // Ripristina il materiale originale
-                e->GetCoreProperty<MeshCore>()->SetMaterial(originalMat);
+                cmd.transform = transform;
+                renderQueue.push(cmd);
             }
         }
 
-        // Ripristina gli stati OpenGL alla fine
-        glStencilMask(0xFF);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_STENCIL_TEST);
+        // Chiama process UNA SOLA VOLTA dopo aver aggiunto tutti i comandi
+        renderQueue.process(view, proj, lightPositions, lightColors, intensities,
+            glm::vec3(
+                editorCamera->GetTransform()->GetPosition().x(),
+                editorCamera->GetTransform()->GetPosition().y(),
+                editorCamera->GetTransform()->GetPosition().z()
+            )
+        );
 
         // for (auto& e : entities)
         // {
@@ -740,9 +676,20 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
             rOrigin,
             rDirection);
 
-        if (res.hit)
-        {
-            std::cout << "Hit!" << std::endl;
+        if (res.hit) {
+            auto it = find_if(entities.begin(), entities.end(), [&](const auto& e) {
+                return e->GetEntityID() == res.entityId;
+                });
+
+            if (it != entities.end()) {
+                (*it)->SetSelected(true);
+                std::cout << "Hit!" << std::endl;
+            }
+        }
+        else {
+            for (auto& e : entities) {
+                e->SetSelected(false);
+            }
         }
     }
 }

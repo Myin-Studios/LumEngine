@@ -6,7 +6,7 @@ layout(location = 1) in vec3 aNormal; // Normale del vertice (importante per l'e
 uniform mat4 model; // Matrice del modello
 uniform mat4 view; // Matrice della vista
 uniform mat4 projection; // Matrice di proiezione
-uniform float outlineThickness = 0.1; // Spessore del contorno
+uniform float outlineThickness = 0.05; // Spessore del contorno
 
 out vec3 fragPos; // Posizione del vertice da passare al fragment shader
 

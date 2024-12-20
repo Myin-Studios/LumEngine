@@ -1,9 +1,10 @@
 #version 330 core
 
 out vec4 FragColor;
+uniform vec4 outlineColor;
 
 void main()
 {
     // Colore del contorno
-    FragColor = vec4(0.0, 0.5, 1.0, 1.0); // Azzurro
+    FragColor = outlineColor; // Azzurro
 }

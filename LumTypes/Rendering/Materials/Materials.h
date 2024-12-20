@@ -47,7 +47,7 @@ public:
 	{
 		_Albedo = Color::Color();
 
-		this->SetShader(std::make_unique<Shader>("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl"));
+		this->SetShader(std::make_unique<Shader>("Resources/Shaders/PBRVert.glsl", "Resources/Shaders/PBRFrag.glsl", "Resources/Shaders/outline.glsl"));
 	}
 
 	const Color::Color GetAlbedo() { return this->_Albedo; }
