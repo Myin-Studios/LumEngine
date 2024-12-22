@@ -76,6 +76,10 @@ public:
         return it != properties.end() ? it->get() : nullptr;
     }
 
+    const std::set<std::unique_ptr<IProperty>>& GetProperties() const {
+        return properties;
+    }
+
     void SerializeProperties() {
         for (auto& prop : properties) {
             prop->OnSerialize();

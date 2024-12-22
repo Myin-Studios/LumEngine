@@ -161,6 +161,67 @@ void BasePanel::addElement(const std::string& title, QWidget* elem) {
     }
 }
 
+void BasePanel::removeElement(const std::string& title, const std::string& elemName)
+{
+    auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
+        return header->getTitle()->toStdString() == title;
+        });
+
+    if (it != _headers.end()) {
+        int pageIndex = _headers.indexOf(*it);
+        QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
+        if (scrollable) {
+            QWidget* scrollContent = scrollable->widget();
+            QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
+
+            if (layout) {
+                for (int i = 0; i < layout->count(); ++i) {
+                    PropertyGroup* group = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget());
+                    if (group) {
+                        // Debug: stampa i titoli per confronto
+                        qDebug() << "Comparing titles:";
+                        qDebug() << "Group title:" << group->getTitle();
+                        qDebug() << "Expected title:" << QString::fromStdString(elemName);
+
+                        if (group->getTitle() == elemName) {
+                            group->hide();
+                            layout->removeWidget(group);
+                            layout->update();
+                            scrollContent->updateGeometry();
+                            scrollable->updateGeometry();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void BasePanel::removeAllElements(const std::string& title)
+{
+	auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
+		return header->getTitle()->toStdString() == title;
+		});
+
+	if (it != _headers.end()) {
+		int pageIndex = _headers.indexOf(*it);
+		QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
+		if (scrollable) {
+			QWidget* scrollContent = scrollable->widget();
+			QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
+			if (layout) {
+				for (int i = 0; i < layout->count(); ++i) {
+					PropertyGroup* group = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget());
+					if (group) {
+						group->setVisible(false);
+					}
+				}
+			}
+		}
+	}
+}
+
 void BasePanel::paintEvent(QPaintEvent* event)
 {
     // Esegui qualcosa per ogni header (se necessario)

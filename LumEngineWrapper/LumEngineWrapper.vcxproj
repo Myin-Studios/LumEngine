@@ -106,6 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;EXCLUDE_CORECLR_HEADERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets;$(NETHOST)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt6Cored.lib;Qt6Guid.lib;Qt6OpenGLd.lib;Qt6Widgetsd.lib;LumTypes.lib;LumEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -139,6 +140,7 @@
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;%(AdditionalIncludeDirectories);$(ProjectDir);$(Qt_INCLUDEPATH_);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtOpenGL;$(Qt6_DIR)/include/QtWidgets;$(NETHOST)</AdditionalIncludeDirectories>
       <CompileAsManaged>NetCore</CompileAsManaged>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt6Core.lib;Qt6Gui.lib;Qt6OpenGL.lib;Qt6Widgets.lib;LumTypes.lib;LumEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -148,9 +150,11 @@
     <ClInclude Include="Core\NativeInterface.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Properties\Properties.h" />
+    <ClInclude Include="GUI\PropertyGroupManager\PropertyGroupManager.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Rendering\Renderer.h" />
+    <ClInclude Include="Scripting\GameBehaviour.h" />
     <ClInclude Include="ScriptLoader\ScriptLoader.h" />
     <ClInclude Include="Transforms\Transforms.h" />
   </ItemGroup>

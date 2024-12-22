@@ -49,10 +49,12 @@ class PropertyGroup : public QWidget
 public:
     PropertyGroup(const std::string& title, QWidget* parent = nullptr);
 
+	const std::string& getTitle() const;
     QVBoxLayout* getLayout() const;
     void addElement(QWidget* elem, Qt::AlignmentFlag flag = Qt::AlignTop);
 
 private:
+	std::string _title;
 	QVBoxLayout* _mainLayout = nullptr;
 	PropertyGroupHeader* _header = nullptr;
     PropertyGroupContainer* _content = nullptr;

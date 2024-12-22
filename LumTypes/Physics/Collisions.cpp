@@ -46,9 +46,10 @@ LumEngine::Physics::RayCastResult LumEngine::Physics::RayCast::Cast(const Vec3Co
 
         if (IntersectRayBounds(origin, direction, bounds, distance, hitPoint)) {
             if (distance < result.distance) {
-                result.hit = true;  
+                result.hit = true;
                 result.distance = distance;
                 result.hitPoint = hitPoint;
+				result.entityId = bounds->GetEntityID();
             }
         }
     }

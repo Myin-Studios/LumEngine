@@ -95,6 +95,7 @@ void RenderQueue::process(const glm::mat4& view, const glm::mat4& proj,
         shader->setMat4x4("view", &view[0][0]);
         shader->setMat4x4("projection", &proj[0][0]);
         shader->setVec4("outlineColor", glm::vec4(0.0f, 0.5f, 1.0f, 1.0f));
+        shader->setVec3("camPos", camPos);
 
         if (cmd.entity->IsSelected())
             cmd.mesh->Draw();

@@ -120,6 +120,8 @@ private:
     void loadModel(const QString& path);
     std::unique_ptr<MeshCore> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
 
+	std::unique_ptr<UIManager> _uiManager;
+
     Camera* editorCamera;
     QPoint mousePos;
     bool canUpdateCamera = false;

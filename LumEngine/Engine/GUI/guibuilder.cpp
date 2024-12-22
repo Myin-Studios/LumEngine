@@ -74,6 +74,14 @@ GuiBuilder::GuiBuilder()
     group->addElement(new QLabel("Scale"), Qt::AlignTop);
     group->addElement(new Vec3Property(), Qt::AlignTop);
 
+    PropertyGroup* transformGroup = new PropertyGroup("Transform");
+    transformGroup->addElement(new QLabel("Position"), Qt::AlignTop);
+    transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
+    transformGroup->addElement(new QLabel("Rotation"), Qt::AlignTop);
+    transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
+    transformGroup->addElement(new QLabel("Scale"), Qt::AlignTop);
+    transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
+
 	PropertyGroup* group2 = new PropertyGroup("RigidBody");
     QStringList labels = { "Constraits", "Mass", "Friction", "Restitution", "Linear Damping",
                           "Angular Damping", "Linear Factor", "Angular Factor", "Gravity",
@@ -94,7 +102,8 @@ GuiBuilder::GuiBuilder()
     // rightPanel->addPage("TEST2", testFrame2.release());
     // rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
     
-    // rightPanel->addElement("PROPERTIES", group2);
+    rightPanel->addElement("PROPERTIES", group2);
+	rightPanel->removeElement("PROPERTIES", "Transform");
 
     topPanel->setStyleSheet("background-color: rgb(25, 25, 25);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

@@ -30,6 +30,7 @@ private:
     component_entry_point_fn StartScript = nullptr;
     component_entry_point_fn UpdateScript = nullptr;
     component_entry_point_fn LoadAssemblyMethod = nullptr;
+    component_entry_point_fn UIManagerInitializer = nullptr;
     hostfxr_handle cxt = nullptr;
 
     const wchar_t* assembly_path = L"LumScripting/LumScriptLoader.dll";
@@ -201,14 +202,14 @@ signals:
 
 protected:
     void run() override {
-        emit progressUpdated("HostFXR loading...", 100 / 5);
+        emit progressUpdated("HostFXR loading...", 100 / 6);
 
         if (!load_hostfxr()) {
             emit progressUpdated("Failed to load hostfxr.", 0);
             return;
         }
 
-        emit progressUpdated("Init Assembly loader...", 100 / 5 * 2);
+        emit progressUpdated("Init Assembly loader...", 100 / 5 * 6);
 
         // Check if assembly_loader is already set
         if (assembly_loader == nullptr) {
@@ -223,7 +224,7 @@ protected:
             const char_t* config_path = s_config_path.c_str();
             assembly_loader = get_dotnet_load_assembly(config_path);
             if (assembly_loader == nullptr) {
-                emit progressUpdated("Failed to get assembly loader.", 100 / 5);
+                emit progressUpdated("Failed to get assembly loader.", 0);
                 return;
             }
         }
@@ -240,7 +241,7 @@ protected:
         const wchar_t* dotnet_type_method_Start = L"Start";
         const wchar_t* dotnet_type_method_Run = L"Run";
 
-        emit progressUpdated("Init Script Runner: 1...", 100 / 5 * 3);
+        emit progressUpdated("Init Script Runner: 1...", 100 / 6 * 3);
 
         if (StartScript == nullptr) {
             int rc = assembly_loader(
@@ -258,7 +259,7 @@ protected:
             }
         }
 
-        emit progressUpdated("Init Script Runner: 2...", 100 / 5 * 4);
+        emit progressUpdated("Init Script Runner: 2...", 100 / 6 * 4);
 
         if (UpdateScript == nullptr) {
             int rc = assembly_loader(
@@ -276,10 +277,45 @@ protected:
             }
         }
 
+		emit progressUpdated("Init UIManager...", 100 / 6 * 5);
+
+		// InitUIManager();
+
         // Al termine invia l'aggiornamento finale
         emit progressUpdated("Loading completed", 100);
         emit loadingCompleted();
 
         quit();
+    }
+
+private:
+    void InitUIManager()
+    {
+        if (assembly_loader == nullptr) {
+            emit progressUpdated("Failed to get assembly loader.", 100 / 5);
+            return;
+        }
+
+        const wchar_t* dotnet_type_method_UIManager = L"InitUIManager";
+        const wchar_t* delegate_type = L"System.Action";
+
+        if (UIManagerInitializer == nullptr) {
+            int rc = assembly_loader(
+                assembly_path,
+                dotnet_type,
+                dotnet_type_method_UIManager,
+                delegate_type,
+                nullptr,
+                (void**)&UIManagerInitializer
+            );
+
+            if (rc != 0 || UIManagerInitializer == nullptr) {
+                std::cerr << "Failed to load UIManager method. Error code: " << std::hex << rc << std::endl;
+                emit progressUpdated("Failed to load UIManager method.", 100 / 5);
+                return;
+            }
+        }
+
+        UIManagerInitializer(nullptr, 0);
     }
 };

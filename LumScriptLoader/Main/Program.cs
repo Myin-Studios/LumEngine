@@ -16,6 +16,11 @@ namespace LumScriptLoader.Main
             Console.WriteLine(35);
         }
 
+        public static void InitUIManager()
+        {
+            // UIManagerManaged UIManager = new UIManagerManaged();
+        }
+
         // Definisci un delegato che corrisponde alla firma di LoadScriptPath
         public delegate int LoadScriptPathDelegate(IntPtr pathPtr, int arg1);
 

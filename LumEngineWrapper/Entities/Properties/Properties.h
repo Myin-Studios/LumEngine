@@ -25,7 +25,7 @@ namespace LumScripting
                 virtual void OnDeserialize() override;
             };
 
-            public ref class Property abstract
+            public ref class Property
             {
             public:
                 Property(IProperty* prop) : native(prop) {}
@@ -36,8 +36,8 @@ namespace LumScripting
                     this->!Property();
                 }
 
-                virtual void OnSerialize() abstract;
-                virtual void OnDeserialize() abstract;
+                virtual void OnSerialize() {};
+                virtual void OnDeserialize() {};
             protected:
                 IProperty* native;
 

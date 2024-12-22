@@ -5,6 +5,8 @@
 #include "../LumEngineWrapper/Rendering/Renderer.h"
 #include "../LumTypes/GameBehaviour/GameBehaviour.h"
 
+
+using namespace System::Collections::Generic;
 using namespace LumScripting::Script::Properties;
 
 namespace LumScripting

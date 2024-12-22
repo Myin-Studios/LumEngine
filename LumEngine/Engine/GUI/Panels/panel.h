@@ -14,6 +14,9 @@
 #include <QScrollBar>
 
 #include "../Elements/Elements.h"
+#include "properties.h"
+#include "../PropertyGroupManager/PropertyGroupManagerCore.h"
+#include "../LumTypes/Entities/Entity.h"
 
 #include <iostream>
 #include <vector>
@@ -64,6 +67,8 @@ public:
     void addHeader(const std::string& title);
     void addPage(const std::string& title, QWidget* elem);
     void addElement(const std::string& title, QWidget* elem);
+	void removeElement(const std::string& title, const std::string& elemName);
+	void removeAllElements(const std::string& title);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

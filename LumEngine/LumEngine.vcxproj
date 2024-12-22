@@ -91,6 +91,7 @@
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
     <ClInclude Include="Engine\GUI\Elements\Elements.h" />
     <ClInclude Include="Engine\GUI\guibuilder.h" />
+    <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
     <QtMoc Include="Engine\GUI\Console\console.h" />
@@ -115,6 +116,7 @@
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
+    <ClCompile Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp" />

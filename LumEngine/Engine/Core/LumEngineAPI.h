@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Engine/GUI/Rendering/renderer.h"
+#include "Engine/GUI/PropertyGroupManager/PropertyGroupManagerCore.h"
+
 #ifdef LUMENGINE_EXPORTS
 #define LUMENGINE_API __declspec(dllexport)
 #else
@@ -14,3 +17,5 @@ extern "C" {
     LUMENGINE_API BaseEntity* GetEngineEntityAt(int index);
     LUMENGINE_API int GetEngineEntityCount();
 }
+
+class UIManager;

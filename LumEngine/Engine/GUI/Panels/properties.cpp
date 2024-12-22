@@ -8,22 +8,6 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
         "background-color: rgb(30, 30, 30);"
     );
 
-    // xTextFrame = new CoordinateFrame("X", this);
-    // yTextFrame = new CoordinateFrame("Y", this);
-    // zTextFrame = new CoordinateFrame("Z", this);
-    // 
-    // xTextFrame->setStyleSheet(
-    // "border: 1 solid rgb(255, 0, 0);"
-    //     "border-radius: 7px;");
-    // 
-    // yTextFrame->setStyleSheet(
-    //     "border: 1 solid rgb(0, 255, 0); "
-    //     "border-radius: 7px;");
-    // 
-    // zTextFrame->setStyleSheet(
-    //     "border: 1 solid rgb(0, 0, 255); "
-    //     "border-radius: 7px;");
-
     xValue = new NumberOperatorLineEdit(this);
     yValue = new NumberOperatorLineEdit(this);
     zValue = new NumberOperatorLineEdit(this);
@@ -32,28 +16,17 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
     yValue->setCoordinate(Coordinate::Y);
     zValue->setCoordinate(Coordinate::Z);
 
-    // xTextFrame->setFixedSize(20, 20);
-    // yTextFrame->setFixedSize(20, 20);
-    // zTextFrame->setFixedSize(20, 20);
-
     xValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     yValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     zValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     _mainLayout = new QHBoxLayout(parent);
 
-    // _mainLayout->addWidget(xTextFrame);
     _mainLayout->addWidget(xValue);
-    // _mainLayout->addWidget(yTextFrame);
     _mainLayout->addWidget(yValue);
-    // _mainLayout->addWidget(zTextFrame);
     _mainLayout->addWidget(zValue);
     
     _mainLayout->setContentsMargins(0, 0, 0, 0);
-
-    // xTextFrame->show();
-    // yTextFrame->show();
-    // zTextFrame->show();
 
     xValue->show();
     yValue->show();
@@ -406,7 +379,7 @@ void PropertyGroupHeader::paintEvent(QPaintEvent* event)
 	painter.drawText(rect, Qt::AlignCenter, *_title);
 }
 
-PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidget(parent)
+PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidget(parent), _title(title)
 {
     this->_mainLayout = new QVBoxLayout(this);
     this->_header = new PropertyGroupHeader(title);
@@ -441,6 +414,10 @@ PropertyGroup::PropertyGroup(const std::string& title, QWidget* parent) : QWidge
     this->_mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
+const std::string& PropertyGroup::getTitle() const
+{
+	return this->_title;
+}
 
 QVBoxLayout* PropertyGroup::getLayout() const { return this->_content->getLayout(); }
 
@@ -499,21 +476,4 @@ void PropertyGroupContainer::paintEvent(QPaintEvent* event)
 	QRect rect(0, 0, width(), height());
 	painter.setRenderHint(QPainter::Antialiasing);
     painter.fillPath(path, QColor(30, 30, 30));
-
-    //QPolygon polygon;
-    //for (int i = 0; i < path.elementCount(); ++i)
-    //{
-    //    QPainterPath::Element element = path.elementAt(i);
-    //    polygon << QPoint(static_cast<int>(element.x), static_cast<int>(element.y));
-    //}
-    //
-    //QRegion region(polygon);
-    //
-    //if (this->testAttribute(Qt::WA_StyledBackground))
-    //{
-    //    painter.setClipRegion(region);
-    //    QStyleOption opt;
-    //    opt.initFrom(this);
-    //    style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
-    //}
 }

@@ -40,6 +40,7 @@ RendererCore::RendererCore(QWidget *parent)
 
     setAcceptDrops(true);
 
+	this->_uiManager = std::make_unique<UIManager>();
     updateTimer = new QTimer(this);
     connect(updateTimer, &QTimer::timeout, this, [this]() { update(); });
     updateTimer->setInterval(1000/60);
@@ -677,19 +678,29 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
             rDirection);
 
         if (res.hit) {
-            auto it = find_if(entities.begin(), entities.end(), [&](const auto& e) {
+            auto it = find_if(entities.begin(), entities.end(), [&](const std::shared_ptr<BaseEntity>& e) {
+				std::cout << e->GetEntityID() << " == " << res.entityId << std::endl;
                 return e->GetEntityID() == res.entityId;
                 });
 
             if (it != entities.end()) {
                 (*it)->SetSelected(true);
+                if (this->_uiManager) {
+                    this->_uiManager->UpdateUI();
+                }
+                else {
+                    // Handle the error or log it
+                    std::cerr << "UI Manager is not initialized." << std::endl;
+                }
                 std::cout << "Hit!" << std::endl;
+                update();
             }
         }
         else {
             for (auto& e : entities) {
                 e->SetSelected(false);
             }
+            update();
         }
     }
 }

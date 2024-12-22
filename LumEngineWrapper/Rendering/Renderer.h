@@ -2,6 +2,8 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "Core/NativeInterface.h"
 
+using namespace System;
+
 public ref class Renderer {
 private:
     static Renderer^ instance;

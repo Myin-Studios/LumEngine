@@ -124,6 +124,9 @@
     <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
@@ -192,6 +195,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Core\Rendering\RenderQueue\RenderQueue.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
