@@ -2,21 +2,22 @@
 
 #include <QThread>
 #include "coreclr_delegates.h"
+#include "ScriptThreading/IScriptRunner.h"
 
-class ScriptRunnerThread : public QThread {
+class ScriptRunnerThread : public QThread, public IScriptRunner {
 
 public:
     ScriptRunnerThread(component_entry_point_fn starter, component_entry_point_fn updater, QObject *parent = nullptr)
             : QThread(parent), StartScript(starter), UpdateScript(updater), running(false) {}
 
 
-    void stop() {
+    void stop() override {
         running = false; // Imposta il flag per fermare il loop
     }
 
-    bool IsRunning() const { return running; }
+    bool IsRunning() const override { return running; }
 
-    void setScripts(component_entry_point_fn start, component_entry_point_fn update) {
+    void setScripts(component_entry_point_fn start, component_entry_point_fn update) override {
         StartScript = start;
         UpdateScript = update;
     }

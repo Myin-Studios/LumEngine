@@ -150,7 +150,6 @@
     <ClInclude Include="Core\NativeInterface.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Properties\Properties.h" />
-    <ClInclude Include="GUI\PropertyGroupManager\PropertyGroupManager.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Rendering\Renderer.h" />

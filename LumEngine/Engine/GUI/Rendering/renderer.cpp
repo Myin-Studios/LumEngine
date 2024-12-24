@@ -40,6 +40,8 @@ RendererCore::RendererCore(QWidget *parent)
 
     setAcceptDrops(true);
 
+	std::cout << "Initializing renderer..." << std::endl;
+
 	this->_uiManager = std::make_unique<UIManager>();
     updateTimer = new QTimer(this);
     connect(updateTimer, &QTimer::timeout, this, [this]() { update(); });
@@ -49,6 +51,11 @@ RendererCore::RendererCore(QWidget *parent)
 RendererCore::~RendererCore()
 {
     cleanup();
+
+    if (_uiManager) {
+        _uiManager->SetGUIBuilder(nullptr);  // Rimuoviamo il riferimento al builder
+        _uiManager.reset();
+    }
 }
 
 void RendererCore::initializeGL()
@@ -697,6 +704,7 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
             }
         }
         else {
+            if (this->_uiManager) this->_uiManager->UpdateUI();
             for (auto& e : entities) {
                 e->SetSelected(false);
             }

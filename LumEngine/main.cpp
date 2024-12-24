@@ -22,13 +22,13 @@ int main(int argc, char* argv[])
     auto loadingWindow = new LoadingWindow();
     loadingWindow->show();
 
-    GuiBuilder* builder = nullptr;
-    LoadingThread* loadingThread = new LoadingThread();
+    std::shared_ptr<GuiBuilder> builder = nullptr;
+    auto loadingThread = std::make_unique<LoadingThread>();
 
-    loadingWindow->setThread(loadingThread);
+    loadingWindow->setThread(loadingThread.get());
 
     // Collega il segnale di aggiornamento del progresso alla finestra di caricamento
-    QObject::connect(loadingThread, &LoadingThread::progressUpdated, loadingWindow, &LoadingWindow::setProgress);
+    QObject::connect(loadingThread.get(), &LoadingThread::progressUpdated, loadingWindow, &LoadingWindow::setProgress);
 
     QSurfaceFormat format;
     format.setVersion(4, 5);
@@ -41,13 +41,15 @@ int main(int argc, char* argv[])
     loadingWindow->setProgress("Init GUI...", 100);
 
     // Usa QMetaObject::invokeMethod per creare GuiBuilder nel thread principale
-    QObject::connect(loadingThread, &LoadingThread::finished, [&]() {
+    QObject::connect(loadingThread.get(), &LoadingThread::finished, [&]() {
         QMetaObject::invokeMethod(qApp, [&]() {
             loadingWindow->close();
-            builder = new GuiBuilder();
+			builder = std::make_shared<GuiBuilder>();
 
             builder->getPlayButton()->SetScriptRunner(loadingThread->getStart(), loadingThread->getUpdate());
-            builder->getMainWindow()->setThread(loadingThread);
+            builder->getMainWindow()->setThread(loadingThread.get());
+
+            builder->Initialize();
 
             builder->getMainWindow()->setWindowTitle("LumE");
 #if defined(Q_OS_WIN)
@@ -75,6 +77,16 @@ int main(int argc, char* argv[])
     });
 
     loadingThread->start();
+
+    QObject::connect(qApp, &QApplication::aboutToQuit, [&builder]() {
+        if (builder) {
+            auto renderer = RendererCore::GetInstance();
+            if (renderer && renderer->GetUIManager()) {
+                renderer->GetUIManager()->SetGUIBuilder(nullptr);
+            }
+            builder.reset();
+        }
+        });
 
     return QApplication::exec();
 }

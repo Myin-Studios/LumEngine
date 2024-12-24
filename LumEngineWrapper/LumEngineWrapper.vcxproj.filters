@@ -39,9 +39,6 @@
     <ClInclude Include="Core\NativeInterface.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\PropertyGroupManager\PropertyGroupManager.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Scripting\GameBehaviour.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>

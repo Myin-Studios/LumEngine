@@ -86,11 +86,14 @@
     <ClInclude Include="Engine\Core\Rendering\RenderCommand\RenderCommand.h" />
     <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
+    <ClInclude Include="Engine\Core\ScriptThreading\IScriptRunner.h" />
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
     <ClInclude Include="Engine\GUI\Elements\Elements.h" />
     <ClInclude Include="Engine\GUI\guibuilder.h" />
+    <ClInclude Include="Engine\GUI\GUIBuilder\IGUIBuilder.h" />
+    <ClInclude Include="Engine\GUI\Panels\BaseProperties\baseProperties.h" />
     <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
@@ -114,6 +117,7 @@
     <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp" />
     <ClCompile Include="Engine\GUI\Elements\Elements.cpp" />
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
+    <ClCompile Include="Engine\GUI\Panels\BaseProperties\baseProperties.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
     <ClCompile Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.cpp" />

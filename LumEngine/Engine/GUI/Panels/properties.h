@@ -117,6 +117,11 @@ public:
     Vec3Property(QWidget* parent = nullptr);
     ~Vec3Property();
 
+    void setValues(float x, float y, float z);
+
+signals:
+    void valueChanged(float x, float y, float z);
+
 private:
     QHBoxLayout* _mainLayout = nullptr;
 

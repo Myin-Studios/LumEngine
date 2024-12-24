@@ -17,5 +17,3 @@ extern "C" {
     LUMENGINE_API BaseEntity* GetEngineEntityAt(int index);
     LUMENGINE_API int GetEngineEntityCount();
 }
-
-class UIManager;

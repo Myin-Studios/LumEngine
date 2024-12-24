@@ -35,7 +35,10 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "../LumTypes/Physics/Collisions.h"
 #include "Meshes/Mesh.h"
-#include "../LumEngine/Engine/Core/scriptingThreading.h"
+
+#include "../LumEngine/Engine/Core/ScriptThreading/IScriptRunner.h"
+#include "Engine/GUI/GUIBuilder/IGUIBuilder.h"
+
 #include "../LumEngine/Engine/Core/LumEngineAPI.h"
 #include "Engine/Core/Rendering/RenderQueue/RenderQueue.h"
 
@@ -57,6 +60,8 @@
 #include <execution>
 
 using namespace std;
+
+class UIManager;
 
 class RendererCore : public QOpenGLWidget
 {
@@ -82,7 +87,7 @@ public:
         return this->entities;
     }
 
-    void SetRunningThread(std::shared_ptr<ScriptRunnerThread> rt)
+    void SetRunningThread(std::shared_ptr<IScriptRunner> rt)
     {
         this->runningThread = std::move(rt);
     }
@@ -90,6 +95,10 @@ public:
     bool IsRunning() const
     {
         return this->runningThread && this->runningThread->IsRunning();
+    }
+
+    UIManager* GetUIManager() {
+        return _uiManager.get();
     }
 
 protected:
@@ -161,5 +170,69 @@ private:
 
     RenderQueue renderQueue;
 
-    std::shared_ptr<ScriptRunnerThread> runningThread = nullptr;
+    std::shared_ptr<IScriptRunner> runningThread = nullptr;
+};
+
+// GUI PROPERTY MANAGER
+
+class UIManager
+{
+private:
+    BaseEntity* GetSelectedEntity()
+    {
+        const auto& entities = RendererCore::GetInstance()->GetEntities();  // Prendi un riferimento
+        auto it = std::find_if(entities.begin(), entities.end(),
+            [](const std::shared_ptr<BaseEntity>& entity) {  // Usa riferimento const
+                return entity->IsSelected();
+            });
+        if (it != entities.end())
+        {
+            return it->get();
+        }
+        return nullptr;
+    }
+
+    std::string GetPropertyFromEntity(IProperty* prop)  // Ritorna per valore, non per riferimento
+    {
+        BaseEntity* entity = GetSelectedEntity();
+        if (entity)
+        {
+            if (entity->GetProperty(typeid(*prop)))  // typeid dell'oggetto, non del puntatore
+            {
+                std::cout << "Property found: " << typeid(*prop).name() << std::endl;
+                return typeid(*prop).name();
+            }
+        }
+        return "";
+    }
+
+    IGUIBuilder* _guiBuilder = nullptr;
+
+public:
+	UIManager() = default;
+
+    void SetGUIBuilder(IGUIBuilder* builder) {
+        _guiBuilder = builder;
+    }
+
+    void UpdateUI()
+    {
+        BaseEntity* entity = GetSelectedEntity();
+        if (entity)
+        {
+            for (auto& prop : entity->GetProperties())
+            {
+                std::string propTitle = GetPropertyFromEntity(prop.get());
+
+				if (propTitle != "")
+				{
+					_guiBuilder->AddElement("PROPERTIES", propTitle);
+				}
+            }
+        }
+        else
+        {
+			_guiBuilder->RemoveAllElements();
+        }
+    }
 };

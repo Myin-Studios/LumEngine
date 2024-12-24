@@ -2,4 +2,3 @@
 #include "Transforms/Transforms.h"
 #include "Entities/Entity.h"
 #include "Rendering/Meshes/Mesh.h"
-#include "GUI/PropertyGroupManager/PropertyGroupManager.h"

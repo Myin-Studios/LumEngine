@@ -20,7 +20,7 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
     yValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     zValue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    _mainLayout = new QHBoxLayout(parent);
+    _mainLayout = new QHBoxLayout(this);
 
     _mainLayout->addWidget(xValue);
     _mainLayout->addWidget(yValue);
@@ -47,6 +47,13 @@ Vec3Property::~Vec3Property()
     delete yTextFrame;
     delete zTextFrame;
     delete _mainLayout;
+}
+
+void Vec3Property::setValues(float x, float y, float z)
+{
+    xValue->setText(QString::number(x));
+    yValue->setText(QString::number(y));
+    zValue->setText(QString::number(z));
 }
 
 CoordinateFrame::CoordinateFrame(std::string text, QWidget* parent) : QFrame(parent)
@@ -449,7 +456,11 @@ QVBoxLayout* PropertyGroupContainer::getLayout() const
 
 void PropertyGroupContainer::addElement(QWidget* elem, Qt::AlignmentFlag flag)
 {
-    this->_mainLayout->addWidget(elem, flag);
+    if (elem) {
+        _mainLayout->addWidget(elem, 0, static_cast<Qt::Alignment>(flag));
+        // Importante: aggiorna la size policy dell'elemento
+        elem->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    }
 }
 
 void PropertyGroupContainer::paintEvent(QPaintEvent* event)

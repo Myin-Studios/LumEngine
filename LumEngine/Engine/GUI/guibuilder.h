@@ -3,6 +3,7 @@
 #include "Console/console.h"
 #include "Console/consoleOutput.h"
 #include "Console/redirectStreamBuf.h"
+#include "Panels/BaseProperties/baseProperties.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -10,6 +11,7 @@
 #include "Buttons/utilsbuttons.h"
 #include "Buttons/tabsbutton.h"
 #include "Rendering/renderer.h"
+#include "GUIBuilder/IGUIBuilder.h"
 #include <QPushButton>
 #include <QSplitter>
 
@@ -17,42 +19,35 @@
 
 #pragma once
 
-class GuiBuilder
+class GuiBuilder : public IGUIBuilder, public std::enable_shared_from_this<GuiBuilder>
 {
 public:
     GuiBuilder();
     ~GuiBuilder();
 
-    MainWindow* getMainWindow() const { return mainWindow.get(); }
-    PlayButton* getPlayButton() const { return playButton.get(); }
+    void Initialize();
+    void Cleanup();
+
+    MainWindow* getMainWindow() const { return mainWindow; }
+    PlayButton* getPlayButton() const { return playButton; }
     RendererCore* getScene() const { return scene; }
 
+	virtual void AddElement(const std::string& title, const std::string& propTitle) override;
+	virtual void RemoveAllElements() override;
+
 private:
-    std::unique_ptr<MainWindow> mainWindow;
-
-    std::unique_ptr<QHBoxLayout> positionLayout;
-    std::unique_ptr<QHBoxLayout> topLine;
-    std::unique_ptr<QVBoxLayout> centralLayout;
-
-    RendererCore* scene;
-    std::unique_ptr<Console> console;
-    std::unique_ptr<RedirectStreamBuf> outputRedirector;
-
-    std::unique_ptr<QSplitter> sceneConsoleSplitter;
-    std::unique_ptr<QSplitter> rightPanelSplitter;
-    std::unique_ptr<QWidget> mainContainer;
-
-    std::unique_ptr<VPanel> topPanel;
-    std::unique_ptr<VerticalPanel> leftPanel;
-    std::unique_ptr<BasePanel> rightPanel;
-
-    std::unique_ptr<BaseButton> consoleButton;
-    std::unique_ptr<BaseButton> lightingSettingsButton;
-    std::unique_ptr<BaseButton> hierarchyButton;
-
-    std::unique_ptr<QLabel> positionLabel;
-    std::unique_ptr<Vec3Property> position;
-
-    std::unique_ptr<PlayButton> playButton;
-    std::unique_ptr<TabsButton> tBtn;
+	RendererCore* scene;
+    MainWindow* mainWindow;
+    VPanel* topPanel;
+    VerticalPanel* leftPanel;
+    BasePanel* rightPanel;
+    QSplitter* sceneConsoleSplitter;
+    QSplitter* rightPanelSplitter;
+    QWidget* mainContainer;
+    TabsButton* tBtn;
+    PlayButton* playButton;
+    QVBoxLayout* centralLayout;
+    BaseButton* lightingSettingsButton;
+    BaseButton* hierarchyButton;
+    Console* console;
 };
