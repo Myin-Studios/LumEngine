@@ -82,6 +82,8 @@ void Transform3DCore::SetRotation(float yaw, float pitch, float roll)
     this->_yaw = yaw;
     this->_pitch = pitch;
     this->_roll = roll;
+
+    this->rotation = { this->_yaw, this->_pitch, this->_roll };
 }
 
 void Transform3DCore::Rotate(float yaw, float pitch, float roll)
@@ -108,4 +110,21 @@ void Transform3DCore::Rotate(float yaw, float pitch, float roll)
     // Calculate right and up vectors based on the forward vector
     this->right = Vec3Core::Cross(Vec3Core(0.0f, -1.0f, 0.0f), this->forward).Normalize();
     this->up = Vec3Core::Cross(this->forward, this->right).Normalize();
+}
+
+Vec3Core& Transform3DCore::GetRotation()
+{
+    return this->rotation;
+}
+
+void Transform3DCore::SetScale(float x, float y, float z)
+{
+    this->scale.setX(x);
+    this->scale.setY(y);
+    this->scale.setZ(z);
+}
+
+Vec3Core& Transform3DCore::GetScale()
+{
+    return this->scale;
 }

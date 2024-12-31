@@ -57,51 +57,7 @@ GuiBuilder::GuiBuilder()
     leftPanel->getLayout()->addWidget(lightingSettingsButton, 0, Qt::AlignCenter);
     leftPanel->getLayout()->addWidget(hierarchyButton);
 
-    // std::unique_ptr<QFrame> testFrame = std::make_unique<QFrame>();
-    // testFrame->setStyleSheet("QFrame { background-color: rgb(255, 0, 255); }");
-    // 
-    // std::unique_ptr<QFrame> testFrame2 = std::make_unique<QFrame>();
-    // testFrame2->setStyleSheet("QFrame { background-color: rgb(0, 255, 255); }");
-    // 
-    // PropertyGroup* group = new PropertyGroup("Transform", mainWindow);
-    // group->addElement(new QLabel("Position"), Qt::AlignTop);
-    // group->addElement(new Vec3Property(), Qt::AlignTop);
-    // group->addElement(new QLabel("Rotation"), Qt::AlignTop);
-    // group->addElement(new Vec3Property(), Qt::AlignTop);
-    // group->addElement(new QLabel("Scale"), Qt::AlignTop);
-    // group->addElement(new Vec3Property(), Qt::AlignTop);
-    // 
-    // PropertyGroup* transformGroup = new PropertyGroup("Transform");
-    // transformGroup->addElement(new QLabel("Position"), Qt::AlignTop);
-    // transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
-    // transformGroup->addElement(new QLabel("Rotation"), Qt::AlignTop);
-    // transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
-    // transformGroup->addElement(new QLabel("Scale"), Qt::AlignTop);
-    // transformGroup->addElement(new Vec3Property(), Qt::AlignTop);
-    // 
-    // PropertyGroup* group2 = new PropertyGroup("RigidBody");
-    // QStringList labels = { "Constraits", "Mass", "Friction", "Restitution", "Linear Damping",
-    //                       "Angular Damping", "Linear Factor", "Angular Factor", "Gravity",
-    //                       "Kinematic", "Sleeping", "Collision Group", "Collision Mask",
-    //                       "Collision Response", "Collision Shape", "Collision Shape Type",
-    //                       "Collision Shape Size", "Collision Shape Offset", "Collision Shape Rotation",
-    //                       "Collision Shape Mass", "Collision Shape Friction", "Collision Shape Restitution",
-    //                       "Collision Shape Linear Damping", "Collision Shape Angular Damping",
-    //                       "Collision Shape Linear Factor", "Collision Shape Angular Factor",
-    //                       "Collision Shape Gravity", "Collision Shape Kinematic", "Collision Shape Sleeping" };
-    // 
-    // for (const QString& label : labels) {
-    //     group2->addElement(new QLabel(label));
-    // }
-    // 
-    // rightPanel->addPage("PROPERTIES", group);
-    // rightPanel->addPage("TEST", testFrame.release());
-    // // rightPanel->addPage("TEST2", testFrame2.release());
-    // // rightPanel->addPage("HIERARCHY", new QLabel("Prova!"));
-    // 
-    // rightPanel->addElement("PROPERTIES", group2);
-    // rightPanel->removeElement("PROPERTIES", "Transform");
-
+    rightPanel->addHeader("PROPERTIES");
     topPanel->setStyleSheet("background-color: rgb(25, 25, 25);" "border-radius: 10px");
     topPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     topPanel->getLayout()->addWidget(playButton, 0, Qt::AlignLeft);
@@ -151,15 +107,38 @@ void GuiBuilder::Cleanup()
     scene = nullptr;
 }
 
+void GuiBuilder::SetEntity(BaseEntity* e)
+{
+    this->_entity = e;
+}
+
+BaseEntity* GuiBuilder::GetEntity()
+{
+    return this->_entity;
+}
+
 void GuiBuilder::AddElement(const std::string& title, const std::string& propTitle)
 {
-    if (propTitle.find("Transform3D") != std::string::npos)
-	{
-		rightPanel->addElement("PROPERTIES", new Transform3DProperty(mainWindow->centralWidget()));
+    if (propTitle.find("Transform3D") != std::string::npos) {
+        auto transform = new Transform3DProperty(mainWindow->centralWidget());
+        transform->SetEntity(GetEntity());
+        rightPanel->addElement("PROPERTIES", transform);
+    }
+	else if (propTitle.find("Collider") != std::string::npos) {
+		auto collider = new ColliderProperty(mainWindow->centralWidget());
+		collider->SetEntity(GetEntity());
+		rightPanel->addElement("PROPERTIES", collider);
 	}
+    else if (propTitle.find("LOD") != std::string::npos)
+    {
+		auto lod = new LODProperty(mainWindow->centralWidget());
+		lod->SetEntity(GetEntity());
+		rightPanel->addElement("PROPERTIES", lod);
+    }
 }
 
 void GuiBuilder::RemoveAllElements()
 {
 	rightPanel->removeAllElements("PROPERTIES");
+    rightPanel->update();
 }

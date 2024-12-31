@@ -42,6 +42,9 @@
     <ClInclude Include="Physics\Collisions.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="LOD\LOD.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transformations\Transformations.cpp">
@@ -51,6 +54,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collisions.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="LOD\LOD.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

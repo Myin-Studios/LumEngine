@@ -32,10 +32,14 @@ public:
     PlayButton* getPlayButton() const { return playButton; }
     RendererCore* getScene() const { return scene; }
 
+    virtual void SetEntity(BaseEntity* e) override;
+    virtual BaseEntity* GetEntity() override;
 	virtual void AddElement(const std::string& title, const std::string& propTitle) override;
 	virtual void RemoveAllElements() override;
 
 private:
+    BaseEntity* _entity;
+
 	RendererCore* scene;
     MainWindow* mainWindow;
     VPanel* topPanel;

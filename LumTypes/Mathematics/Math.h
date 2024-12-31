@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -14,6 +16,7 @@ public:
 		float m20 = 0.0f, float m21 = 0.0f, float m22 = 0.0f, float m23 = 0.0f,
 		float m30 = 0.0f, float m31 = 0.0f, float m32 = 0.0f, float m33 = 0.0f);
 	Mat4Core(const Mat4Core& other);
+	Mat4Core(const glm::mat4& other);
 	
 	const float m00() const;
 	const float m01() const;
@@ -36,8 +39,10 @@ public:
 	float Determinant() const;
 	float Det3x3(float a00, float a01, float a02, float a10, float a11, float a12, float a20, float a21, float a22) const;
 	float Cofactor(int i0, int i1, int i2, int j0, int j1, int j2) const;
+	static Mat4Core Identity();
 
 	Mat4Core& operator=(const Mat4Core& other);
+	Mat4Core& operator=(const glm::mat4& other);
 	Mat4Core operator*(const Mat4Core& other);
 	Vec4Core operator*(const Vec4Core& v) const;
 
@@ -90,6 +95,7 @@ public:
 	Vec3Core(const Vec3Core& other);
 	Vec3Core(float x, float y, float z);
 	Vec3Core(const Vec4Core& v);
+	Vec3Core(const glm::vec3& v);
 
 	float x() const;
 	float y() const;
@@ -101,8 +107,11 @@ public:
 
 	static Vec3Core Cross(const Vec3Core& v1, const Vec3Core& v2);
 	static Vec3Core Lerp(const Vec3Core& v1, const Vec3Core& v2, float t);
+	static Vec3Core Min(const Vec3Core& a, const Vec3Core& b);
+	static Vec3Core Max(const Vec3Core& a, const Vec3Core& b);
+	static float Angle(const Vec3Core& a, const Vec3Core& b);
 
-	float length() const;
+	float Length() const;
 	Vec3Core& Normalize();
 
 	Vec3Core& operator=(const Vec3Core& v);

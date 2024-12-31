@@ -14,6 +14,7 @@
 #include <QScrollBar>
 
 #include "../Elements/Elements.h"
+#include "../Text Fields/TextField.h"
 #include "properties.h"
 #include "../PropertyGroupManager/PropertyGroupManagerCore.h"
 #include "../LumTypes/Entities/Entity.h"
@@ -75,6 +76,7 @@ protected:
 
 private:
     QVector<PanelHeader*> _headers;
+    TextField* _searchField;
     QStackedWidget* _stackedWidget;
 
     QHBoxLayout* _headersLayout;

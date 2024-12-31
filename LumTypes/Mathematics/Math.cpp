@@ -50,6 +50,29 @@ Mat4Core::Mat4Core(const Mat4Core& other)
 	this->_m33 = other._m33;
 }
 
+Mat4Core::Mat4Core(const glm::mat4& other)
+{
+	this->_m00 = other[0][0];
+	this->_m01 = other[1][0];
+	this->_m02 = other[2][0];
+	this->_m03 = other[3][0];
+
+	this->_m10 = other[0][1];
+	this->_m11 = other[1][1];
+	this->_m12 = other[2][1];
+	this->_m13 = other[3][1];
+
+	this->_m20 = other[0][2];
+	this->_m21 = other[1][2];
+	this->_m22 = other[2][2];
+	this->_m23 = other[3][2];
+
+	this->_m30 = other[0][3];
+	this->_m31 = other[1][3];
+	this->_m32 = other[2][3];
+	this->_m33 = other[3][3];
+}
+
 Mat4Core::Mat4Core(
 	float m00, float m01, float m02, float m03,
 	float m10, float m11, float m12, float m13,
@@ -201,6 +224,16 @@ float Mat4Core::Cofactor(int i0, int i1, int i2, int j0, int j1, int j2) const {
 		m[2][0], m[2][1], m[2][2]);
 }
 
+Mat4Core Mat4Core::Identity()
+{
+	return Mat4Core(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+}
+
 float Mat4Core::Determinant() const
 {
 	return _m00 * Cofactor(1, 2, 3, 1, 2, 3)
@@ -227,6 +260,27 @@ Mat4Core& Mat4Core::operator=(const Mat4Core& other)
 	this->_m31 = other._m31;
 	this->_m32 = other._m32;
 	this->_m33 = other._m33;
+
+	return *this;
+}
+
+Mat4Core& Mat4Core::operator=(const glm::mat4& other) {
+	std::cout << "Converting glm::mat4 to Mat4Core\n";
+	std::cout << "GLM matrix:\n";
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			std::cout << other[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	// Converte da glm::mat4 a Mat4Core
+	_m00 = other[0][0]; _m01 = other[1][0]; _m02 = other[2][0]; _m03 = other[3][0];
+	_m10 = other[0][1]; _m11 = other[1][1]; _m12 = other[2][1]; _m13 = other[3][1];
+	_m20 = other[0][2]; _m21 = other[1][2]; _m22 = other[2][2]; _m23 = other[3][2];
+	_m30 = other[0][3]; _m31 = other[1][3]; _m32 = other[2][3]; _m33 = other[3][3];
+
+	std::cout << "Converted Mat4Core:\n" << this->ToString() << std::endl;
 
 	return *this;
 }
@@ -316,6 +370,13 @@ Vec3Core::Vec3Core(const Vec4Core& v) : _x(v.x()), _y(v.y()), _z(v.z())
 {
 }
 
+Vec3Core::Vec3Core(const glm::vec3& v)
+{
+	this->_x = v.x;
+	this->_y = v.y;
+	this->_z = v.z;
+}
+
 float Vec3Core::x() const { return this->_x; }
 float Vec3Core::y() const { return this->_y; }
 float Vec3Core::z() const { return this->_z; }
@@ -348,17 +409,50 @@ Vec3Core Vec3Core::Lerp(const Vec3Core& v1, const Vec3Core& v2, float t)
 	return v1 + (v2 - v1) * t;
 }
 
-float Vec3Core::length() const
+Vec3Core Vec3Core::Min(const Vec3Core& a, const Vec3Core& b)
+{
+	return Vec3Core(
+		std::min(a.x(), b.x()),
+		std::min(a.y(), b.y()),
+		std::min(a.z(), b.z())
+	);
+}
+
+Vec3Core Vec3Core::Max(const Vec3Core& a, const Vec3Core& b)
+{
+	return Vec3Core(
+		std::max(a.x(), b.x()),
+		std::max(a.y(), b.y()),
+		std::max(a.z(), b.z())
+	);
+}
+
+float Vec3Core::Angle(const Vec3Core& a, const Vec3Core& b)
+{
+	float lenA = a.Length();
+	float lenB = b.Length();
+
+	if (lenA < 1e-6f || lenB < 1e-6f) {
+	}
+
+	float cosAngle = (a * b) / (lenA * lenB);
+
+	cosAngle = std::max(-1.0f, std::min(1.0f, cosAngle));
+
+	return std::acos(cosAngle);
+}
+
+float Vec3Core::Length() const
 {
 	return std::sqrt(x() * x() + y() * y() + z() * z());
 }
 
 Vec3Core& Vec3Core::Normalize()
 {
-	if (this->length() != 0.0f) {
-		_x /= this->length();
-		_y /= this->length();
-		_z /= this->length();
+	if (this->Length() != 0.0f) {
+		_x /= this->Length();
+		_y /= this->Length();
+		_z /= this->Length();
 	}
 	return *this;
 }

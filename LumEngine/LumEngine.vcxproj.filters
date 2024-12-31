@@ -74,6 +74,8 @@
     <None Include="Output\Debug\Resources\Shaders\outlineFrag.glsl" />
     <None Include="Output\Debug\Resources\Shaders\outlineVert.glsl" />
     <None Include="Engine\Resources\Shaders\outline.glsl" />
+    <None Include="Engine\Resources\Shaders\AABBDebuggerVert.glsl" />
+    <None Include="Engine\Resources\Shaders\AABBDebuggerFrag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">
@@ -133,7 +135,7 @@
     <ClInclude Include="Engine\GUI\GUIBuilder\IGUIBuilder.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI\Panels\BaseProperties\baseProperties.h">
+    <ClInclude Include="Engine\Core\Rendering\Debugger\AABBDebugger.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -160,6 +162,12 @@
       <Filter>File di intestazione</Filter>
     </QtMoc>
     <QtMoc Include="Engine\GUI\Panels\properties.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Panels\BaseProperties\baseProperties.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Text Fields\TextField.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
   </ItemGroup>
@@ -210,6 +218,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Panels\BaseProperties\baseProperties.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Text Fields\TextField.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

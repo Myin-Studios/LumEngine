@@ -64,12 +64,8 @@ public:
     }
 
     IProperty* GetProperty(const type_info& expectedType) {
-        std::cout << "Property requested: " << expectedType.name() << std::endl;
-        std::cout << "Number of properties in set: " << properties.size() << std::endl;
-
         auto it = std::find_if(properties.begin(), properties.end(),
             [&expectedType](const std::unique_ptr<IProperty>& prop) {
-                std::cout << "Checking property type: " << typeid(*prop).name() << std::endl;
                 return typeid(*prop) == expectedType;
             });
 

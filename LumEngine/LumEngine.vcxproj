@@ -51,6 +51,8 @@
     <None Include="Engine\Resources\Icons\New\LumE_HierarchyHover.svg" />
     <None Include="Engine\Resources\Icons\New\LumE_LightSettingsHover.svg" />
     <None Include="Engine\Resources\res.qrc.depends" />
+    <None Include="Engine\Resources\Shaders\AABBDebuggerFrag.glsl" />
+    <None Include="Engine\Resources\Shaders\AABBDebuggerVert.glsl" />
     <None Include="Engine\Resources\Shaders\baseFrag.glsl" />
     <None Include="Engine\Resources\Shaders\baseVert.glsl" />
     <None Include="Engine\Resources\Shaders\depthFrag.glsl" />
@@ -83,6 +85,7 @@
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
     <ClInclude Include="Engine\Core\CMAPICore.h" />
     <ClInclude Include="Engine\Core\LumEngineAPI.h" />
+    <ClInclude Include="Engine\Core\Rendering\Debugger\AABBDebugger.h" />
     <ClInclude Include="Engine\Core\Rendering\RenderCommand\RenderCommand.h" />
     <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
@@ -93,7 +96,8 @@
     <ClInclude Include="Engine\GUI\Elements\Elements.h" />
     <ClInclude Include="Engine\GUI\guibuilder.h" />
     <ClInclude Include="Engine\GUI\GUIBuilder\IGUIBuilder.h" />
-    <ClInclude Include="Engine\GUI\Panels\BaseProperties\baseProperties.h" />
+    <QtMoc Include="Engine\GUI\Text Fields\TextField.h" />
+    <QtMoc Include="Engine\GUI\Panels\BaseProperties\baseProperties.h" />
     <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
@@ -124,6 +128,7 @@
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp" />
+    <ClCompile Include="Engine\GUI\Text Fields\TextField.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

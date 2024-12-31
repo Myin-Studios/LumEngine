@@ -33,6 +33,7 @@ Vec3Property::Vec3Property(QWidget* parent) : QWidget(parent)
     zValue->show();
 
     setLayout(_mainLayout);
+    setupConnections();
 }
 
 Vec3Property::~Vec3Property()
@@ -54,6 +55,22 @@ void Vec3Property::setValues(float x, float y, float z)
     xValue->setText(QString::number(x));
     yValue->setText(QString::number(y));
     zValue->setText(QString::number(z));
+}
+
+void Vec3Property::setupConnections()
+{
+    connect(xValue, &NumberOperatorLineEdit::textChanged, this, &Vec3Property::handleValueChange);
+    connect(yValue, &NumberOperatorLineEdit::textChanged, this, &Vec3Property::handleValueChange);
+    connect(zValue, &NumberOperatorLineEdit::textChanged, this, &Vec3Property::handleValueChange);
+}
+
+void Vec3Property::handleValueChange()
+{
+    emit valueChanged(
+        xValue->text().toFloat(),
+        yValue->text().toFloat(),
+        zValue->text().toFloat()
+    );
 }
 
 CoordinateFrame::CoordinateFrame(std::string text, QWidget* parent) : QFrame(parent)
@@ -132,6 +149,20 @@ NumberOperatorLineEdit::NumberOperatorLineEdit(QWidget* parent) : QLineEdit(pare
         "color: rgb(255, 255, 255);"
         "}";
 
+    normalStyleNeuter = "QLineEdit {"
+        "background-color: rgb(25, 25, 25);"
+        "border: 2 solid rgb(0, 63, 127);"
+        "border-radius: 7px;"
+        "color: rgb(255, 255, 255);"
+        "}";
+
+	focusStyleNeuter = "QLineEdit {"
+		"background-color: rgb(25, 25, 25);"
+		"border: 2 solid rgb(0, 127, 255);"
+		"border-radius: 7px;"
+		"color: rgb(255, 255, 255);"
+		"}";
+
 	QLocale::setDefault(QLocale(QLocale::English));
     this->setPlaceholderText("0.0");
     this->setMaxLength(50);
@@ -158,6 +189,39 @@ void NumberOperatorLineEdit::setCoordinate(Coordinate c)
     case W:
         this->setPlaceholderText("W");
         break;
+	case NEUTER:
+		this->setPlaceholderText("Value");
+		break;
+    default:
+        break;
+    }
+
+    switch (this->_coord)
+    {
+    case X:
+    {
+        this->setStyleSheet(normalStyleX);
+        break;
+    }
+    case Y:
+    {
+        this->setStyleSheet(normalStyleY);
+        break;
+    }
+    case Z:
+    {
+        this->setStyleSheet(normalStyleZ);
+        break;
+    }
+    case W:
+    {
+        this->setStyleSheet(normalStyleW);
+        break;
+    }
+	case NEUTER:
+    {
+		this->setStyleSheet(normalStyleNeuter);
+    }
     default:
         break;
     }
@@ -203,63 +267,6 @@ void NumberOperatorLineEdit::keyPressEvent(QKeyEvent* event)
 
 void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 {
-    if (this->hasFocus())
-    {
-        switch (this->_coord)
-        {
-        case X:
-        {
-            this->setStyleSheet(focusStyleX);
-            break;
-        }
-        case Y:
-        {
-            this->setStyleSheet(focusStyleY);
-            break;
-        }
-        case Z:
-        {
-            this->setStyleSheet(focusStyleZ);
-            break;
-        }
-        case W:
-        {
-            this->setStyleSheet(focusStyleW);
-            break;
-        }
-        default:
-            break;
-        }
-    }
-    else
-    {
-        switch (this->_coord)
-        {
-        case X:
-        {
-            this->setStyleSheet(normalStyleX);
-            break;
-        }
-        case Y:
-        {
-            this->setStyleSheet(normalStyleY);
-            break;
-        }
-        case Z:
-        {
-            this->setStyleSheet(normalStyleZ);
-            break;
-        }
-        case W:
-        {
-            this->setStyleSheet(normalStyleW);
-            break;
-        }
-        default:
-            break;
-        }
-    }
-
 	QLineEdit::paintEvent(event);
 
 	QPainter painter(this);
@@ -268,20 +275,77 @@ void NumberOperatorLineEdit::paintEvent(QPaintEvent* event)
 
 void NumberOperatorLineEdit::focusInEvent(QFocusEvent* event)
 {
-    QLineEdit::focusInEvent(event);
+    switch (this->_coord)
+    {
+    case X:
+    {
+        this->setStyleSheet(focusStyleX);
+        break;
+    }
+    case Y:
+    {
+        this->setStyleSheet(focusStyleY);
+        break;
+    }
+    case Z:
+    {
+        this->setStyleSheet(focusStyleZ);
+        break;
+    }
+    case W:
+    {
+        this->setStyleSheet(focusStyleW);
+        break;
+    }
+	case NEUTER:
+    {
+		this->setStyleSheet(focusStyleNeuter);
+		break;
+    }
+    default:
+        break;
+    }
 }
 
 void NumberOperatorLineEdit::focusOutEvent(QFocusEvent* event)
 {
-    QLineEdit::focusOutEvent(event);
+    switch (this->_coord)
+    {
+    case X:
+    {
+        this->setStyleSheet(normalStyleX);
+        break;
+    }
+    case Y:
+    {
+        this->setStyleSheet(normalStyleY);
+        break;
+    }
+    case Z:
+    {
+        this->setStyleSheet(normalStyleZ);
+        break;
+    }
+    case W:
+    {
+        this->setStyleSheet(normalStyleW);
+        break;
+    }
+	case NEUTER:
+    {
+		this->setStyleSheet(normalStyleNeuter);
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void NumberOperatorLineEdit::evaluateExpression()
 {
     QString input = text();
-    input.replace(",", "."); // Supporta numeri con la virgola
+    input.replace(",", ".");
 
-    // Espressione regolare per tokenizzare numeri e operatori
     QRegularExpression regex("(?:\\d+\\.\\d+|\\.\\d+|\\d+)|[-+*/]");
 
     QRegularExpressionMatchIterator it = regex.globalMatch(input);
@@ -298,12 +362,9 @@ void NumberOperatorLineEdit::evaluateExpression()
         return;
     }
 
-    // Calcolo dell'espressione
     double result = 0.0;
     bool expectOperator = false;
     QString lastOperator = "+";
-
-    qDebug() << "Tokens: " << tokens;
 
     for (const QString& token : tokens) {
         if (expectOperator) {
@@ -332,7 +393,6 @@ void NumberOperatorLineEdit::evaluateExpression()
                 return;
             }
 
-            // Applica l'operatore precedente
             if (lastOperator == "+") result += value;
             else if (lastOperator == "-") result -= value;
             else if (lastOperator == "*") result *= value;
@@ -353,9 +413,7 @@ void NumberOperatorLineEdit::evaluateExpression()
         return;
     }
 
-    // Mostra il risultato
     setText(QString::number(result, 'g', 10));
-    qDebug() << "Risultato: " << result;
 }
 
 PropertyGroupHeader::PropertyGroupHeader(const PropertyGroupHeader& other) : QFrame(other.parentWidget())

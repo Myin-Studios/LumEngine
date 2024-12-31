@@ -40,8 +40,6 @@ RendererCore::RendererCore(QWidget *parent)
 
     setAcceptDrops(true);
 
-	std::cout << "Initializing renderer..." << std::endl;
-
 	this->_uiManager = std::make_unique<UIManager>();
     updateTimer = new QTimer(this);
     connect(updateTimer, &QTimer::timeout, this, [this]() { update(); });
@@ -60,18 +58,6 @@ RendererCore::~RendererCore()
 
 void RendererCore::initializeGL()
 {
-
-    // QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
-    // if (logger->initialize()) {
-    //     logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
-    //     connect(logger, &QOpenGLDebugLogger::messageLogged, this,
-    //         [](const QOpenGLDebugMessage& msg) {
-    //             qDebug() << msg;
-    //         });
-    // }
-
-    RendererDebugger::checkOpenGLError("after initializeOpenGLFunctions");
-
 	glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cerr << "GLEW initialization failed!" << std::endl;
@@ -87,10 +73,9 @@ void RendererCore::initializeGL()
         nullptr
     );
 
-    qDebug() << "GLEW version:" << QString((const char*)glewGetString(GLEW_VERSION));
-    qDebug() << "OpenGL version:" << QString((const char*)glGetString(GL_VERSION));
-
     RendererDebugger::checkOpenGLError("after glewInit");
+
+    AABBDebugRenderer::Initialize();
 
     editorCamera = new Camera();
 
@@ -223,6 +208,8 @@ void RendererCore::paintGL()
     if (!entities.empty())
     {
         for (const auto& e : entities) {
+            ProcessLOD(e.get());
+
             if (e->GetCoreProperty<MeshCore>() != nullptr) {
                 RenderCommand cmd;
                 cmd.entity = e.get();
@@ -231,17 +218,32 @@ void RendererCore::paintGL()
 
                 glm::mat4 transform = glm::mat4(1.0f);
                 if (e->GetCoreProperty<Transform3DCore>() != nullptr) {
+                    auto transformCore = e->GetCoreProperty<Transform3DCore>();
+
                     transform = glm::translate(transform, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->position->x(),
-                        e->GetCoreProperty<Transform3DCore>()->position->y(),
-                        e->GetCoreProperty<Transform3DCore>()->position->z()
+                        transformCore->position->x(),
+                        transformCore->position->y(),
+                        transformCore->position->z()
                     ));
+
+                    transform = glm::rotate(transform, glm::radians(transformCore->GetRotation().x()), glm::vec3(1, 0, 0));
+                    transform = glm::rotate(transform, glm::radians(transformCore->GetRotation().y()), glm::vec3(0, 1, 0));
+                    transform = glm::rotate(transform, glm::radians(transformCore->GetRotation().z()), glm::vec3(0, 0, 1));
+
                     transform = glm::scale(transform, glm::vec3(
-                        e->GetCoreProperty<Transform3DCore>()->scale.x(),
-                        e->GetCoreProperty<Transform3DCore>()->scale.y(),
-                        e->GetCoreProperty<Transform3DCore>()->scale.z()
+                        transformCore->scale.x(),
+                        transformCore->scale.y(),
+                        transformCore->scale.z()
                     ));
+
+                    if (auto collider = e->GetCoreProperty<LumEngine::Physics::Collider>()) {
+                        Mat4Core transformMat = transform;
+                        collider->UpdateTransform(transformMat);
+                    }
+
+                    LumEngine::Physics::RayCast::UpdateTransform(e->GetEntityID(), transform);
                 }
+
                 cmd.transform = transform;
                 renderQueue.push(cmd);
             }
@@ -514,6 +516,46 @@ void RendererCore::UpdateCamera()
         editorCamera->GetTransform()->Move(new Vec3Core(editorCamera->GetTransform()->up.Normalize() * 0.05f));
 }
 
+void RendererCore::ProcessLOD(BaseEntity* e)
+{
+    if (!e) return;  // Controllo di sicurezza sull'entità
+
+    auto mesh = e->GetCoreProperty<MeshCore>();
+    if (!mesh) return;  // Controllo se esiste il MeshCore
+
+    auto lodSettings = mesh->GetLODSettings();
+    if (!lodSettings) return;  // Controllo se esistono le impostazioni LOD
+
+    auto transform = e->GetCoreProperty<Transform3DCore>();
+    if (!transform) return;
+
+    // Calcola la distanza dalla camera all'oggetto
+    float distance = (editorCamera->GetTransform()->GetPosition() -
+        transform->GetPosition()).Length();
+
+    // Imposta i limiti per il LOD
+    int targetLOD;
+    if (distance > lodSettings->GetMaxDistance()) {
+        targetLOD = lodSettings->GetSteps();
+    }
+    else if (distance < lodSettings->GetMinDistance()) {
+        targetLOD = 0;
+    }
+    else {
+        // Interpola il livello di LOD basato sulla distanza
+        float t = (distance - lodSettings->GetMinDistance()) /
+            (lodSettings->GetMaxDistance() - lodSettings->GetMinDistance());
+        targetLOD = static_cast<int>(t * lodSettings->GetSteps());
+        // Assicurati che il livello sia nei limiti
+        targetLOD = std::clamp(targetLOD, 0, lodSettings->GetSteps());
+    }
+
+    // Aggiorna il LOD solo se necessario
+    if (mesh->GetCurrentLOD() != targetLOD) {  // Confronta con il livello corrente
+        mesh->SetLOD(targetLOD);
+    }
+}
+
 void RendererCore::setupSkysphere()
 {
     skysphere = loadOBJ("Resources/Models/Skysphere.obj", std::make_shared<ProceduralSkybox>());
@@ -559,9 +601,6 @@ void RendererCore::setupFrameBuffer()
 {
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    qDebug() << "Generated FBO:" << FBO;
-
-	std::cout << "Width: " << width() << "\nHeight: " << height() << std::endl;
 
 	RendererDebugger::checkOpenGLError("setting up FBO");
 
@@ -672,34 +711,28 @@ void RendererCore::mousePressEvent(QMouseEvent* event)
     }
     else if (event->button() == Qt::LeftButton)
     {
-		Vec3Core rOrigin, rDirection;
-
-        LumEngine::Physics::RayCast::ScreenToRay(
-            event->pos().x(),
-            event->pos().y(),
-            width(), height(),
-            rOrigin, rDirection);
-
         LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(
-            rOrigin,
-            rDirection);
+            editorCamera->GetTransform()->GetPosition(),
+            LumEngine::Physics::RayCast::ScreenToRay(
+                event->pos().x(),
+                event->pos().y(),
+                width(), height()));
 
         if (res.hit) {
             auto it = find_if(entities.begin(), entities.end(), [&](const std::shared_ptr<BaseEntity>& e) {
-				std::cout << e->GetEntityID() << " == " << res.entityId << std::endl;
                 return e->GetEntityID() == res.entityId;
                 });
 
             if (it != entities.end()) {
+                std::cout << "Selected Entity: " << (*it)->GetEntityID() << std::endl;
                 (*it)->SetSelected(true);
                 if (this->_uiManager) {
-                    this->_uiManager->UpdateUI();
+                    this->_uiManager->UpdateUI(it->get());
                 }
                 else {
                     // Handle the error or log it
                     std::cerr << "UI Manager is not initialized." << std::endl;
                 }
-                std::cout << "Hit!" << std::endl;
                 update();
             }
         }
@@ -790,15 +823,35 @@ void RendererCore::loadModel(const QString& path) {
     {
         entities.emplace_back(std::make_shared<BaseEntity>());
         entities.back()->AddProperty<MeshCore>(loadOBJ(path, std::make_shared<PBR>()));
+
+        Mat4Core t = {};
+
         entities.back()->AddProperty(std::make_unique<LumEngine::Physics::Collider>(
-            entities.back()->GetEntityID(), entities.back()->GetCoreProperty<MeshCore>()->GetVertices()));
+            entities.back()->GetEntityID(), entities.back()->GetCoreProperty<MeshCore>()->GetVertices(), t));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
 
-        std::cout << entities.back()->GetCoreProperty<MeshCore>()->GetVertices().back().Position.x << std::endl;
+		entities.back()->AddProperty<LumEngine::Graphics::LODCore>(std::make_unique<LumEngine::Graphics::LODCore>(3));
 
         LumEngine::Physics::RayCast::RegisterBoundingVolume(
             entities.back()->GetCoreProperty<MeshCore>()->GetVertices()
         );
+
+        if (auto mesh = entities.back()->GetCoreProperty<MeshCore>()) {
+            // First, get the existing LOD settings
+            if (auto lodCore = entities.back()->GetCoreProperty<LumEngine::Graphics::LODCore>()) {
+                // Create a new LODCore using the values from the existing one
+                mesh->SetLODSettings(std::make_shared<LumEngine::Graphics::LODCore>(
+                    lodCore->GetSteps(),
+                    lodCore->GetMaxDistance(),
+                    lodCore->GetMinDistance()
+                ));
+            }
+            else {
+                // If no LODCore exists, create one with default values
+                mesh->SetLODSettings(std::make_shared<LumEngine::Graphics::LODCore>());
+            }
+            mesh->SetLOD(0);
+        }
     }
 }
 
@@ -810,6 +863,7 @@ std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared
     }
 
     std::vector<Vertex> ver;
+    std::vector<int> ids;
     std::vector<glm::vec3> vertices, normals;
     std::vector<glm::vec2> texCoords;
 
@@ -842,7 +896,7 @@ std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared
                 iss >> vertexData;
 
                 int vertexIndex = -1, uvIndex = -1, normalIndex = -1;
-                std::replace(vertexData.begin(), vertexData.end(), '/', ' '); // Sostituisce '/' con spazio
+                std::replace(vertexData.begin(), vertexData.end(), '/', ' ');
                 std::istringstream vertexStream(vertexData);
                 vertexStream >> vertexIndex >> uvIndex >> normalIndex;
 
@@ -851,6 +905,8 @@ std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared
                     normalIndex > 0 ? normals[normalIndex - 1] : glm::vec3(0, 0, 0),
                     uvIndex > 0 ? texCoords[uvIndex - 1] : glm::vec2(0, 0)
                 );
+
+                ids.push_back(ver.size() - 1);
             }
         }
     }
@@ -859,7 +915,7 @@ std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared
 
     // Creazione della mesh
     makeCurrent();
-    auto m = std::make_unique<MeshCore>(std::move(ver));
+    auto m = std::make_unique<MeshCore>(std::move(ver), std::move(ids));
     m->SetMaterial(mat);
 
     RendererDebugger::checkOpenGLError("model loading");

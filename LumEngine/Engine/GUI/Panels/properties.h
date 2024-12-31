@@ -12,6 +12,9 @@
 #include <QPaintEvent>
 #include <QPainterPath>
 #include <QStyleOption>
+#include <QObject>
+
+#include "../LumTypes/Entities/Entity.h"
 
 class PropertyGroupHeader : public QFrame
 {
@@ -48,10 +51,14 @@ class PropertyGroup : public QWidget
 	Q_OBJECT
 public:
     PropertyGroup(const std::string& title, QWidget* parent = nullptr);
+    virtual ~PropertyGroup() = default;
 
 	const std::string& getTitle() const;
     QVBoxLayout* getLayout() const;
     void addElement(QWidget* elem, Qt::AlignmentFlag flag = Qt::AlignTop);
+
+    virtual BaseEntity* GetEntity() { return nullptr; };
+    virtual void UpdateValues() {};
 
 private:
 	std::string _title;
@@ -66,7 +73,8 @@ enum Coordinate
     X,
     Y,
     Z,
-    W
+    W,
+	NEUTER
 };
 
 class NumberOperatorLineEdit : public QLineEdit {
@@ -91,10 +99,12 @@ private:
     QString normalStyleY;
     QString normalStyleZ;
     QString normalStyleW;
+    QString normalStyleNeuter;
     QString focusStyleX;
     QString focusStyleY;
     QString focusStyleZ;
     QString focusStyleW;
+	QString focusStyleNeuter;
 };
 
 class CoordinateFrame : public QFrame
@@ -110,9 +120,9 @@ private:
 	std::string _text;
 };
 
-
 class Vec3Property : public QWidget
 {
+	Q_OBJECT
 public:
     Vec3Property(QWidget* parent = nullptr);
     ~Vec3Property();
@@ -122,7 +132,12 @@ public:
 signals:
     void valueChanged(float x, float y, float z);
 
+private slots:
+    void handleValueChange();
+
 private:
+    void setupConnections();
+
     QHBoxLayout* _mainLayout = nullptr;
 
     QLabel* xLabel = nullptr;

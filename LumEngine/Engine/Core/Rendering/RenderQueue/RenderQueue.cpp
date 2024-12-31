@@ -51,13 +51,19 @@ void RenderQueue::process(const glm::mat4& view, const glm::mat4& proj,
             cmd.mesh->SetMaterial(currentMaterial);
         }
 
+        RendererDebugger::checkOpenGLError("RenderQueue::process: SetMaterial");
+
         auto shader = currentMaterial->GetShader();
         shader->use();
+
+        RendererDebugger::checkOpenGLError("RenderQueue::process: Shader usage");
 
         // Setup trasformazioni originali
         shader->setMat4x4("model", &cmd.transform[0][0]);
         shader->setMat4x4("view", &view[0][0]);
         shader->setMat4x4("projection", &proj[0][0]);
+
+        RendererDebugger::checkOpenGLError("RenderQueue::process: Matrices uniforms");
 
         if (auto pbrMat = std::dynamic_pointer_cast<PBR>(currentMaterial)) {
             shader->setVec3Array("lightPositions", lightPositions.size(), glm::value_ptr(lightPositions[0]));
@@ -69,7 +75,11 @@ void RenderQueue::process(const glm::mat4& view, const glm::mat4& proj,
             shader->setVec3("albedo", glm::vec3(c.r(), c.g(), c.b()));
             shader->setFloat("metallic", 1.0f);
             shader->setFloat("roughness", 0.4f);
+
+            RendererDebugger::checkOpenGLError("RenderQueue::process: PBR material uniforms");
         }
+
+        RendererDebugger::checkOpenGLError("RenderQueue::process");
 
         cmd.mesh->Draw();
     }
@@ -98,11 +108,26 @@ void RenderQueue::process(const glm::mat4& view, const glm::mat4& proj,
         shader->setVec3("camPos", camPos);
 
         if (cmd.entity->IsSelected())
+        {
             cmd.mesh->Draw();
+        }
 
         // Ripristina il materiale originale
         cmd.mesh->SetMaterial(currentMaterial);
     }
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Importante per vedere il wireframe
+
+    for (const auto& cmd : _commands) {
+        if (cmd.entity->IsSelected() && cmd.entity->GetCoreProperty<LumEngine::Physics::Collider>()) {
+            auto collider = cmd.entity->GetCoreProperty<LumEngine::Physics::Collider>();
+            AABBDebugRenderer::DrawAABB(collider->GetBoundingBox(), view, proj);
+        }
+    }
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Ripristina gli stati
     glStencilMask(0xFF);

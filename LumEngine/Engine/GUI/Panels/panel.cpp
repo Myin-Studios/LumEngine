@@ -13,19 +13,26 @@ BasePanel::BasePanel(const std::string& title)
     this->_headersLayout = new QHBoxLayout();
     this->_mainContainerLayout = new QVBoxLayout();
     this->_stackedWidget = new QStackedWidget();
+    this->_searchField = new TextField();
 
     // Assicurati che il QStackedWidget possa espandersi
     this->_stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     this->_stackedWidget->setContentsMargins(0, 0, 0, 0);
 
+    this->_searchField->setPlaceholderText("Search...");
+    this->_searchField->setSizeIncrement(0, 0);
+    this->_searchField->setMaximumHeight(30);
+    this->_searchField->setVisible(false);
+
     // Imposta il layout principale
-    this->_mainContainerLayout->setContentsMargins(0, 0, 0, 0);
+    this->_mainContainerLayout->setContentsMargins(10, 0, 10, 0);
     this->_mainContainerLayout->setSpacing(10);
     this->_mainContainerLayout->addLayout(this->_headersLayout);
+    this->_mainContainerLayout->addWidget(_searchField);
     this->_mainContainerLayout->addWidget(this->_stackedWidget);
     this->_mainContainerLayout->addStretch();
 
-    this->_headersLayout->setContentsMargins(10, 10, 10, 10);
+    this->_headersLayout->setContentsMargins(0, 0, 0, 0);
     this->_headersLayout->setSpacing(2);
 
     // Configura il layout del pannello
@@ -40,7 +47,86 @@ BasePanel::~BasePanel()
 
 void BasePanel::addHeader(const std::string& title)
 {
-    // this->_headers.emplace_back(title);
+    auto* _header = new PanelHeader(title);
+    _headers.append(_header);
+
+    connect(_header, &PanelHeader::clicked, this, [this, _header]() {
+        int index = _headers.indexOf(_header);
+        if (index != -1) {
+            _header->setFocus();
+            onHeaderClicked(index);
+            this->update();
+        }
+        });
+
+    _headersLayout->addWidget(_header);
+
+    // Crea una nuova QScrollArea per la pagina
+    QScrollArea* scrollable = new QScrollArea();
+    QWidget* scrollContent = new QWidget();
+    QVBoxLayout* scrollContentLayout = new QVBoxLayout(scrollContent);
+    QScrollBar* scrollBar = new QScrollBar();
+
+    // Configura lo scroll area
+    scrollable->setWidget(scrollContent);
+    scrollable->setWidgetResizable(true); // Permette il ridimensionamento
+    scrollable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    scrollBar->setStyleSheet(
+        "QScrollBar:vertical {"
+        "    border: none;"
+        "    background: rgb(25, 25, 25);"
+        "    width: 10px;" // Questo controlla la larghezza del contenitore
+        "    margin: 0px 0px 0px 0px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background: rgb(50, 50, 50);"
+        "    min-height: 20px;"
+        "    border-radius: 3px;"
+        "    width: 5px;" // Larghezza iniziale del gestore
+        "    margin-left: 2px;" // Centrare il gestore
+        "    margin-right: 2px;"
+        "}"
+        "QScrollBar::handle:vertical:hover {"
+        "    background: rgb(70, 70, 70);"
+        "    width: 10px;" // Larghezza al passaggio del mouse
+        "    margin-left: 1px;" // Regola per centrare
+        "    margin-right: 1px;"
+        "}"
+        "QScrollBar::add-line:vertical {"
+        "    height: 0px;"
+        "    subcontrol-position: bottom;"
+        "    subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::sub-line:vertical {"
+        "    height: 0px;"
+        "    subcontrol-position: top;"
+        "    subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+        "    background: none;"
+        "}"
+        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+        "    background: none;"
+        "}"
+    );
+
+    scrollable->setVerticalScrollBar(scrollBar);
+
+    scrollContent->setLayout(scrollContentLayout);
+
+    // Imposta le politiche di dimensionamento
+    scrollable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    scrollContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    scrollable->setWidget(scrollContent);
+    scrollable->setWidgetResizable(true); // Permette il ridimensionamento
+    scrollable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    // Aggiungi la QScrollArea al QStackedWidget
+    _stackedWidget->addWidget(scrollable);
 }
 
 void BasePanel::addPage(const std::string& title, QWidget* elem)
@@ -131,6 +217,7 @@ void BasePanel::addPage(const std::string& title, QWidget* elem)
 
     // Aggiungi l'elemento al layout della nuova pagina
     scrollContentLayout->addWidget(elem);
+	scrollContentLayout->setContentsMargins(0, 0, 0, 0);
     scrollContentLayout->addSpacing(10);
 
     // Se è il primo header, selezionalo
@@ -145,6 +232,7 @@ void BasePanel::addElement(const std::string& title, QWidget* elem) {
         });
 
     if (it != _headers.end()) {
+        this->_searchField->setVisible(true);
         int pageIndex = _headers.indexOf(*it);
         QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
         if (scrollable) {
@@ -154,17 +242,36 @@ void BasePanel::addElement(const std::string& title, QWidget* elem) {
                 // Controlla se esiste già un PropertyGroup con lo stesso titolo
                 PropertyGroup* newGroup = qobject_cast<PropertyGroup*>(elem);
                 if (newGroup) {
+                    PropertyGroup* newProperty = dynamic_cast<PropertyGroup*>(newGroup);
                     for (int i = 0; i < layout->count(); ++i) {
                         PropertyGroup* existingGroup = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget());
-                        if (existingGroup && existingGroup->getTitle() == newGroup->getTitle()) {
-                            // Se esiste già, mostralo e termina
-                            existingGroup->setVisible(true);
-                            delete elem;  // Elimina il nuovo elemento poiché non verrà utilizzato
-                            return;
+                        PropertyGroup* existingProperty = dynamic_cast<PropertyGroup*>(existingGroup);
+
+                        if (existingProperty && newProperty) {
+                            bool sameTitle = existingGroup->getTitle() == newGroup->getTitle();
+                            bool sameEntity = existingProperty->GetEntity() == newProperty->GetEntity();
+
+                            qDebug() << "Comparing properties:";
+                            qDebug() << "Same title:" << sameTitle;
+                            qDebug() << "Same entity:" << sameEntity;
+                            qDebug() << "Existing entity ID:" << (existingProperty->GetEntity() ? existingProperty->GetEntity()->GetEntityID() : -1);
+                            qDebug() << "New entity ID:" << (newProperty->GetEntity() ? newProperty->GetEntity()->GetEntityID() : -1);
+
+                            if (sameTitle && !sameEntity) {
+                                layout->removeWidget(existingGroup);
+                                existingGroup->deleteLater();
+                                layout->addWidget(elem);
+                                return;
+                            }
+                            else if (sameTitle && sameEntity) {
+                                existingProperty->UpdateValues();
+                                delete elem;
+                                return;
+                            }
                         }
                     }
                 }
-                // Se non esiste, aggiungilo
+
                 layout->addWidget(elem);
                 return;
             }
@@ -219,6 +326,7 @@ void BasePanel::removeAllElements(const std::string& title)
         });
 
     if (it != _headers.end()) {
+        this->_searchField->setVisible(false);
         int pageIndex = _headers.indexOf(*it);
         QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
         if (scrollable) {
@@ -229,7 +337,8 @@ void BasePanel::removeAllElements(const std::string& title)
                 for (int i = layout->count() - 1; i >= 0; --i) {
                     QWidget* widget = layout->itemAt(i)->widget();
                     if (widget) {
-                        widget->setVisible(false);
+                        layout->removeWidget(widget);
+                        widget->deleteLater();
                     }
                 }
                 // Aggiorna il layout per riflettere i cambiamenti

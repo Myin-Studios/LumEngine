@@ -35,12 +35,12 @@
 #include "../LumTypes/Entities/Entity.h"
 #include "../LumTypes/Physics/Collisions.h"
 #include "Meshes/Mesh.h"
+#include "../LumEngine/Engine/Core/LumEngineAPI.h"
+#include "Engine/Core/Rendering/RenderQueue/RenderQueue.h"
+#include "../LumTypes/LOD/LOD.h"
 
 #include "../LumEngine/Engine/Core/ScriptThreading/IScriptRunner.h"
 #include "Engine/GUI/GUIBuilder/IGUIBuilder.h"
-
-#include "../LumEngine/Engine/Core/LumEngineAPI.h"
-#include "Engine/Core/Rendering/RenderQueue/RenderQueue.h"
 
 #include "GL/glew.h"
 #include "glm/vec3.hpp"
@@ -122,6 +122,8 @@ private:
 
     void UpdateCamera();
 
+    void ProcessLOD(BaseEntity* e);
+
     void setupSkysphere();
     void checkFrameBufferError();
     void setupFrameBuffer();
@@ -199,7 +201,6 @@ private:
         {
             if (entity->GetProperty(typeid(*prop)))  // typeid dell'oggetto, non del puntatore
             {
-                std::cout << "Property found: " << typeid(*prop).name() << std::endl;
                 return typeid(*prop).name();
             }
         }
@@ -215,24 +216,44 @@ public:
         _guiBuilder = builder;
     }
 
-    void UpdateUI()
+    void UpdateUI(BaseEntity* e = nullptr)
     {
-        BaseEntity* entity = GetSelectedEntity();
-        if (entity)
+        if (e)
         {
-            for (auto& prop : entity->GetProperties())
+            _guiBuilder->SetEntity(e);
+
+            for (auto& prop : e->GetProperties())
             {
                 std::string propTitle = GetPropertyFromEntity(prop.get());
 
-				if (propTitle != "")
-				{
-					_guiBuilder->AddElement("PROPERTIES", propTitle);
-				}
+                if (propTitle != "")
+                {
+                    _guiBuilder->AddElement("PROPERTIES", propTitle);
+                }
             }
         }
         else
         {
-			_guiBuilder->RemoveAllElements();
+            BaseEntity* entity = GetSelectedEntity();
+
+            this->_guiBuilder->SetEntity(entity);
+
+            if (entity)
+            {
+                for (auto& prop : entity->GetProperties())
+                {
+                    std::string propTitle = GetPropertyFromEntity(prop.get());
+
+                    if (propTitle != "")
+                    {
+                        _guiBuilder->AddElement("PROPERTIES", propTitle);
+                    }
+                }
+            }
+            else
+            {
+                _guiBuilder->RemoveAllElements();
+            }
         }
     }
 };

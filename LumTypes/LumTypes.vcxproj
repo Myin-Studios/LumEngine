@@ -147,6 +147,7 @@
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Properties\Property.h" />
     <ClInclude Include="GameBehaviour\GameBehaviour.h" />
+    <ClInclude Include="LOD\LOD.h" />
     <ClInclude Include="Mathematics\Math.h" />
     <ClInclude Include="Physics\Collisions.h" />
     <ClInclude Include="Rendering\Colors\Color.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Transformations\Transformations.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LOD\LOD.cpp" />
     <ClCompile Include="Mathematics\Math.cpp" />
     <ClCompile Include="Physics\Collisions.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

@@ -11,5 +11,7 @@ struct Vertex {
     glm::vec3 Normal;
     glm::vec2 TexCoords;
 
-    Vertex(glm::vec3 pos, glm::vec3 nor, glm::vec2 tex) : Position(pos), Normal(nor), TexCoords(tex) {}
+    Vertex(const Vertex& other) = default;
+
+    Vertex(glm::vec3 pos = glm::vec3(), glm::vec3 nor = glm::vec3(), glm::vec2 tex = glm::vec2()) : Position(pos), Normal(nor), TexCoords(tex) {}
 };

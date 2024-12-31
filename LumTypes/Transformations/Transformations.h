@@ -89,6 +89,12 @@ public:
 
     void SetRotation(float yaw, float pitch, float roll);
     void Rotate(float yaw, float pitch, float roll);
+    Vec3Core& GetRotation();
+
+    /* --------------------------{ Rotation }--------------------------*/
+
+    void SetScale(float x, float y, float z);
+    Vec3Core& GetScale();
 
     /* --------------------------{ Serialization }--------------------------*/
 
