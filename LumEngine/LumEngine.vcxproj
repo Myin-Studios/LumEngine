@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\LumE_PlusNormal.svg" />
+    <None Include="..\..\..\LumE_Recents.svg" />
     <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Active.svg" />
     <None Include="Engine\Resources\Icons\CMEngine_Icon_Build_Inactive.svg" />
     <None Include="Engine\Resources\Icons\CMEngine_Icon_File.svg" />
@@ -50,6 +52,8 @@
     <None Include="Engine\Resources\Icons\New\CMEngine_TabsHover.svg" />
     <None Include="Engine\Resources\Icons\New\LumE_HierarchyHover.svg" />
     <None Include="Engine\Resources\Icons\New\LumE_LightSettingsHover.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_PlusNormal.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_Recents.svg" />
     <None Include="Engine\Resources\res.qrc.depends" />
     <None Include="Engine\Resources\Shaders\AABBDebuggerFrag.glsl" />
     <None Include="Engine\Resources\Shaders\AABBDebuggerVert.glsl" />
@@ -83,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\AssemblyLoader\ScriptPathLoader.h" />
+    <ClInclude Include="Engine\Core\Caching\BufferCache.h" />
     <ClInclude Include="Engine\Core\CMAPICore.h" />
     <ClInclude Include="Engine\Core\LumEngineAPI.h" />
     <ClInclude Include="Engine\Core\Rendering\Debugger\AABBDebugger.h" />
@@ -90,6 +95,7 @@
     <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
     <ClInclude Include="Engine\Core\ScriptThreading\IScriptRunner.h" />
+    <QtMoc Include="Engine\GUI\AssetsManager\IAssetManager.h" />
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h" />
@@ -98,6 +104,7 @@
     <ClInclude Include="Engine\GUI\GUIBuilder\IGUIBuilder.h" />
     <QtMoc Include="Engine\GUI\Text Fields\TextField.h" />
     <QtMoc Include="Engine\GUI\Panels\BaseProperties\baseProperties.h" />
+    <QtMoc Include="Engine\GUI\Home\IHomeBuilder.h" />
     <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
@@ -116,11 +123,13 @@
   <ItemGroup>
     <ClCompile Include="Engine\Core\Rendering\RenderCommand\RenderCommand.cpp" />
     <ClCompile Include="Engine\Core\Rendering\RenderQueue\RenderQueue.cpp" />
+    <ClCompile Include="Engine\GUI\AssetsManager\IAssetManager.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\tabsbutton.cpp" />
     <ClCompile Include="Engine\GUI\Buttons\utilsbutton.cpp" />
     <ClCompile Include="Engine\GUI\Elements\Elements.cpp" />
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
+    <ClCompile Include="Engine\GUI\Home\IHomeBuilder.cpp" />
     <ClCompile Include="Engine\GUI\Panels\BaseProperties\baseProperties.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
@@ -224,13 +233,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
     <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
-    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtSvg;$(ExternalIncludePath)</ExternalIncludePath>
     <OutDir>Output/$(Configuration)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>Output/$(Configuration)</OutDir>
     <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
-    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtSvg;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -277,7 +286,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Cored.lib;Qt6Guid.lib;Qt6Svgd.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGLd.lib;Qt6OpenGLWidgetsd.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GLEW_LIB);$(Qt6_DIR)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -314,7 +323,7 @@ xcopy /y /i /e "$(NETHOST_LIB)\nethost.dll" "$(OutDir)"</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGL.lib;Qt6OpenGLWidgets.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
+      <AdditionalDependencies>Qt6Widgets.lib;Qt6Core.lib;Qt6Gui.lib;Qt6Svg.lib;%(AdditionalDependencies);$(CoreLibraryDependencies);glew32.lib;Qt6OpenGL.lib;Qt6OpenGLWidgets.lib;opengl32.lib;nethost.lib;LumTypes.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "C:\vcpkg\installed\x64-windows\bin\glew32.dll" "$(SolutionDir)Output\$(Configuration)\"

@@ -37,12 +37,15 @@
 #include "../LumTypes/Transformations/Transformations.h"
 #include "../LumTypes/Entities/Properties/Property.h"
 #include "../LumTypes/LOD/LOD.h"
+#include "Engine/Core/Caching/BufferCache.h"
 
 #include "gl/glew.h"
 #include <vector>
 #include <string>
 #include <iostream>
 #include <map>
+#include <queue>
+#include <set>
 
 using namespace std;
 using namespace LumEngine::Graphics;
@@ -59,7 +62,7 @@ private:
     // The key is the LOD step, and the value contains both vertices and indices for that LOD level
     struct LODData {
         vector<Vertex> vertices;
-        vector<int> indices;
+        vector<unsigned int> indices;
         unsigned int VBO;  // Each LOD level has its own VBO
         unsigned int EBO;  // Element Buffer Object per gli indici
 
@@ -77,11 +80,13 @@ private:
     shared_ptr<Material> material;
     shared_ptr<LODCore> lodSettings;  // Store LOD configuration
 
+	std::string _path;
+
 public:
     vector<Vertex> vertices;
-    vector<int> indices;
+    vector<unsigned int> indices;
 
-    MeshCore(vector<Vertex> vertices = {}, vector<int> indices = {})
+    MeshCore(vector<Vertex> vertices = {}, vector<unsigned int> indices = {}, const std::string& path = "")
         : vertices(std::move(vertices)), indices(std::move(indices))
     {
         // Initialize with base LOD (original mesh)
@@ -91,17 +96,44 @@ public:
         lodLevels[0] = baseLevel;
 
         lodSettings = std::make_shared<LODCore>(0, 100.0f, 0.0f);
+
+		_path = path;
+
         setupMesh();
     }
+
+	~MeshCore()
+	{
+		if (VAO != 0) glDeleteVertexArrays(1, &VAO);
+
+		auto it = find_if(lodLevels.begin(), lodLevels.end(), [](const pair<int, LODData>& level) {
+			return level.second.VBO != 0;
+			});
+
+        if (it != lodLevels.end())
+        {
+            if (!it->second.vertices.empty())
+            {
+                it->second.vertices.clear();
+            }
+            if (!it->second.indices.empty())
+			{
+				it->second.indices.clear();
+			}
+
+			if (it->second.EBO != 0) glDeleteBuffers(1, &it->second.EBO);
+            glDeleteBuffers(1, &it->second.VBO);
+        }
+
+        lodLevels.clear();
+	}
+
+	void SetPath(const std::string& path) { _path = path; }
 
     const vector<Vertex> GetVertices() const { return this->vertices; }
 
     void Draw() const
     {
-        material->GetShader()->use();
-
-        RendererDebugger::checkOpenGLError("shader usage");
-
         glBindVertexArray(VAO);
 
         // Get the current LOD level data
@@ -116,10 +148,6 @@ public:
         glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
         glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
         glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
-
-        std::cerr << "Debug Buffers:\n\tVAO: " << currentVAO
-            << "\n\tVBO: " << currentVBO
-            << "\n\tEBO: " << currentEBO << std::endl;
 
         if (!currentLevel.indices.empty()) {
             glDrawElements(GL_TRIANGLES, currentLevel.indices.size(),
@@ -180,6 +208,18 @@ public:
         }
 
         currentLOD = step;
+
+        auto buffers = GLBufferCache::GetInstance()->GetOrCreateBuffers(
+            _path,
+            lodLevels[step].vertices,
+            lodLevels[step].indices,
+            step
+        );
+
+        // Usa i buffer del livello LOD appropriato
+        VAO = buffers->VAO;
+		lodLevels[step].VBO = buffers->VBO;
+		lodLevels[step].EBO = buffers->EBO;
     }
 
 	void SetLODSettings(shared_ptr<LODCore> settings) { lodSettings = settings; }
@@ -192,7 +232,7 @@ public:
 private:
 
     void SetupLODLevel(LODData& level) {
-        // Setup VBO for this level
+        // Generate and set up VBO
         glGenBuffers(1, &level.VBO);
         glBindBuffer(GL_ARRAY_BUFFER, level.VBO);
         glBufferData(GL_ARRAY_BUFFER,
@@ -200,18 +240,7 @@ private:
             level.vertices.data(),
             GL_STATIC_DRAW);
 
-        RendererDebugger::checkOpenGLError("LOD VBO setup");
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0); // Posizione
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal)); // Normale
-        glEnableVertexAttribArray(1);
-
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords)); // Coordinate UV
-        glEnableVertexAttribArray(2);
-
-        // Setup EBO for this level
+        // Generate and set up EBO
         glGenBuffers(1, &level.EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, level.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -219,107 +248,224 @@ private:
             level.indices.data(),
             GL_STATIC_DRAW);
 
-        RendererDebugger::checkOpenGLError("LOD EBO setup");
+        RendererDebugger::checkOpenGLError("LOD buffer setup");
     }
 
-    void ProcessLOD(int step)
-    {
+    void ProcessLOD(int step) {
         const auto& prevLevel = lodLevels[step - 1];
 
-        LODData newLevel;
+        // Fase 1: Vertex Welding
+        float weldThreshold = 0.0001f;
+        std::vector<int> vertexRemap(prevLevel.vertices.size(), -1);
+        std::vector<Vertex> unifiedVertices;
 
-        // Soglia basata sul livello di LOD
-        // Più alto è step, più aggressiva sarà la decimazione
-        float threshold = 3.14159265358979323846 / 4.0f * (1.0f + step * 0.5f);  // Partiamo da 45 gradi
+        for (size_t i = 0; i < prevLevel.vertices.size(); i++) {
+            if (vertexRemap[i] != -1) continue;
 
-        // We'll process triangles in groups of three vertices
-        for (size_t i = 0; i < prevLevel.indices.size(); i += 3)
-        {
-            // Get the three vertices that form our triangle
-            Vertex v1 = prevLevel.vertices[prevLevel.indices[i]];
-            Vertex v2 = prevLevel.vertices[prevLevel.indices[i + 1]];
-            Vertex v3 = prevLevel.vertices[prevLevel.indices[i + 2]];
+            const Vec3Core v1Pos(prevLevel.vertices[i].Position.x,
+                prevLevel.vertices[i].Position.y,
+                prevLevel.vertices[i].Position.z);
 
-            // Calculate the angles between vertex normals
-            float angle1 = Vec3Core::Angle(Vec3Core(v1.Normal), Vec3Core(v2.Normal));
-            float angle2 = Vec3Core::Angle(Vec3Core(v2.Normal), Vec3Core(v3.Normal));
-            float angle3 = Vec3Core::Angle(Vec3Core(v3.Normal), Vec3Core(v1.Normal));
+            vertexRemap[i] = unifiedVertices.size();
+            unifiedVertices.push_back(prevLevel.vertices[i]);
 
-            // Calculate the average angle between normals
-            float averageAngle = (angle1 + angle2 + angle3) / 3.0f;
+            for (size_t j = i + 1; j < prevLevel.vertices.size(); j++) {
+                if (vertexRemap[j] != -1) continue;
 
-            // If the average angle is less than our threshold, we can merge these vertices
-            if (averageAngle < threshold)
-            {
-                // Create a merged vertex by averaging positions and normals
-                Vertex mergedVertex;
+                const Vec3Core v2Pos(prevLevel.vertices[j].Position.x,
+                    prevLevel.vertices[j].Position.y,
+                    prevLevel.vertices[j].Position.z);
 
-                // Average the positions
-                mergedVertex.Position = {
-                    (v1.Position.x + v2.Position.x + v3.Position.x) / 3.0f,
-                    (v1.Position.y + v2.Position.y + v3.Position.y) / 3.0f,
-                    (v1.Position.z + v2.Position.z + v3.Position.z) / 3.0f
-                };
-
-                // Average and normalize the normals
-                Vec3Core mergedNormal(
-                    (v1.Normal.x + v2.Normal.x + v3.Normal.x) / 3.0f,
-                    (v1.Normal.y + v2.Normal.y + v3.Normal.y) / 3.0f,
-                    (v1.Normal.z + v2.Normal.z + v3.Normal.z) / 3.0f
-                );
-                mergedNormal = mergedNormal.Normalize();
-                mergedVertex.Normal = { mergedNormal.x(), mergedNormal.y(), mergedNormal.z() };
-
-                // Average texture coordinates if they exist
-                mergedVertex.TexCoords = {
-                    (v1.TexCoords.x + v2.TexCoords.x + v3.TexCoords.x) / 3.0f,
-                    (v1.TexCoords.y + v2.TexCoords.y + v3.TexCoords.y) / 3.0f
-                };
-
-                // Add the merged vertex to our new level
-                newLevel.vertices.emplace_back(mergedVertex);
-
-                // Add three indices pointing to the same merged vertex
-                unsigned int newIndex = newLevel.vertices.size() - 1;
-                newLevel.indices.push_back(newIndex);
-                newLevel.indices.push_back(newIndex);
-                newLevel.indices.push_back(newIndex);
-            }
-            else
-            {
-                // If we're not merging, keep the original vertices and update indices
-                unsigned int baseIndex = newLevel.vertices.size();
-
-                // Add the original vertices
-                newLevel.vertices.push_back(v1);
-                newLevel.vertices.push_back(v2);
-                newLevel.vertices.push_back(v3);
-
-                // Add indices for these vertices
-                newLevel.indices.push_back(baseIndex);
-                newLevel.indices.push_back(baseIndex + 1);
-                newLevel.indices.push_back(baseIndex + 2);
+                Vec3Core diff = v2Pos - v1Pos;
+                if (diff.Length() < weldThreshold) {
+                    vertexRemap[j] = vertexRemap[i];
+                    std::cout << "Welding vertex " << j << " to " << i << std::endl;
+                }
             }
         }
 
+        // Crea gli indici unificati
+        std::vector<unsigned int> unifiedIndices;
+        for (size_t i = 0; i < prevLevel.indices.size(); i++) {
+            unifiedIndices.push_back(vertexRemap[prevLevel.indices[i]]);
+        }
+
+        std::cout << "Vertex welding statistics:" << std::endl;
+        std::cout << "Original vertices: " << prevLevel.vertices.size() << std::endl;
+        std::cout << "Unified vertices: " << unifiedVertices.size() << std::endl;
+
+        // Crea la mesh unificata
+        LODData unifiedMesh;
+        unifiedMesh.vertices = std::move(unifiedVertices);
+        unifiedMesh.indices = std::move(unifiedIndices);
+
+        // Fase 2: Edge Collapse
+        const auto& meshToProcess = unifiedMesh;
+        LODData newLevel = meshToProcess;
+
+        // Costruisci la mappa vertice->facce usando set per evitare duplicati
+        std::vector<std::set<unsigned int>> vertexToFacesSet(meshToProcess.vertices.size());
+        for (size_t i = 0; i < meshToProcess.indices.size(); i += 3) {
+            unsigned int faceIndex = i / 3;
+            unsigned int i1 = meshToProcess.indices[i];
+            unsigned int i2 = meshToProcess.indices[i + 1];
+            unsigned int i3 = meshToProcess.indices[i + 2];
+
+            vertexToFacesSet[i1].insert(faceIndex);
+            vertexToFacesSet[i2].insert(faceIndex);
+            vertexToFacesSet[i3].insert(faceIndex);
+        }
+
+        // Converti i set in vector
+        std::vector<std::vector<unsigned int>> vertexToFaces(meshToProcess.vertices.size());
+        for (size_t i = 0; i < vertexToFacesSet.size(); i++) {
+            vertexToFaces[i] = std::vector<unsigned int>(vertexToFacesSet[i].begin(), vertexToFacesSet[i].end());
+        }
+
+        // Costruisci la coda degli edge da collassare
+        std::priority_queue<Edge> edgeQueue;
+        std::set<std::pair<unsigned int, unsigned int>> processedEdges;
+
+        for (size_t i = 0; i < meshToProcess.indices.size(); i += 3) {
+            for (int j = 0; j < 3; j++) {
+                unsigned int v1 = meshToProcess.indices[i + j];
+                unsigned int v2 = meshToProcess.indices[i + ((j + 1) % 3)];
+
+                if (v1 > v2) std::swap(v1, v2);
+
+                if (processedEdges.insert({ v1, v2 }).second) {
+                    const Vec3Core v1Pos(meshToProcess.vertices[v1].Position.x,
+                        meshToProcess.vertices[v1].Position.y,
+                        meshToProcess.vertices[v1].Position.z);
+                    const Vec3Core v2Pos(meshToProcess.vertices[v2].Position.x,
+                        meshToProcess.vertices[v2].Position.y,
+                        meshToProcess.vertices[v2].Position.z);
+                    Vec3Core collapsePoint = (v1Pos + v2Pos) * 0.5f;
+
+                    float cost = (v2Pos - v1Pos).Length();
+                    edgeQueue.emplace(v1, v2, cost, collapsePoint);
+                }
+            }
+        }
+
+        // Esegui i collapse
+        int targetTriangles = meshToProcess.indices.size() / 6;  // Riduci di metà
+        int currentTriangles = meshToProcess.indices.size() / 3;
+        std::vector<bool> vertexRemoved(meshToProcess.vertices.size(), false);
+        std::vector<bool> triangleRemoved(meshToProcess.indices.size() / 3, false);
+
+        while (!edgeQueue.empty() && currentTriangles > targetTriangles) {
+            Edge edge = edgeQueue.top();
+            edgeQueue.pop();
+
+            if (vertexRemoved[edge.v1] || vertexRemoved[edge.v2]) continue;
+
+            EdgeTopology topo = EdgeTopology::analyzeEdgeTopology(
+                edge.v1, edge.v2, vertexToFaces, meshToProcess.indices);
+
+            if (!EdgeTopology::isValidCollapse(topo, edge.collapsePoint,
+                meshToProcess.vertices, meshToProcess.indices)) {
+                continue;
+            }
+
+            // Rimuovi i triangoli che verranno eliminati
+            int removedTris = 0;
+            for (unsigned int triIndex : topo.adjacentTriangles) {
+                if (!triangleRemoved[triIndex]) {
+                    triangleRemoved[triIndex] = true;
+                    removedTris++;
+                }
+            }
+
+            currentTriangles -= removedTris;
+
+            // Aggiorna il vertice v1 con il punto di collasso
+            newLevel.vertices[edge.v1].Position = {
+                edge.collapsePoint.x(),
+                edge.collapsePoint.y(),
+                edge.collapsePoint.z()
+            };
+
+            // Interpola gli attributi
+            const Vertex& v1 = meshToProcess.vertices[edge.v1];
+            const Vertex& v2 = meshToProcess.vertices[edge.v2];
+
+            Vec3Core normal1(v1.Normal.x, v1.Normal.y, v1.Normal.z);
+            Vec3Core normal2(v2.Normal.x, v2.Normal.y, v2.Normal.z);
+            Vec3Core newNormal = (normal1 + normal2).Normalize();
+
+            newLevel.vertices[edge.v1].Normal = {
+                newNormal.x(),
+                newNormal.y(),
+                newNormal.z()
+            };
+
+            newLevel.vertices[edge.v1].TexCoords = {
+                (v1.TexCoords.x + v2.TexCoords.x) * 0.5f,
+                (v1.TexCoords.y + v2.TexCoords.y) * 0.5f
+            };
+
+            vertexRemoved[edge.v2] = true;
+
+            // Aggiorna i riferimenti a v2 con v1
+            for (size_t i = 0; i < newLevel.indices.size(); i++) {
+                if (newLevel.indices[i] == edge.v2) {
+                    newLevel.indices[i] = edge.v1;
+                }
+            }
+        }
+
+        // Compatta la mesh finale
+        LODData compactedLevel;
+        std::vector<int> finalRemap(meshToProcess.vertices.size(), -1);
+
+        for (size_t i = 0; i < meshToProcess.vertices.size(); i++) {
+            if (!vertexRemoved[i]) {
+                finalRemap[i] = compactedLevel.vertices.size();
+                compactedLevel.vertices.push_back(newLevel.vertices[i]);
+            }
+        }
+
+        for (size_t i = 0; i < meshToProcess.indices.size(); i += 3) {
+            if (!triangleRemoved[i / 3]) {
+                for (int j = 0; j < 3; j++) {
+                    unsigned int oldIndex = newLevel.indices[i + j];
+                    compactedLevel.indices.push_back(finalRemap[oldIndex]);
+                }
+            }
+        }
+
+        // Output statistics
+        std::cout << "LOD Level " << step << " statistics:" << std::endl;
+        std::cout << "Original triangles: " << prevLevel.indices.size() / 3 << std::endl;
+        std::cout << "Final triangles: " << compactedLevel.indices.size() / 3 << std::endl;
+        std::cout << "Reduction: " <<
+            (1.0f - (float)(compactedLevel.indices.size() / 3) / (prevLevel.indices.size() / 3)) * 100.0f << "%" << std::endl;
+
+        // Set up the new level's buffers
         glBindVertexArray(VAO);
-        SetupLODLevel(newLevel);
+        SetupLODLevel(compactedLevel);
         glBindVertexArray(0);
 
-        // Store the new level in our LOD map
-        lodLevels[step] = std::move(newLevel);
-	}
+        // Store the new level
+        lodLevels[step] = std::move(compactedLevel);
+    }
 
-    void setupMesh()
-    {
+    void setupMesh() {
+		auto buffers = GLBufferCache::GetInstance()->GetOrCreateBuffers(_path, vertices, indices);
+
+        VAO = buffers->VAO;
+		lodLevels[0].VBO = buffers->VBO;
+		lodLevels[0].EBO = buffers->EBO;
+
+        // Create and bind VAO
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
-        // Set up base level VBO and EBO
+        // Set up base level buffers
         SetupLODLevel(lodLevels[0]);
 
         glBindVertexArray(0);
-
         RendererDebugger::checkOpenGLError("mesh setup");
     }
 };

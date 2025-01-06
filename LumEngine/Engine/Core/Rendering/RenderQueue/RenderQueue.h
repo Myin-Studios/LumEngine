@@ -7,6 +7,8 @@
 class RenderQueue
 {
 public:
+	RenderQueue();
+
 	void push(const RenderCommand& command);
 	void pop();
 	void sort();
@@ -21,4 +23,5 @@ public:
 
 private:
 	std::vector<RenderCommand> _commands;
+	std::shared_ptr<Outline> _outlineMaterial;
 };

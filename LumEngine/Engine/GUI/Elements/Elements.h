@@ -31,3 +31,9 @@ public:
 private:
     std::vector<BaseUIElement*> _elements;
 };
+
+class IUIElement
+{
+public:
+	virtual ~IUIElement() = default;
+};

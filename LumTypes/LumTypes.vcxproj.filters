@@ -45,6 +45,15 @@
     <ClInclude Include="LOD\LOD.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\Octree.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\IEntity.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ICollisions.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transformations\Transformations.cpp">

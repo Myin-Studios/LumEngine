@@ -36,6 +36,8 @@ private:
     const wchar_t* assembly_path = L"LumScripting/LumScriptLoader.dll";
     const wchar_t* dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
 
+    std::string _projPath = "";
+
 // Funzione per caricare la libreria dinamica
     void* load_library(const char_t* path) {
 #if defined(_WIN32)
@@ -154,11 +156,15 @@ public:
     component_entry_point_fn getUpdate() { return UpdateScript; }
     component_entry_point_fn getLoader() { return LoadAssemblyMethod; }
 
+    const std::string& GetProjectPath() { return _projPath; }
+
 public slots:
     void LoadAssembly(QString path)
     {
         if (!path.isEmpty())
         {
+            SetProjectPath(path.toStdString());
+
             assembly_path = L"LumScripting/LumScriptLoader.dll";
             dotnet_type = L"LumScriptLoader.Main.Program, LumScriptLoader";
             const wchar_t* dotnet_type_method_LoadAssembly = L"LoadScriptPath";
@@ -289,6 +295,11 @@ protected:
     }
 
 private:
+    void SetProjectPath(const std::string& path)
+    {
+        _projPath = path;
+    }
+
     void InitUIManager()
     {
         if (assembly_loader == nullptr) {

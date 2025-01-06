@@ -2,12 +2,14 @@
 
 #include "Properties/Property.h"
 #include "../GameBehaviour/GameBehaviour.h"
+#include "IEntity.h"
 
 #include "set"
 #include <iostream>
 #include <typeindex>
+#include "../Physics/ICollisions.h"
 
-class BaseEntity
+class BaseEntity : public IEntity
 {
 private:
     std::set<std::unique_ptr<IProperty>> properties;
@@ -54,13 +56,12 @@ public:
 
     template<typename T>
     T* GetCoreProperty() {
-        const type_info& requestedType = typeid(T);
-        auto it = std::find_if(properties.begin(), properties.end(),
-            [&requestedType](const std::unique_ptr<IProperty>& prop) {
-                return typeid(*prop) == requestedType;
-            });
-
-        return it != properties.end() ? static_cast<T*>(it->get()) : nullptr;
+        for (const auto& prop : properties) {
+            if (T* derived = dynamic_cast<T*>(prop.get())) {
+                return derived;
+            }
+        }
+        return nullptr;
     }
 
     IProperty* GetProperty(const type_info& expectedType) {
@@ -87,4 +88,57 @@ public:
             prop->OnDeserialize();
         }
     }
+
+    bool Intersects(const LumEngine::Physics::IRay& ray, float& distance) override
+    {
+        if (auto collider = GetCoreProperty<LumEngine::Physics::ICollider>()) {
+            const LumEngine::Physics::IAABB& boundingBox = collider->GetBoundingBox();
+
+            std::cout << "Testing intersection with bounds: " << std::endl;
+            std::cout << "Min: " << boundingBox.GetMin().ToString() << std::endl;
+            std::cout << "Max: " << boundingBox.GetMax().ToString() << std::endl;
+            std::cout << "Ray origin: " << ray.GetOrigin().ToString() << std::endl;
+            std::cout << "Ray direction: " << ray.GetDirection().ToString() << std::endl;
+
+            Vec3Core rayOrigin = ray.GetOrigin();
+            Vec3Core rayDirection = ray.GetDirection();
+            Vec3Core min = boundingBox.GetMin();
+            Vec3Core max = boundingBox.GetMax();
+
+            // Test di intersezione usando il slab method
+            float tmin = -std::numeric_limits<float>::infinity();
+            float tmax = std::numeric_limits<float>::infinity();
+
+            for (int i = 0; i < 3; ++i) {
+                if (std::abs(rayDirection[i]) < std::numeric_limits<float>::epsilon()) {
+                    if (rayOrigin[i] < min[i] || rayOrigin[i] > max[i])
+                        return false;
+                }
+                else {
+                    float invD = 1.0f / rayDirection[i];
+                    float t1 = (min[i] - rayOrigin[i]) * invD;
+                    float t2 = (max[i] - rayOrigin[i]) * invD;
+
+                    if (t1 > t2) std::swap(t1, t2);
+
+                    tmin = t1 > tmin ? t1 : tmin;
+                    tmax = t2 < tmax ? t2 : tmax;
+
+                    if (tmin > tmax) return false;
+                }
+            }
+
+            if (tmin < 0) {
+                distance = tmax;
+                return tmax > 0;
+            }
+
+            distance = tmin;
+            return true;
+        }
+
+		std::cout << "No collider found for entity " << ID << std::endl;
+        return false;
+    }
+
 };

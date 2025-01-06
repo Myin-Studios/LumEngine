@@ -4,6 +4,7 @@
 #include "Console/consoleOutput.h"
 #include "Console/redirectStreamBuf.h"
 #include "Panels/BaseProperties/baseProperties.h"
+#include "AssetsManager/IAssetManager.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -27,6 +28,7 @@ public:
 
     void Initialize();
     void Cleanup();
+    void SetProjectPath(const std::string& path);
 
     MainWindow* getMainWindow() const { return mainWindow; }
     PlayButton* getPlayButton() const { return playButton; }
@@ -39,6 +41,8 @@ public:
 
 private:
     BaseEntity* _entity;
+
+	AssetPanel* _assetsManager;
 
 	RendererCore* scene;
     MainWindow* mainWindow;
@@ -54,4 +58,6 @@ private:
     BaseButton* lightingSettingsButton;
     BaseButton* hierarchyButton;
     Console* console;
+
+    std::string _projPath;
 };

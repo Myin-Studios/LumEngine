@@ -38,6 +38,7 @@
 #include "../LumEngine/Engine/Core/LumEngineAPI.h"
 #include "Engine/Core/Rendering/RenderQueue/RenderQueue.h"
 #include "../LumTypes/LOD/LOD.h"
+#include "../LumTypes/Physics/Octree.h"
 
 #include "../LumEngine/Engine/Core/ScriptThreading/IScriptRunner.h"
 #include "Engine/GUI/GUIBuilder/IGUIBuilder.h"
@@ -56,12 +57,15 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QTimer>
+#include <QFileInfo>
+
 #include <iostream>
 #include <execution>
 
 using namespace std;
 
 class UIManager;
+class MeshCache;
 
 class RendererCore : public QOpenGLWidget
 {
@@ -101,6 +105,8 @@ public:
         return _uiManager.get();
     }
 
+    std::unique_ptr<MeshCore> LoadOBJ(const std::string& path, std::shared_ptr<Material> mat);
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -129,9 +135,10 @@ private:
     void setupFrameBuffer();
     void cleanup();
     void loadModel(const QString& path);
-    std::unique_ptr<MeshCore> loadOBJ(const QString& path, std::shared_ptr<Material> mat);
 
 	std::unique_ptr<UIManager> _uiManager;
+
+    std::unique_ptr<LumEngine::Physics::Octree> _octree;
 
     Camera* editorCamera;
     QPoint mousePos;
@@ -170,9 +177,32 @@ private:
     };
     Shader* fboShader = nullptr;
 
-    RenderQueue renderQueue;
+    RenderQueue* renderQueue = nullptr;
 
     std::shared_ptr<IScriptRunner> runningThread = nullptr;
+};
+
+// MESH CACHING
+
+class MeshCache
+{
+public:
+	static MeshCache* GetInstance()
+	{
+		if (!s_instance)
+		{
+			s_instance = new MeshCache();
+		}
+		return s_instance;
+	}
+
+    std::unique_ptr<MeshCore> LoadOrGetModel(const std::string& path);
+    std::unique_ptr<MeshCore> LoadOBJ(const std::string& path, std::shared_ptr<Material> mat);
+
+private:
+	static MeshCache* s_instance;
+
+	std::map<std::string, std::unique_ptr<MeshCore>> _meshes;
 };
 
 // GUI PROPERTY MANAGER

@@ -29,12 +29,12 @@ MainWindow::~MainWindow()
     delete m_MainLayout;
 }
 
-QHBoxLayout* MainWindow::getMainLayout() const
+QHBoxLayout* MainWindow::GetMainLayout() const
 {
     return m_MainLayout;
 }
 
-void MainWindow::createNewProject()
+bool MainWindow::createNewProject()
 {
     connect(this, &MainWindow::assemblyPathProvided, loadingThread, &LoadingThread::LoadAssembly);
 
@@ -51,7 +51,7 @@ void MainWindow::createNewProject()
                 }
                 else {
                     std::cout << "Failed to create project." << std::endl;
-                    return;
+                    return false;
                 }
             }
 
@@ -62,16 +62,24 @@ void MainWindow::createNewProject()
             splc->createProject(dir.toStdString(), projectDir.dirName().toStdString());
             
             emit assemblyPathProvided(dir);
+
+			loadingThread->start();
+
+            return true;
         }
         else {
             QMessageBox::warning(this, "Warning", "No directory selected!");
+
+            return false;
         }
 
     }
     else std::cerr << "LoadingThread is null!" << std::endl;
+
+    return false;
 }
 
-void MainWindow::loadProject()
+bool MainWindow::loadProject()
 {
     connect(this, &MainWindow::assemblyPathProvided, loadingThread, &LoadingThread::LoadAssembly);
 
@@ -89,15 +97,30 @@ void MainWindow::loadProject()
                 splc->build(dir.toStdString());
 
                 emit assemblyPathProvided(dir);
+
+                return true;
             }
-            else std::cout << "Project already loaded!" << std::endl;
+            else
+            {
+                std::cout << "Project already loaded!" << std::endl;
+                return false;
+            }
         }
         else {
             QMessageBox::warning(this, "Warning", "No directory selected!");
+            return false;
         }
     }
     else std::cerr << "LoadingThread is null!" << std::endl;
     
+    return false;
+}
+
+const std::string& MainWindow::GetProjectPath() const
+{
+    static std::string path;
+    path = assemblyPath.toStdString();
+    return path;
 }
 
 void MainWindow::buildProject()

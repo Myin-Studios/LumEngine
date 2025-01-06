@@ -265,22 +265,11 @@ Mat4Core& Mat4Core::operator=(const Mat4Core& other)
 }
 
 Mat4Core& Mat4Core::operator=(const glm::mat4& other) {
-	std::cout << "Converting glm::mat4 to Mat4Core\n";
-	std::cout << "GLM matrix:\n";
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << other[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	// Converte da glm::mat4 a Mat4Core
+	
 	_m00 = other[0][0]; _m01 = other[1][0]; _m02 = other[2][0]; _m03 = other[3][0];
 	_m10 = other[0][1]; _m11 = other[1][1]; _m12 = other[2][1]; _m13 = other[3][1];
 	_m20 = other[0][2]; _m21 = other[1][2]; _m22 = other[2][2]; _m23 = other[3][2];
 	_m30 = other[0][3]; _m31 = other[1][3]; _m32 = other[2][3]; _m33 = other[3][3];
-
-	std::cout << "Converted Mat4Core:\n" << this->ToString() << std::endl;
 
 	return *this;
 }
@@ -447,14 +436,22 @@ float Vec3Core::Length() const
 	return std::sqrt(x() * x() + y() * y() + z() * z());
 }
 
-Vec3Core& Vec3Core::Normalize()
-{
-	if (this->Length() != 0.0f) {
-		_x /= this->Length();
-		_y /= this->Length();
-		_z /= this->Length();
+Vec3Core& Vec3Core::Normalize() {
+	float length = this->Length();
+	if (length != 0.0f) {
+		float invLength = 1.0f / length;
+		_x *= invLength;
+		_y *= invLength;
+		_z *= invLength;
 	}
 	return *this;
+}
+
+Vec3Core Vec3Core::Normalized()
+{
+	Vec3Core result = *this;
+	result.Normalize();
+	return result;
 }
 
 Vec3Core& Vec3Core::operator=(const Vec3Core& v)
@@ -551,7 +548,363 @@ bool Vec3Core::operator==(const Vec3Core& v) const
 	return (this->_x == v._x && this->_y == v._y && this->_z == v._z);
 }
 
+float Vec3Core::operator[](int i) const
+{
+	if (i == 0) return _x;
+	if (i == 1) return _y;
+	if (i == 2) return _z;
+	return 0.0f;
+}
+
 std::string Vec3Core::ToString() const
 {
 	return std::string("Vec3Core(") + std::to_string(_x) + ", " + std::to_string(_y) + ", " + std::to_string(_z) + ")";
+}
+
+Vec2Core::Vec2Core(const Vec2Core& other) : _x(other._x), _y(other._y)
+{
+
+}
+
+Vec2Core::Vec2Core(float x, float y) : _x(x), _y(y)
+{
+
+}
+
+void Vec2Core::setX(float x)
+{
+	_x = x;
+}
+
+void Vec2Core::setY(float y)
+{
+	_y = y;
+}
+
+float Vec2Core::x() const { return _x; }
+float Vec2Core::y() const { return _y; }
+
+Vec2Core Vec2Core::Lerp(const Vec2Core& v1, const Vec2Core& v2, float t)
+{
+	return v1 + (v2 - v1) * t;
+}
+
+Vec2Core Vec2Core::Min(const Vec2Core& a, const Vec2Core& b)
+{
+	return Vec2Core(std::min(a.x(), b.x()), std::min(a.y(), b.y()));
+}
+
+Vec2Core Vec2Core::Max(const Vec2Core& a, const Vec2Core& b)
+{
+	return Vec2Core(std::max(a.x(), b.x()), std::max(a.y(), b.y()));
+}
+
+float Vec2Core::Angle(const Vec2Core& a, const Vec2Core& b)
+{
+	float lenA = a.Length();
+	float lenB = b.Length();
+
+	if (lenA < 1e-6f || lenB < 1e-6f) {
+	}
+
+	float cosAngle = (a * b) / (lenA * lenB);
+
+	cosAngle = std::max(-1.0f, std::min(1.0f, cosAngle));
+
+	return std::acos(cosAngle);
+}
+
+float Vec2Core::Length() const
+{
+	return std::sqrt(_x * _x + _y * _y);
+}
+
+Vec2Core& Vec2Core::Normalize()
+{
+	if (this->Length() != 0.0f) {
+		_x /= this->Length();
+		_y /= this->Length();
+	}
+	return *this;
+}
+
+Vec2Core& Vec2Core::operator=(const Vec2Core& v)
+{
+	_x = v.x();
+	_y = v.y();
+	return *this;
+}
+
+Vec2Core Vec2Core::operator*(float scalar) const
+{
+	return Vec2Core(_x * scalar, _y * scalar);
+}
+
+float Vec2Core::operator*(const Vec2Core& v) const
+{
+	return _x * v.x() + _y * v.y();
+}
+
+Vec2Core Vec2Core::operator+(const Vec2Core& v) const
+{
+	return Vec2Core(_x + v.x(), _y + v.y());
+}
+
+Vec2Core Vec2Core::operator-(const Vec2Core& v) const
+{
+	return Vec2Core(_x - v.x(), _y - v.y());
+}
+
+Vec2Core Vec2Core::operator/(float scalar) const
+{
+	return Vec2Core(_x / scalar, _y / scalar);
+}
+
+Vec2Core& Vec2Core::operator+=(const Vec2Core& v)
+{
+	_x += v.x();
+	_y += v.y();
+	return *this;
+}
+
+Vec2Core& Vec2Core::operator-=(const Vec2Core& v)
+{
+	_x -= v.x();
+	_y -= v.y();
+	return *this;
+}
+
+Vec2Core& Vec2Core::operator/=(float scalar)
+{
+	_x /= scalar;
+	_y /= scalar;
+	return *this;
+}
+
+Vec2Core& Vec2Core::operator*=(float scalar)
+{
+	_x *= scalar;
+	_y *= scalar;
+	return *this;
+}
+
+bool Vec2Core::operator==(const Vec2Core& v) const
+{
+	return _x == v.x() && _y == v.y();
+}
+
+std::string Vec2Core::ToString() const
+{
+	return std::string("Vec2Core(") + std::to_string(_x) + ", " + std::to_string(_y) + ")";
+}
+
+Mat3Core::Mat3Core(const Mat3Core& other)
+{
+	this->_m00 = other._m00;
+	this->_m01 = other._m01;
+	this->_m02 = other._m02;
+	this->_m10 = other._m10;
+	this->_m11 = other._m11;
+	this->_m12 = other._m12;
+	this->_m20 = other._m20;
+	this->_m21 = other._m21;
+	this->_m22 = other._m22;
+}
+
+Mat3Core::Mat3Core(const glm::mat3& other)
+{
+	this->_m00 = other[0][0];
+	this->_m01 = other[1][0];
+	this->_m02 = other[2][0];
+	this->_m10 = other[0][1];
+	this->_m11 = other[1][1];
+	this->_m12 = other[2][1];
+	this->_m20 = other[0][2];
+	this->_m21 = other[1][2];
+	this->_m22 = other[2][2];
+}
+
+Mat3Core::Mat3Core(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
+{
+	this->_m00 = m00;
+	this->_m01 = m01;
+	this->_m02 = m02;
+	this->_m10 = m10;
+	this->_m11 = m11;
+	this->_m12 = m12;
+	this->_m20 = m20;
+	this->_m21 = m21;
+	this->_m22 = m22;
+}
+
+const float Mat3Core::m00() const { return _m00; }
+const float Mat3Core::m01() const { return _m01; }
+const float Mat3Core::m02() const { return _m02; }
+const float Mat3Core::m10() const { return _m10; }
+const float Mat3Core::m11() const { return _m11; }
+const float Mat3Core::m12() const { return _m12; }
+const float Mat3Core::m20() const { return _m20; }
+const float Mat3Core::m21() const { return _m21; }
+const float Mat3Core::m22() const { return _m22; }
+
+Mat3Core Mat3Core::Inverse() const
+{
+	// Primo passo: calcolo del determinante
+	float det = Determinant();
+
+	// Se il determinante è zero, la matrice non è invertibile
+	if (std::abs(det) < 1e-7f) {
+		std::cerr << "Matrix is not invertible" << std::endl;
+		return *this;
+	}
+
+	// Calcolo della matrice dei cofattori
+	Mat3Core adj;
+
+	// Calcolo dei cofattori
+	adj._m00 = Cofactor(1, 2, 1, 2);
+	adj._m01 = -Cofactor(0, 2, 1, 2);
+	adj._m02 = Cofactor(0, 1, 1, 2);
+
+	adj._m10 = -Cofactor(1, 2, 0, 2);
+	adj._m11 = Cofactor(0, 2, 0, 2);
+	adj._m12 = -Cofactor(0, 1, 0, 2);
+
+	adj._m20 = Cofactor(1, 2, 0, 1);
+	adj._m21 = -Cofactor(0, 2, 0, 1);
+	adj._m22 = Cofactor(0, 1, 0, 1);
+
+	// Dividiamo per il determinante
+	float invDet = 1.0f / det;
+	Mat3Core result;
+	result._m00 = adj._m00 * invDet;
+	result._m01 = adj._m01 * invDet;
+	result._m02 = adj._m02 * invDet;
+	result._m10 = adj._m10 * invDet;
+	result._m11 = adj._m11 * invDet;
+	result._m12 = adj._m12 * invDet;
+	result._m20 = adj._m20 * invDet;
+	result._m21 = adj._m21 * invDet;
+	result._m22 = adj._m22 * invDet;
+
+	return result;
+}
+
+float Mat3Core::Determinant() const
+{
+	return _m00 * Cofactor(1, 2, 1, 2)
+		- _m01 * Cofactor(0, 2, 1, 2)
+		+ _m02 * Cofactor(0, 1, 1, 2);
+}
+
+float Mat3Core::Det2x2(float a00, float a01, float a10, float a11) const
+{
+	return a00 * a11 - a01 * a10;
+}
+
+float Mat3Core::Cofactor(int i0, int i1, int j0, int j1) const
+{
+	float m[2][2];
+	int index = 0;
+
+	for (int i = 0; i < 3; i++) {
+		if (i == i0 || i == i1) {
+			int jindex = 0;
+			for (int j = 0; j < 3; j++) {
+				if (j == j0 || j == j1) {
+					// Ottieni il corretto elemento della matrice 3x3
+					switch (i) {
+					case 0:
+						switch (j) {
+						case 0: m[index][jindex] = _m00; break;
+						case 1: m[index][jindex] = _m01; break;
+						case 2: m[index][jindex] = _m02; break;
+						}
+						break;
+					case 1:
+						switch (j) {
+						case 0: m[index][jindex] = _m10; break;
+						case 1: m[index][jindex] = _m11; break;
+						case 2: m[index][jindex] = _m12; break;
+						}
+						break;
+					case 2:
+						switch (j) {
+						case 0: m[index][jindex] = _m20; break;
+						case 1: m[index][jindex] = _m21; break;
+						case 2: m[index][jindex] = _m22; break;
+						}
+						break;
+					}
+					jindex++;
+				}
+			}
+			index++;
+		}
+	}
+
+	return Det2x2(m[0][0], m[0][1], m[1][0], m[1][1]);
+}
+
+Mat3Core Mat3Core::Identity()
+{
+	return Mat3Core(
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f
+	);
+}
+
+Mat3Core& Mat3Core::operator=(const Mat3Core& other)
+{
+	this->_m00 = other._m00;
+	this->_m01 = other._m01;
+	this->_m02 = other._m02;
+	this->_m10 = other._m10;
+	this->_m11 = other._m11;
+	this->_m12 = other._m12;
+	this->_m20 = other._m20;
+	this->_m21 = other._m21;
+	this->_m22 = other._m22;
+
+	return *this;
+}
+
+Mat3Core Mat3Core::operator*(const Mat3Core& other)
+{
+	Mat3Core result;
+
+	// Prima riga
+	result._m00 = _m00 * other._m00 + _m01 * other._m10 + _m02 * other._m20;
+	result._m01 = _m00 * other._m01 + _m01 * other._m11 + _m02 * other._m21;
+	result._m02 = _m00 * other._m02 + _m01 * other._m12 + _m02 * other._m22;
+
+	// Seconda riga
+	result._m10 = _m10 * other._m00 + _m11 * other._m10 + _m12 * other._m20;
+	result._m11 = _m10 * other._m01 + _m11 * other._m11 + _m12 * other._m21;
+	result._m12 = _m10 * other._m02 + _m11 * other._m12 + _m12 * other._m22;
+
+	// Terza riga
+	result._m20 = _m20 * other._m00 + _m21 * other._m10 + _m22 * other._m20;
+	result._m21 = _m20 * other._m01 + _m21 * other._m11 + _m22 * other._m21;
+	result._m22 = _m20 * other._m02 + _m21 * other._m12 + _m22 * other._m22;
+
+	return result;
+}
+
+Vec3Core Mat3Core::operator*(const Vec3Core& v) const
+{
+	return Vec3Core(
+		m00() * v.x() + m01() * v.y() + m02() * v.z(),
+		m10() * v.x() + m11() * v.y() + m12() * v.z(),
+		m20() * v.x() + m21() * v.y() + m22() * v.z()
+	);
+}
+
+std::string Mat3Core::ToString() const
+{
+	return std::string("Mat3Core(") +
+		std::to_string(_m00) + ", " + std::to_string(_m01) + ", " + std::to_string(_m02) + ",\n" +
+		"\t " + std::to_string(_m10) + ", " + std::to_string(_m11) + ", " + std::to_string(_m12) + ",\n" +
+		"\t " + std::to_string(_m20) + ", " + std::to_string(_m21) + ", " + std::to_string(_m22) + ")";
 }

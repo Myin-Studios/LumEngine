@@ -76,6 +76,10 @@
     <None Include="Engine\Resources\Shaders\outline.glsl" />
     <None Include="Engine\Resources\Shaders\AABBDebuggerVert.glsl" />
     <None Include="Engine\Resources\Shaders\AABBDebuggerFrag.glsl" />
+    <None Include="..\..\..\LumE_PlusNormal.svg" />
+    <None Include="..\..\..\LumE_Recents.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_Recents.svg" />
+    <None Include="Engine\Resources\Icons\New\LumE_PlusNormal.svg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\CMAPICore.h">
@@ -117,9 +121,6 @@
     <ClInclude Include="Engine\GUI\Buttons\utilsbuttons.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI\Elements\Elements.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Core\Rendering\RenderCommand\RenderCommand.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -136,6 +137,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Rendering\Debugger\AABBDebugger.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GUI\Elements\Elements.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\Caching\BufferCache.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -168,6 +175,12 @@
       <Filter>File di intestazione</Filter>
     </QtMoc>
     <QtMoc Include="Engine\GUI\Text Fields\TextField.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\Home\IHomeBuilder.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine\GUI\AssetsManager\IAssetManager.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
   </ItemGroup>
@@ -221,6 +234,12 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\Text Fields\TextField.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Home\IHomeBuilder.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\AssetsManager\IAssetManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

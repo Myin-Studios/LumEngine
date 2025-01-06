@@ -1,92 +1,17 @@
 #include <string>
 
+#include "Engine/GUI/Home/IHomeBuilder.h"
+
 #include "QApplication"
-#include "QCoreApplication"
-#include "QStyleFactory"
-#include "Engine/GUI/guibuilder.h"
-#include "Engine/GUI/Loading/loadingWindow.h"
-#include "Engine/Core/hostInitializer.h"
-#include <QMetaObject>
 #include <QOpenGLFramebufferObjectFormat>
 
 #include <filesystem>
 
 int main(int argc, char* argv[])
 {
-    SetEnvironmentVariable(L"COREHOST_TRACE", L"1");
-    SetEnvironmentVariable(L"COREHOST_TRACEFILE", L"corehost.log");
-    SetEnvironmentVariable(L"COREHOST_TRACE_VERBOSITY", L"4");
-
     QApplication a(argc, argv);
 
-    auto loadingWindow = new LoadingWindow();
-    loadingWindow->show();
-
-    std::shared_ptr<GuiBuilder> builder = nullptr;
-    auto loadingThread = std::make_unique<LoadingThread>();
-
-    loadingWindow->setThread(loadingThread.get());
-
-    // Collega il segnale di aggiornamento del progresso alla finestra di caricamento
-    QObject::connect(loadingThread.get(), &LoadingThread::progressUpdated, loadingWindow, &LoadingWindow::setProgress);
-
-    QSurfaceFormat format;
-    format.setVersion(4, 5);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setDepthBufferSize(24);
-	format.setOption(QSurfaceFormat::DebugContext);
-	format.setSwapInterval(1); // VSync (1 = attivato, 0 = disattivato
-    QSurfaceFormat::setDefaultFormat(format);
-
-    loadingWindow->setProgress("Init GUI...", 100);
-
-    // Usa QMetaObject::invokeMethod per creare GuiBuilder nel thread principale
-    QObject::connect(loadingThread.get(), &LoadingThread::finished, [&]() {
-        QMetaObject::invokeMethod(qApp, [&]() {
-            loadingWindow->close();
-			builder = std::make_shared<GuiBuilder>();
-
-            builder->getPlayButton()->SetScriptRunner(loadingThread->getStart(), loadingThread->getUpdate());
-            builder->getMainWindow()->setThread(loadingThread.get());
-
-            builder->Initialize();
-
-            builder->getMainWindow()->setWindowTitle("LumE");
-#if defined(Q_OS_WIN)
-            QApplication::setStyle(QStyleFactory::create("Fusion")); // Tema Fusion per Windows
-            QIcon icon("Resources/Assets/LumEngine_Logo.ico");
-            if (!icon.isNull()) {
-                builder->getMainWindow()->setWindowIcon(icon);
-            }
-
-            builder->getMainWindow()->setWindowState(Qt::WindowMaximized);
-
-#elif defined(Q_OS_LINUX)
-            if (QSysInfo::productVersion().startsWith("5")) {
-                QApplication::setStyle(QStyleFactory::create("Fusion")); // Cambia con "Plasma" se supportato
-            }
-
-            if (QIcon icon(":/Icons/CMEngine_Logo.svg"); icon.isNull()) {
-                qWarning() << "Icon not found!";
-            } else {
-                QApplication::setWindowIcon(icon);
-                builder->getMainWindow()->setWindowIcon(icon);
-            }
-#endif
-        }, Qt::QueuedConnection);
-    });
-
-    loadingThread->start();
-
-    QObject::connect(qApp, &QApplication::aboutToQuit, [&builder]() {
-        if (builder) {
-            auto renderer = RendererCore::GetInstance();
-            if (renderer && renderer->GetUIManager()) {
-                renderer->GetUIManager()->SetGUIBuilder(nullptr);
-            }
-            builder.reset();
-        }
-        });
+    std::unique_ptr<HomeBuilder> homeBuilder = std::make_unique<HomeBuilder>();
 
     return QApplication::exec();
 }

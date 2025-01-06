@@ -24,10 +24,24 @@ public:
 		shader = std::move(s);
 	}
 	
+	Material(const Material& m)
+	{
+		this->shader = std::make_unique<Shader>(*m.GetShader());
+	}
+
 	virtual ~Material() {}
 
 	Shader* GetShader() const { return this->shader.get(); }
 	void SetShader(std::unique_ptr<Shader> s) { this->shader = std::move(s); }
+
+	Material& operator=(const Material& other) {
+		if (this != &other) {
+			if (other.shader) {
+				shader = std::make_unique<Shader>(*other.shader);
+			}
+		}
+		return *this;
+	}
 
 private:
 	std::unique_ptr<Shader> shader = nullptr;

@@ -145,11 +145,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Entities\Entity.h" />
+    <ClInclude Include="Entities\IEntity.h" />
     <ClInclude Include="Entities\Properties\Property.h" />
     <ClInclude Include="GameBehaviour\GameBehaviour.h" />
     <ClInclude Include="LOD\LOD.h" />
     <ClInclude Include="Mathematics\Math.h" />
     <ClInclude Include="Physics\Collisions.h" />
+    <ClInclude Include="Physics\ICollisions.h" />
+    <ClInclude Include="Physics\Octree.h" />
     <ClInclude Include="Rendering\Colors\Color.h" />
     <ClInclude Include="Rendering\Lighting\Lighting.h" />
     <ClInclude Include="Rendering\Materials\Materials.h" />

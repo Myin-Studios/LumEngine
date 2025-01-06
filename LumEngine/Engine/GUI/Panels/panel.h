@@ -108,6 +108,8 @@ public:
     {
         _layout = std::make_unique<QVBoxLayout>();
         _layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+		_layout->setContentsMargins(0, 0, 0, 0);
+		_layout->setSpacing(0);
         setLayout(_layout.get());
         baseWidth = width();
     }

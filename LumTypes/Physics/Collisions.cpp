@@ -71,6 +71,11 @@ const Vec3Core LumEngine::Physics::AABB::GetMax() const
     );
 }
 
+const Vec3Core LumEngine::Physics::AABB::GetCenter() const
+{
+	return (GetMin() + GetMax()) * 0.5f;
+}
+
 void LumEngine::Physics::AABB::SetSize(const Vec3Core& newSize)
 {
 	Vec3Core center = (min + max) * 0.5f;
@@ -95,33 +100,89 @@ const Mat4Core& LumEngine::Physics::AABB::GetTransform() const
     return transform;
 }
 
+bool LumEngine::Physics::AABB::Contains(const IAABB& bounds) const
+{
+	Vec3Core min = GetMin();
+	Vec3Core max = GetMax();
+	Vec3Core otherMin = bounds.GetMin();
+	Vec3Core otherMax = bounds.GetMax();
+
+	return min.x() <= otherMin.x() && min.y() <= otherMin.y() && min.z() <= otherMin.z() &&
+		max.x() >= otherMax.x() && max.y() >= otherMax.y() && max.z() >= otherMax.z();
+}
+
+bool LumEngine::Physics::AABB::Intersects(const IRay& ray, float& distance) const
+{
+    Vec3Core rayOrigin = ray.GetOrigin();
+    Vec3Core rayDirection = ray.GetDirection();
+    Vec3Core min = GetMin();
+    Vec3Core max = GetMax();
+
+    float tmin = -std::numeric_limits<float>::infinity();
+    float tmax = std::numeric_limits<float>::infinity();
+
+    for (int i = 0; i < 3; ++i) {
+        if (std::abs(rayDirection[i]) < std::numeric_limits<float>::epsilon()) {
+            if (rayOrigin[i] < min[i] || rayOrigin[i] > max[i])
+                return false;
+        }
+        else {
+            float invD = 1.0f / rayDirection[i];
+            float t1 = (min[i] - rayOrigin[i]) * invD;
+            float t2 = (max[i] - rayOrigin[i]) * invD;
+            if (t1 > t2) std::swap(t1, t2);
+            tmin = t1 > tmin ? t1 : tmin;
+            tmax = t2 < tmax ? t2 : tmax;
+            if (tmin > tmax) return false;
+        }
+    }
+
+    if (tmin < 0) {
+        distance = tmax;
+        return tmax > 0;
+    }
+
+    distance = tmin;
+    return true;
+}
+
+float LumEngine::Physics::AABB::GetDistanceToRay(const IRay& origin) const
+{
+	float distance;
+	if (origin.IntersectsAABB(*this, distance)) {
+		return distance;
+	}
+
+	return -1.0f;
+}
+
+float LumEngine::Physics::AABB::GetDistanceToPoint(const Vec3Core& point) const
+{
+	Vec3Core toPoint = point - GetCenter();
+    float projectionLength = toPoint * Vec3Core(0, 0, 1);
+
+	if (projectionLength < 0) {
+		return toPoint.Length();
+	}
+
+	Vec3Core projection = Vec3Core(0, 0, 1) * projectionLength;
+	return (toPoint - projection).Length();
+}
+
 Mat4Core LumEngine::Physics::RayCast::projectionMatrix = Mat4Core();
 Mat4Core LumEngine::Physics::RayCast::viewMatrix = Mat4Core();
 Vec3Core LumEngine::Physics::RayCast::origin = Vec3Core();
 Vec3Core LumEngine::Physics::RayCast::direction = Vec3Core();
 std::vector<std::shared_ptr<LumEngine::Physics::AABB>> LumEngine::Physics::RayCast::boundingVolumes = {};
 
-LumEngine::Physics::RayCastResult LumEngine::Physics::RayCast::Cast(const Vec3Core& origin, const Vec3Core& direction)
-{
+LumEngine::Physics::RayCastResult LumEngine::Physics::RayCast::Cast(const Vec3Core& origin, const Vec3Core& direction) {
     RayCastResult result = { false, std::numeric_limits<float>::max(), -1, Vec3Core() };
 
-    // Ordina i boundingVolumes per distanza dall'origine del raggio
-    std::vector<std::pair<float, std::shared_ptr<AABB>>> sortedVolumes;
+    // Invece di ordinare, possiamo tenere traccia solo del più vicino
     for (const auto& bounds : boundingVolumes) {
-        // Ottieni il bounding box trasformato
-        std::cout << "Pre-sort bounds transform:\n" << bounds->GetTransform().ToString() << std::endl;
-        Vec3Core center = (bounds->GetMin() + bounds->GetMax()) * 0.5f;
-        float dist = (center - origin).Length();
-        sortedVolumes.push_back({ dist, bounds });
-    }
-
-    std::sort(sortedVolumes.begin(), sortedVolumes.end(),
-        [](const auto& a, const auto& b) { return a.first < b.first; });
-
-    for (const auto& [dist, bounds] : sortedVolumes) {
-        std::cout << "Post-sort bounds transform:\n" << bounds->GetTransform().ToString() << std::endl;
         float distance;
         Vec3Core hitPoint;
+
         if (IntersectRayBounds(origin, direction, bounds, distance, hitPoint)) {
             if (distance < result.distance) {
                 result.hit = true;
@@ -169,26 +230,14 @@ Vec3Core LumEngine::Physics::RayCast::ScreenToRay(int mouseX, int mouseY, int wi
 
 bool LumEngine::Physics::RayCast::IntersectRayBounds(const Vec3Core& origin, const Vec3Core& direction, std::shared_ptr<AABB> bounds, float& distance, Vec3Core& hitPoint)
 {
-    // std::cout << "\n\n=== Testing intersection ===" << std::endl;
-
-    // Ottieni i punti trasformati
     Vec3Core bMin = bounds->GetMin();
     Vec3Core bMax = bounds->GetMax();
-
-    // std::cout << "Current transform in IntersectRayBounds:\n" << bounds->GetTransform().ToString() << std::endl;
-
-    // std::cout << "Ray test with:" << std::endl;
-    // std::cout << "Origin: " << origin.ToString() << std::endl;
-    // std::cout << "Direction: " << direction.ToString() << std::endl;
-    // std::cout << "Transformed min: " << bMin.ToString() << std::endl;
-    // std::cout << "Transformed max: " << bMax.ToString() << std::endl;
 
     const float EPSILON = 1e-6f;
     float dirX = std::abs(direction.x()) < EPSILON ? EPSILON : direction.x();
     float dirY = std::abs(direction.y()) < EPSILON ? EPSILON : direction.y();
     float dirZ = std::abs(direction.z()) < EPSILON ? EPSILON : direction.z();
 
-    // Calcola i tempi di intersezione
     float t1 = (bMin.x() - origin.x()) / dirX;
     float t2 = (bMax.x() - origin.x()) / dirX;
     float t3 = (bMin.y() - origin.y()) / dirY;
@@ -196,15 +245,8 @@ bool LumEngine::Physics::RayCast::IntersectRayBounds(const Vec3Core& origin, con
     float t5 = (bMin.z() - origin.z()) / dirZ;
     float t6 = (bMax.z() - origin.z()) / dirZ;
 
-    // std::cout << "Intersection times:" << std::endl;
-    // std::cout << "X: t1=" << t1 << " t2=" << t2 << std::endl;
-    // std::cout << "Y: t3=" << t3 << " t4=" << t4 << std::endl;
-    // std::cout << "Z: t5=" << t5 << " t6=" << t6 << std::endl;
-
     float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
     float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
-
-    // std::cout << "tmin=" << tmin << " tmax=" << tmax << std::endl;
 
     if (tmax < tmin || tmax < 0) {
         std::cout << "No intersection" << std::endl;
@@ -273,27 +315,35 @@ void LumEngine::Physics::RayCast::UpdateTransform(int entityID, const Mat4Core& 
 LumEngine::Physics::Collider::Collider(int eID, const std::vector<Vertex>& verts, Mat4Core& t) : vertices(verts)
 , entityId(eID), transform(t)
 {
-    boundingBox = AABB(vertices);
+    _boundingBox = AABB(vertices);
     SetSize(1.0f, 1.0f, 1.0f);
 }
 
-const LumEngine::Physics::AABB& LumEngine::Physics::Collider::GetBoundingBox() const { return boundingBox; }
+const LumEngine::Physics::AABB& LumEngine::Physics::Collider::GetBoundingBox() const
+{
+    if (_needUpdate) {
+		_boundingBox = CalculateBoundingBox();
+		_needUpdate = false;
+	}
+	return _boundingBox;
+}
+
 int LumEngine::Physics::Collider::GetEntityID() const { return entityId; }
 const std::vector<Vertex>& LumEngine::Physics::Collider::GetVertices() const { return vertices; }
 
 void LumEngine::Physics::Collider::SetSize(const Vec3Core& newSize)
 {
-	boundingBox.SetSize(newSize);
+	_boundingBox.SetSize(newSize);
 }
 
 void LumEngine::Physics::Collider::SetSize(float x, float y, float z)
 {
-	boundingBox.SetSize(Vec3Core(x, y, z));
+	_boundingBox.SetSize(Vec3Core(x, y, z));
 }
 
 Vec3Core LumEngine::Physics::Collider::GetSize() const
 {
-	return boundingBox.GetBoundingBox().GetMax() - boundingBox.GetBoundingBox().GetMin();
+	return _boundingBox.GetMax() - _boundingBox.GetMin();
 }
 
 ColliderType LumEngine::Physics::Collider::GetColliderType() const
@@ -308,5 +358,15 @@ void LumEngine::Physics::Collider::SetColliderType(ColliderType newType)
 
 void LumEngine::Physics::Collider::UpdateTransform(const Mat4Core& newTransform)
 {
-    boundingBox.UpdateTransform(newTransform);
+    _boundingBox.UpdateTransform(newTransform);
+}
+
+void LumEngine::Physics::Collider::InvalidateBoundingBox() const
+{
+	_needUpdate = true;
+}
+
+LumEngine::Physics::AABB LumEngine::Physics::Collider::CalculateBoundingBox() const
+{
+    return _boundingBox.GetBoundingBox();
 }

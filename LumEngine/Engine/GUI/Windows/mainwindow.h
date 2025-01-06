@@ -21,13 +21,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    QHBoxLayout* getMainLayout() const;
+    QHBoxLayout* GetMainLayout() const;
 
-    void setThread(LoadingThread* thread) { this->loadingThread = thread; }
+    void SetThread(LoadingThread* thread) { this->loadingThread = thread; }
+
+    bool createNewProject();
+    bool loadProject();
+
+    const std::string& GetProjectPath() const;
 
 private:
-    void createNewProject();
-    void loadProject();
+    
     void buildProject();
 
     ScriptPathLoader* splc = nullptr;

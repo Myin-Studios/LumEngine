@@ -3,6 +3,7 @@
 GuiBuilder::GuiBuilder()
 {
     mainWindow = new MainWindow();
+	_assetsManager = new AssetPanel(mainWindow->centralWidget(), _projPath);
     topPanel = new VPanel(mainWindow->centralWidget());
     leftPanel = new VerticalPanel(mainWindow->centralWidget());
     rightPanel = new BasePanel();
@@ -63,7 +64,7 @@ GuiBuilder::GuiBuilder()
     topPanel->getLayout()->addWidget(playButton, 0, Qt::AlignLeft);
 
     sceneConsoleSplitter->addWidget(scene);
-    sceneConsoleSplitter->addWidget(console);
+    sceneConsoleSplitter->addWidget(_assetsManager);
     sceneConsoleSplitter->setOrientation(Qt::Vertical);
 
     centralLayout->addWidget(topPanel, 0, Qt::AlignTop);
@@ -77,7 +78,7 @@ GuiBuilder::GuiBuilder()
     rightPanelSplitter->addWidget(mainContainer);
     rightPanelSplitter->addWidget(rightPanel);
 
-    mainWindow->getMainLayout()->addWidget(rightPanelSplitter);
+    mainWindow->GetMainLayout()->addWidget(rightPanelSplitter);
 
     mainWindow->show();
     leftPanel->show();
@@ -105,6 +106,16 @@ void GuiBuilder::Cleanup()
         scene->GetUIManager()->SetGUIBuilder({});
     }
     scene = nullptr;
+}
+
+void GuiBuilder::SetProjectPath(const std::string& path)
+{
+    _projPath = path;
+
+	if (_assetsManager)
+	{
+		_assetsManager->SetProjectPath(path);
+	}
 }
 
 void GuiBuilder::SetEntity(BaseEntity* e)

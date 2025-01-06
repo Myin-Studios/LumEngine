@@ -75,7 +75,12 @@ void RendererCore::initializeGL()
 
     RendererDebugger::checkOpenGLError("after glewInit");
 
+    LumEngine::Physics::AABB worldBounds(Vec3Core(-10, -10, -10), Vec3Core(10, 10, 10));
+    _octree = std::make_unique<LumEngine::Physics::Octree>(worldBounds);
+
     AABBDebugRenderer::Initialize();
+
+    renderQueue = new RenderQueue();
 
     editorCamera = new Camera();
 
@@ -245,12 +250,12 @@ void RendererCore::paintGL()
                 }
 
                 cmd.transform = transform;
-                renderQueue.push(cmd);
+                renderQueue->push(cmd);
             }
         }
 
         // Chiama process UNA SOLA VOLTA dopo aver aggiunto tutti i comandi
-        renderQueue.process(view, proj, lightPositions, lightColors, intensities,
+        renderQueue->process(view, proj, lightPositions, lightColors, intensities,
             glm::vec3(
                 editorCamera->GetTransform()->GetPosition().x(),
                 editorCamera->GetTransform()->GetPosition().y(),
@@ -558,7 +563,7 @@ void RendererCore::ProcessLOD(BaseEntity* e)
 
 void RendererCore::setupSkysphere()
 {
-    skysphere = loadOBJ("Resources/Models/Skysphere.obj", std::make_shared<ProceduralSkybox>());
+    skysphere = LoadOBJ("Resources/Models/Skysphere.obj", std::make_shared<ProceduralSkybox>());
 }
 
 void RendererCore::checkFrameBufferError()
@@ -672,7 +677,7 @@ void RendererCore::cleanup()
 
 void RendererCore::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (event->mimeData()->hasFormat("text/uri-list"))
+    if (event->mimeData()->hasFormat("application/x-lume-asset"))
     {
         event->acceptProposedAction();
     }
@@ -680,61 +685,59 @@ void RendererCore::dragEnterEvent(QDragEnterEvent* event)
 
 void RendererCore::dropEvent(QDropEvent *event) {
     const QMimeData* mimeData = event->mimeData();
-    if (mimeData->hasUrls())
-    {
-        QList<QUrl> urlList = mimeData->urls();
-        if (!urlList.empty())
-        {
-            QString fileName = urlList.at(0).toLocalFile();
+	if (mimeData->hasUrls()) {
+		QList<QUrl> urlList = mimeData->urls();
+		for (const QUrl& url : urlList) {
+			QString filePath = url.toLocalFile();
+			QFileInfo fileInfo(filePath);
 
-            if (fileName.contains(".obj"))
-            {
-                loadModel(fileName);
-            }
-        }
-    }
+			if (fileInfo.suffix() == "obj" || fileInfo.suffix() == "fbx") {
+				loadModel(filePath);
+			}
+		}
+	}
+	else if (mimeData->hasText()) {
+		QString filePath = event->mimeData()->text();
+		QFileInfo fileInfo(filePath);
+
+		if (fileInfo.suffix() == "obj" || fileInfo.suffix() == "fbx") {
+			loadModel(filePath);
+		}
+	}
 }
 
-void RendererCore::mousePressEvent(QMouseEvent* event)
-{
+void RendererCore::mousePressEvent(QMouseEvent* event) {
     setFocus();
-
-    if (event->button() == Qt::RightButton)
-    {
+    if (event->button() == Qt::RightButton) {
         setCursor(Qt::ClosedHandCursor);
-
         canUpdateCamera = true;
-
         mousePos = event->pos();
-
         updateTimer->start();
     }
-    else if (event->button() == Qt::LeftButton)
-    {
-        LumEngine::Physics::RayCastResult res = LumEngine::Physics::RayCast::Cast(
-            editorCamera->GetTransform()->GetPosition(),
-            LumEngine::Physics::RayCast::ScreenToRay(
-                event->pos().x(),
-                event->pos().y(),
-                width(), height()));
+    else if (event->button() == Qt::LeftButton) {
+        Vec3Core rayOrigin = editorCamera->GetTransform()->GetPosition();
+        Vec3Core rayDir = LumEngine::Physics::RayCast::ScreenToRay(
+            event->pos().x(),
+            event->pos().y(),
+            width(), height());
 
-        if (res.hit) {
-            auto it = find_if(entities.begin(), entities.end(), [&](const std::shared_ptr<BaseEntity>& e) {
-                return e->GetEntityID() == res.entityId;
-                });
+        std::cout << "Mouse click at: " << event->pos().x() << ", " << event->pos().y() << std::endl;
+        std::cout << "Camera position: " << rayOrigin.ToString() << std::endl;
+        std::cout << "Ray direction: " << rayDir.ToString() << std::endl;
 
-            if (it != entities.end()) {
-                std::cout << "Selected Entity: " << (*it)->GetEntityID() << std::endl;
-                (*it)->SetSelected(true);
-                if (this->_uiManager) {
-                    this->_uiManager->UpdateUI(it->get());
-                }
-                else {
-                    // Handle the error or log it
-                    std::cerr << "UI Manager is not initialized." << std::endl;
-                }
-                update();
+        BaseEntity* selectedEntity = _octree->RayCast(rayOrigin, rayDir);
+
+        if (selectedEntity) {
+            std::cout << "Selected Entity: " << selectedEntity->GetEntityID() << std::endl;
+            selectedEntity->SetSelected(true);
+
+            if (this->_uiManager) {
+                this->_uiManager->UpdateUI(selectedEntity);
             }
+            else {
+                std::cerr << "UI Manager is not initialized." << std::endl;
+            }
+            update();
         }
         else {
             if (this->_uiManager) this->_uiManager->UpdateUI();
@@ -806,6 +809,19 @@ void RendererCore::keyPressEvent(QKeyEvent* event)
             keyPressed.emplace(event->key());
         }
 
+		// Uncomment when the delete functionality is implemented (when the octree mesh removal is implemented)
+
+		// auto it = find_if(entities.begin(), entities.end(), [](const shared_ptr<BaseEntity>& e) { return e->IsSelected(); });
+        // 
+		// if (it != entities.end())
+        // {
+        //     if (event->key() == Qt::Key_Delete)
+        //     {
+		// 		_octree->Remove((*it).get());
+		// 		entities.erase(it);
+		// 	}
+		// }
+
         update();
     }
 }
@@ -822,7 +838,7 @@ void RendererCore::loadModel(const QString& path) {
     if (path.endsWith(".obj"))
     {
         entities.emplace_back(std::make_shared<BaseEntity>());
-        entities.back()->AddProperty<MeshCore>(loadOBJ(path, std::make_shared<PBR>()));
+        entities.back()->AddProperty<MeshCore>(MeshCache::GetInstance()->LoadOrGetModel(path.toStdString()));
 
         Mat4Core t = {};
 
@@ -830,7 +846,7 @@ void RendererCore::loadModel(const QString& path) {
             entities.back()->GetEntityID(), entities.back()->GetCoreProperty<MeshCore>()->GetVertices(), t));
         entities.back()->AddProperty<Transform3DCore>(std::make_unique<Transform3DCore>());
 
-		entities.back()->AddProperty<LumEngine::Graphics::LODCore>(std::make_unique<LumEngine::Graphics::LODCore>(3));
+		// entities.back()->AddProperty<LumEngine::Graphics::LODCore>(std::make_unique<LumEngine::Graphics::LODCore>(3));
 
         LumEngine::Physics::RayCast::RegisterBoundingVolume(
             entities.back()->GetCoreProperty<MeshCore>()->GetVertices()
@@ -852,74 +868,198 @@ void RendererCore::loadModel(const QString& path) {
             }
             mesh->SetLOD(0);
         }
+
+		_octree->Insert(entities.back().get());
     }
 }
 
-std::unique_ptr<MeshCore> RendererCore::loadOBJ(const QString& path, std::shared_ptr<Material> mat) {
-    std::ifstream file(path.toStdString());
+std::unique_ptr<MeshCore> RendererCore::LoadOBJ(const std::string& path, std::shared_ptr<Material> mat) {
+    std::ifstream file(path);
     if (!file.is_open()) {
         qCritical() << "Unable to open the file:" << path;
         return nullptr;
     }
 
     std::vector<Vertex> ver;
-    std::vector<int> ids;
+    std::vector<unsigned int> ids;
     std::vector<glm::vec3> vertices, normals;
     std::vector<glm::vec2> texCoords;
 
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '#') continue; // Salta linee vuote o commenti
+    // Pre-allocazione per evitare riallocazioni frequenti
+    size_t fileSize = file.tellg();
+    size_t estimatedVertices = fileSize / 100;
+    vertices.reserve(estimatedVertices);
+    normals.reserve(estimatedVertices);
+    texCoords.reserve(estimatedVertices);
+    ver.reserve(estimatedVertices);
+    ids.reserve(estimatedVertices * 3);
 
-        std::istringstream iss(line);
-        std::string prefix;
-        iss >> prefix;
+    // Iteratori per il file
+    std::istreambuf_iterator<char> begin(file), end;
+    std::string token;
+    std::string number;
+    number.reserve(20);
 
-        if (prefix == "v") {
+    for (auto it = begin; it != end; ++it) {
+        char c = *it;
+
+        // Salta spazi bianchi e commenti
+        if (std::isspace(c)) continue;
+        if (c == '#') {
+            while (it != end && *it != '\n') ++it;
+            continue;
+        }
+
+        // Leggi il tipo (v, vt, vn, f)
+        token.clear();
+        while (it != end && !std::isspace(*it)) {
+            token += *it;
+            ++it;
+        }
+
+        if (token == "v") {
             glm::vec3 pos;
-            iss >> pos.x >> pos.y >> pos.z;
+            // Leggi x
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) pos.x = std::stof(number);
+
+            // Leggi y
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) pos.y = std::stof(number);
+
+            // Leggi z
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) pos.z = std::stof(number);
+
             vertices.push_back(pos);
         }
-        else if (prefix == "vt") {
+        else if (token == "vt") {
             glm::vec2 uv;
-            iss >> uv.x >> uv.y;
+            // Leggi u
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) uv.x = std::stof(number);
+
+            // Leggi v
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) uv.y = std::stof(number);
+
             texCoords.push_back(uv);
         }
-        else if (prefix == "vn") {
+        else if (token == "vn") {
             glm::vec3 normal;
-            iss >> normal.x >> normal.y >> normal.z;
+            // Leggi nx
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) normal.x = std::stof(number);
+
+            // Leggi ny
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) normal.y = std::stof(number);
+
+            // Leggi nz
+            number.clear();
+            while (it != end && std::isspace(*it)) ++it;
+            while (it != end && !std::isspace(*it)) {
+                number += *it;
+                ++it;
+            }
+            if (!number.empty()) normal.z = std::stof(number);
+
             normals.push_back(normal);
         }
-        else if (prefix == "f") {
+        else if (token == "f") {
+            // Parser per le facce
             for (int i = 0; i < 3; ++i) {
-                std::string vertexData;
-                iss >> vertexData;
-
                 int vertexIndex = -1, uvIndex = -1, normalIndex = -1;
-                std::replace(vertexData.begin(), vertexData.end(), '/', ' ');
-                std::istringstream vertexStream(vertexData);
-                vertexStream >> vertexIndex >> uvIndex >> normalIndex;
 
-                ver.emplace_back(
-                    vertexIndex > 0 ? vertices[vertexIndex - 1] : glm::vec3(0, 0, 0),
-                    normalIndex > 0 ? normals[normalIndex - 1] : glm::vec3(0, 0, 0),
-                    uvIndex > 0 ? texCoords[uvIndex - 1] : glm::vec2(0, 0)
-                );
+                // Leggi indice vertice
+                number.clear();
+                while (it != end && std::isspace(*it)) ++it;
+                while (it != end && *it != '/' && !std::isspace(*it)) {
+                    number += *it;
+                    ++it;
+                }
+                if (!number.empty()) vertexIndex = std::stoi(number);
 
-                ids.push_back(ver.size() - 1);
+                // Se c'è una texture coordinate
+                if (it != end && *it == '/') {
+                    ++it;
+                    number.clear();
+                    while (it != end && *it != '/' && !std::isspace(*it)) {
+                        number += *it;
+                        ++it;
+                    }
+                    if (!number.empty()) uvIndex = std::stoi(number);
+                }
+
+                // Se c'è una normale
+                if (it != end && *it == '/') {
+                    ++it;
+                    number.clear();
+                    while (it != end && !std::isspace(*it)) {
+                        number += *it;
+                        ++it;
+                    }
+                    if (!number.empty()) normalIndex = std::stoi(number);
+                }
+
+                if (vertexIndex > 0 && vertexIndex <= vertices.size()) {
+                    ver.emplace_back(
+                        vertices[vertexIndex - 1],
+                        normalIndex > 0 && normalIndex <= normals.size() ? normals[normalIndex - 1] : glm::vec3(0),
+                        uvIndex > 0 && uvIndex <= texCoords.size() ? texCoords[uvIndex - 1] : glm::vec2(0)
+                    );
+                    ids.push_back(ver.size() - 1);
+                }
             }
         }
     }
 
     file.close();
 
-    // Creazione della mesh
+    if (ver.empty() || ids.empty()) {
+        qWarning() << "No valid geometry found in OBJ file";
+        return nullptr;
+    }
+
     makeCurrent();
-    auto m = std::make_unique<MeshCore>(std::move(ver), std::move(ids));
+    auto m = std::make_unique<MeshCore>(std::move(ver), std::move(ids), path);
     m->SetMaterial(mat);
 
-    RendererDebugger::checkOpenGLError("model loading");
-    setFocus();
     update();
 
     return m;
@@ -942,3 +1082,28 @@ extern "C" {
         return renderer ? renderer->GetEntities().size() : 0;
     }
 }
+
+// MESH CACHING
+MeshCache* MeshCache::s_instance = nullptr;
+
+std::unique_ptr<MeshCore> MeshCache::LoadOrGetModel(const std::string& path)
+{
+    auto it = _meshes.find(path);
+
+    if (it != _meshes.end()) {
+        return std::make_unique<MeshCore>(*it->second);
+    }
+
+    auto model = LoadOBJ(path, std::make_shared<PBR>());
+    if (model) {
+        _meshes[path] = std::make_unique<MeshCore>(*model);
+        RendererCore::GetInstance()->update();
+    }
+    return model;
+}
+
+std::unique_ptr<MeshCore> MeshCache::LoadOBJ(const std::string& path, std::shared_ptr<Material> mat)
+{
+    return RendererCore::GetInstance()->LoadOBJ(path, mat);
+}
+

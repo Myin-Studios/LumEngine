@@ -227,126 +227,104 @@ void BasePanel::addPage(const std::string& title, QWidget* elem)
 }
 
 void BasePanel::addElement(const std::string& title, QWidget* elem) {
+    // Trova l'header una volta sola
     auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
         return header->getTitle()->toStdString() == title;
         });
+    if (it == _headers.end()) {
+        addPage(title, elem);
+        return;
+    }
 
-    if (it != _headers.end()) {
-        this->_searchField->setVisible(true);
-        int pageIndex = _headers.indexOf(*it);
-        QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
-        if (scrollable) {
-            QWidget* scrollContent = scrollable->widget();
-            QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
-            if (layout) {
-                // Controlla se esiste già un PropertyGroup con lo stesso titolo
-                PropertyGroup* newGroup = qobject_cast<PropertyGroup*>(elem);
-                if (newGroup) {
-                    PropertyGroup* newProperty = dynamic_cast<PropertyGroup*>(newGroup);
-                    for (int i = 0; i < layout->count(); ++i) {
-                        PropertyGroup* existingGroup = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget());
-                        PropertyGroup* existingProperty = dynamic_cast<PropertyGroup*>(existingGroup);
+    int pageIndex = _headers.indexOf(*it);
+    QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
+    if (!scrollable) return;
 
-                        if (existingProperty && newProperty) {
-                            bool sameTitle = existingGroup->getTitle() == newGroup->getTitle();
-                            bool sameEntity = existingProperty->GetEntity() == newProperty->GetEntity();
+    QWidget* scrollContent = scrollable->widget();
+    QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
+    if (!layout) return;
 
-                            qDebug() << "Comparing properties:";
-                            qDebug() << "Same title:" << sameTitle;
-                            qDebug() << "Same entity:" << sameEntity;
-                            qDebug() << "Existing entity ID:" << (existingProperty->GetEntity() ? existingProperty->GetEntity()->GetEntityID() : -1);
-                            qDebug() << "New entity ID:" << (newProperty->GetEntity() ? newProperty->GetEntity()->GetEntityID() : -1);
+    // Cast una volta sola
+    PropertyGroup* newGroup = qobject_cast<PropertyGroup*>(elem);
+    if (!newGroup) {
+        layout->addWidget(elem);
+        return;
+    }
 
-                            if (sameTitle && !sameEntity) {
-                                layout->removeWidget(existingGroup);
-                                existingGroup->deleteLater();
-                                layout->addWidget(elem);
-                                return;
-                            }
-                            else if (sameTitle && sameEntity) {
-                                existingProperty->UpdateValues();
-                                delete elem;
-                                return;
-                            }
-                        }
-                    }
+    // Confronta una volta sola
+    std::string newTitle = newGroup->getTitle();
+    auto* newEntity = newGroup->GetEntity();
+
+    for (int i = 0; i < layout->count(); ++i) {
+        if (auto* existingGroup = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget())) {
+            if (existingGroup->getTitle() == newTitle) {
+                if (existingGroup->GetEntity() == newEntity) {
+                    existingGroup->UpdateValues();
+                    delete elem;
+                    return;
                 }
-
+                layout->removeWidget(existingGroup);
+                existingGroup->deleteLater();
                 layout->addWidget(elem);
                 return;
             }
         }
     }
-    else {
-        addPage(title, elem);
-    }
+
+    layout->addWidget(elem);
 }
 
-void BasePanel::removeElement(const std::string& title, const std::string& elemName)
-{
-    auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
-        return header->getTitle()->toStdString() == title;
-        });
+void BasePanel::removeElement(const std::string& title, const std::string& elemName) {
+    auto it = std::find_if(_headers.begin(), _headers.end(),
+        [&title](PanelHeader* header) { return header->getTitle()->toStdString() == title; });
 
-    if (it != _headers.end()) {
-        int pageIndex = _headers.indexOf(*it);
-        QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
-        if (scrollable) {
-            QWidget* scrollContent = scrollable->widget();
-            QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
+    if (it == _headers.end()) return;
 
-            if (layout) {
-                for (int i = 0; i < layout->count(); ++i) {
-                    PropertyGroup* group = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget());
-                    if (group) {
-                        // Debug: stampa i titoli per confronto
-                        qDebug() << "Comparing titles:";
-                        qDebug() << "Group title:" << group->getTitle();
-                        qDebug() << "Expected title:" << QString::fromStdString(elemName);
+    int pageIndex = _headers.indexOf(*it);
+    auto* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
+    if (!scrollable) return;
 
-                        if (group->getTitle() == elemName) {
-                            group->hide();
-                            layout->removeWidget(group);
-                            layout->update();
-                            scrollContent->updateGeometry();
-                            scrollable->updateGeometry();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+    auto* layout = qobject_cast<QVBoxLayout*>(scrollable->widget()->layout());
+    if (!layout) return;
 
-void BasePanel::removeAllElements(const std::string& title)
-{
-    auto it = std::find_if(_headers.begin(), _headers.end(), [&title](PanelHeader* header) {
-        return header->getTitle()->toStdString() == title;
-        });
-
-    if (it != _headers.end()) {
-        this->_searchField->setVisible(false);
-        int pageIndex = _headers.indexOf(*it);
-        QScrollArea* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(pageIndex));
-        if (scrollable) {
-            QWidget* scrollContent = scrollable->widget();
-            QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(scrollContent->layout());
-            if (layout) {
-                // Itera attraverso tutti gli elementi del layout
-                for (int i = layout->count() - 1; i >= 0; --i) {
-                    QWidget* widget = layout->itemAt(i)->widget();
-                    if (widget) {
-                        layout->removeWidget(widget);
-                        widget->deleteLater();
-                    }
-                }
-                // Aggiorna il layout per riflettere i cambiamenti
+    std::string targetName = elemName;
+    for (int i = 0; i < layout->count(); ++i) {
+        if (auto* group = qobject_cast<PropertyGroup*>(layout->itemAt(i)->widget())) {
+            if (group->getTitle() == targetName) {
+                layout->removeWidget(group);
+                group->deleteLater();
                 layout->update();
-                scrollContent->updateGeometry();
+                scrollable->viewport()->update();
+                return;
             }
         }
     }
+}
+
+void BasePanel::removeAllElements(const std::string& title) {
+    auto it = std::find_if(_headers.begin(), _headers.end(),
+        [&title](PanelHeader* header) { return header->getTitle()->toStdString() == title; });
+
+    if (it == _headers.end()) return;
+
+    _searchField->setVisible(false);
+
+    auto* scrollable = qobject_cast<QScrollArea*>(_stackedWidget->widget(_headers.indexOf(*it)));
+    if (!scrollable) return;
+
+    auto* layout = qobject_cast<QVBoxLayout*>(scrollable->widget()->layout());
+    if (!layout) return;
+
+    QLayoutItem* child;
+    while ((child = layout->takeAt(0)) != nullptr) {
+        if (child->widget()) {
+            child->widget()->deleteLater();
+        }
+        delete child;
+    }
+
+    layout->update();
+    scrollable->viewport()->update();
 }
 
 void BasePanel::paintEvent(QPaintEvent* event)

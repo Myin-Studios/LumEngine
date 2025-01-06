@@ -80,7 +80,7 @@ public:
         progressBar->setValue(value);
     }
 
-    void setThread(QThread* thread)
+    void SetThread(QThread* thread)
     {
         loadingThread = thread;
     }

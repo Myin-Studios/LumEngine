@@ -1,23 +1,16 @@
 #pragma once
 
+#include "Engine/GUI/Rendering/Vertices/Vertices.h"
+#include "Engine/GUI/Rendering/Meshes/Mesh.h"
 #include "../Mathematics/Math.h"
 #include "../Entities/Properties/Property.h"
-#include "../LumEngine/Engine/GUI/Rendering/Vertices/Vertices.h"
 #include "../Entities/Entity.h"
 #include <algorithm>
 #include <vector>
 
-enum ColliderType
-{
-    AABB,
-    Sphere,
-    Capsule,
-    Mesh
-};
-
 namespace LumEngine::Physics
 {
-    class AABB
+    class AABB : public IAABB
     {
     public:
         AABB(std::vector<Vertex> verts = {}) : vertices(std::move(verts))
@@ -31,17 +24,32 @@ namespace LumEngine::Physics
             transform = Mat4Core::Identity();
         }
 
+		AABB(const Vec3Core& min, const Vec3Core& max) : min(min), max(max)
+		{
+			transform = Mat4Core::Identity();
+		}
+
         AABB GetBoundingBox() const;
 
-        const Vec3Core GetMin() const;
-        const Vec3Core GetMax() const;
-        const int GetEntityID() const { return entityId; }
+        const Vec3Core GetMin() const override;
+        const Vec3Core GetMax() const override;
+        const int GetEntityID() const override { return entityId; }
 
-		void SetSize(const Vec3Core& newSize);
-		void SetSize(float x, float y, float z);
+		const Vec3Core GetCenter() const override;
 
-        void UpdateTransform(const Mat4Core& newTransform);
-        const Mat4Core& GetTransform() const;
+		void SetSize(const Vec3Core& newSize) override;
+		void SetSize(float x, float y, float z) override;
+
+        void UpdateTransform(const Mat4Core& newTransform) override;
+        const Mat4Core& GetTransform() const override;
+
+		float GetDistanceToRay(const IRay& ray) const;
+
+		float GetDistanceToPoint(const Vec3Core& origin) const override;
+
+		bool Contains(const IAABB& bounds) const override;
+
+        bool Intersects(const IRay& ray, float& distance) const;
 
     private:
         std::vector<Vertex> vertices;
@@ -84,32 +92,40 @@ namespace LumEngine::Physics
         static std::vector<std::shared_ptr<AABB>> boundingVolumes;
     };
 
-    class Collider : public IProperty
+    class Collider : public ICollider
     {
+		mutable AABB _boundingBox;
+		mutable bool _needUpdate = true;
+		std::weak_ptr<MeshCore> _mesh;
+        Transform3DCore* _transform;
+
     public:
         Collider(int eID, const std::vector<Vertex>& verts, Mat4Core& t);
 
-        const AABB& GetBoundingBox() const;
-        int GetEntityID() const;
-        const std::vector<Vertex>& GetVertices() const;
+		void InvalidateBoundingBox() const;
+
+		AABB CalculateBoundingBox() const;
+
+        const AABB& GetBoundingBox() const override;
+        int GetEntityID() const override;
+        const std::vector<Vertex>& GetVertices() const override;
 
         virtual void OnSerialize() override {}
         virtual void OnDeserialize() override {}
 
-		void SetSize(const Vec3Core& newSize);
-		void SetSize(float x, float y, float z);
+		void SetSize(const Vec3Core& newSize) override;
+		void SetSize(float x, float y, float z) override;
 
-		Vec3Core GetSize() const;
+		Vec3Core GetSize() const override;
 
-		ColliderType GetColliderType() const;
-		void SetColliderType(ColliderType newType);
+		ColliderType GetColliderType() const override;
+		void SetColliderType(ColliderType newType) override;
 
-        void UpdateTransform(const Mat4Core& newTransform);
+        void UpdateTransform(const Mat4Core& newTransform) override;
 
     private:
         std::vector<Vertex> vertices;
         Mat4Core& transform;
-        AABB boundingBox;
         int entityId;
 		ColliderType type;
     };

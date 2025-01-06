@@ -7,6 +7,7 @@
 #include <cmath>
 
 class Vec4Core;
+class Vec3Core;
 
 class Mat4Core
 {
@@ -67,6 +68,49 @@ private:
 	float _m33 = 0.0f;
 };
 
+class Mat3Core
+{
+public:
+	Mat3Core(const Mat3Core& other);
+	Mat3Core(const glm::mat3& other);
+	Mat3Core(float m00 = 0.0f, float m01 = 0.0f, float m02 = 0.0f,
+			 float m10 = 0.0f, float m11 = 0.0f, float m12 = 0.0f,
+			 float m20 = 0.0f, float m21 = 0.0f, float m22 = 0.0f);
+
+	const float m00() const;
+	const float m01() const;
+	const float m02() const;
+	const float m10() const;
+	const float m11() const;
+	const float m12() const;
+	const float m20() const;
+	const float m21() const;
+	const float m22() const;
+
+	Mat3Core Inverse() const;
+	float Determinant() const;
+	float Det2x2(float a00, float a01, float a10, float a11) const;
+	float Cofactor(int i0, int i1, int j0, int j1) const;
+	static Mat3Core Identity();
+
+	Mat3Core& operator=(const Mat3Core& other);
+	Mat3Core operator*(const Mat3Core& other);
+	Vec3Core operator*(const Vec3Core& v) const;
+
+	std::string ToString() const;
+
+private:
+	float _m00 = 0.0f;
+	float _m01 = 0.0f;
+	float _m02 = 0.0f;
+	float _m10 = 0.0f;
+	float _m11 = 0.0f;
+	float _m12 = 0.0f;
+	float _m20 = 0.0f;
+	float _m21 = 0.0f;
+	float _m22 = 0.0f;
+};
+
 class Vec4Core
 {
 public:
@@ -113,6 +157,7 @@ public:
 
 	float Length() const;
 	Vec3Core& Normalize();
+	Vec3Core Normalized();
 
 	Vec3Core& operator=(const Vec3Core& v);
 	Vec3Core& operator=(const Vec3Core* v);
@@ -128,6 +173,7 @@ public:
 	Vec3Core& operator/=(const float s);
 	Vec3Core operator^(const Vec3Core& v) const;
 	bool operator==(const Vec3Core& v) const;
+	float operator[](int i) const;
 
 	std::string ToString() const;
 
@@ -135,4 +181,43 @@ private:
 	float _x = 0.0f;
 	float _y = 0.0f;
 	float _z = 0.0f;
+};
+
+class Vec2Core
+{
+public:
+	Vec2Core(const Vec2Core& other);
+	Vec2Core(float x = 0.0f, float y = 0.0f);
+
+	void setX(float x);
+	void setY(float y);
+
+	float x() const;
+	float y() const;
+
+	static Vec2Core Lerp(const Vec2Core& v1, const Vec2Core& v2, float t);
+	static Vec2Core Min(const Vec2Core& a, const Vec2Core& b);
+	static Vec2Core Max(const Vec2Core& a, const Vec2Core& b);
+	static float Angle(const Vec2Core& a, const Vec2Core& b);
+
+	float Length() const;
+	Vec2Core& Normalize();
+
+	Vec2Core& operator=(const Vec2Core& v);
+	Vec2Core operator*(float scalar) const;
+	float operator*(const Vec2Core& v) const;
+	Vec2Core operator+(const Vec2Core& v) const;
+	Vec2Core operator-(const Vec2Core& v) const;
+	Vec2Core operator/(float scalar) const;
+	Vec2Core& operator+=(const Vec2Core& v);
+	Vec2Core& operator-=(const Vec2Core& v);
+	Vec2Core& operator/=(float scalar);
+	Vec2Core& operator*=(float scalar);
+	bool operator==(const Vec2Core& v) const;
+
+	std::string ToString() const;
+
+private:
+	float _x = 0.0f;
+	float _y = 0.0f;
 };
