@@ -231,16 +231,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_DEPS)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(LUME_DEPS)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtSvg;$(ExternalIncludePath)</ExternalIncludePath>
     <OutDir>Output/$(Configuration)</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>Output/$(Configuration)</OutDir>
-    <IncludePath>$(LUME_GLEW)/include;$(LUME_GLM)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
+    <IncludePath>$(LUME_DEPS)/include;$(Qt6_DIR)/include;$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtGui;$(Qt6_DIR)/include/QtWidgets;$(Qt6_DIR)/include/QtOpenGL;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(NETHOST);$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(NETHOST_LIB);$(Qt6_DIR)/include/QtCore;$(Qt6_DIR)/include/QtSvg;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_GLEW)/lib;$(LUME_GLM)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LUME_DEPS)/lib;$(Qt6_DIR)/lib;$(NETHOST_LIB);Output\$(Configuration)\LumScripting;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

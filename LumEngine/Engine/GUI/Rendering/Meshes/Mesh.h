@@ -102,32 +102,6 @@ public:
         setupMesh();
     }
 
-	~MeshCore()
-	{
-		if (VAO != 0) glDeleteVertexArrays(1, &VAO);
-
-		auto it = find_if(lodLevels.begin(), lodLevels.end(), [](const pair<int, LODData>& level) {
-			return level.second.VBO != 0;
-			});
-
-        if (it != lodLevels.end())
-        {
-            if (!it->second.vertices.empty())
-            {
-                it->second.vertices.clear();
-            }
-            if (!it->second.indices.empty())
-			{
-				it->second.indices.clear();
-			}
-
-			if (it->second.EBO != 0) glDeleteBuffers(1, &it->second.EBO);
-            glDeleteBuffers(1, &it->second.VBO);
-        }
-
-        lodLevels.clear();
-	}
-
 	void SetPath(const std::string& path) { _path = path; }
 
     const vector<Vertex> GetVertices() const { return this->vertices; }
@@ -458,14 +432,6 @@ private:
 		lodLevels[0].VBO = buffers->VBO;
 		lodLevels[0].EBO = buffers->EBO;
 
-        // Create and bind VAO
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-
-        // Set up base level buffers
-        SetupLODLevel(lodLevels[0]);
-
-        glBindVertexArray(0);
         RendererDebugger::checkOpenGLError("mesh setup");
     }
 };

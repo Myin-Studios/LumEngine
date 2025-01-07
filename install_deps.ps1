@@ -15,16 +15,14 @@ Write-Output "Integrazione di vcpkg con Visual Studio..."
 & $vcpkgPath\vcpkg integrate install
 
 # Installazione delle librerie richieste
-Write-Output "Installazione delle librerie richieste (GLEW e GLM)..."
-& $vcpkgPath\vcpkg install glew glm
+Write-Output "Installazione delle librerie richieste (GLEW, GLM e ASIO)..."
+& $vcpkgPath\vcpkg install glew glm asio
 
-# Ottieni il percorso di installazione di GLEW e GLM
-$glewPath = Join-Path $vcpkgPath "installed\x64-windows-static"
-$glmPath = Join-Path $vcpkgPath "installed\x64-windows"
+# Ottieni il percorso di installazione
+$lumeDepsPath = Join-Path $vcpkgPath "installed\x64-windows"
 
 # Imposta le variabili d'ambiente
-[System.Environment]::SetEnvironmentVariable("LUME_GLEW", $glewPath, [System.EnvironmentVariableTarget]::User)
-[System.Environment]::SetEnvironmentVariable("LUME_GLM", $glmPath, [System.EnvironmentVariableTarget]::User)
+[System.Environment]::SetEnvironmentVariable("LUME_DEPS", $lumeDepsPath, [System.EnvironmentVariableTarget]::User)
 
 Write-Output "Installazione completata con successo!"
-Write-Output "Le variabili d'ambiente sono state impostate: LUME_GLEW=$glewPath, LUME_GLM=$glmPath"
+Write-Output "La variabile d'ambiente è stata impostata: LUME_DEPS=$lumeDepsPath"

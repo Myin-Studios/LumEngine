@@ -64,6 +64,14 @@ private:
 
 	QFrame* _mainContainer;
 
+	QFrame* _buttonsContainer;
+
+	QHBoxLayout* _mainButtonsLayout;
+	QHBoxLayout* _projectButtonsLayout;
+	QHBoxLayout* _connectionButtonsLayout;
+
 	BaseButton* _newProjectButton;
 	BaseButton* _openProjectButton;
+	BaseButton* _connectToButton;
+	BaseButton* _liveEditorButton;
 };

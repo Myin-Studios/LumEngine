@@ -73,13 +73,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting\</OutDir>
-    <IncludePath>../LumEngine;$(LUME_GLEW);$(LUME_GLM);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LUME_GLEW)/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>../LumEngine;$(LUME_DEPS);$(IncludePath)</IncludePath>
+    <LibraryPath>$(LUME_DEPS)/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting\</OutDir>
-    <IncludePath>../LumEngine;$(LUME_GLEW);$(LUME_GLM);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LUME_GLEW)/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>../LumEngine;$(LUME_DEPS);$(IncludePath)</IncludePath>
+    <LibraryPath>$(LUME_DEPS)/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

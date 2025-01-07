@@ -52,7 +52,7 @@ public:
             {{-0.5f,  0.5f,  0.5f}, {0,0,0}, {0,0}}
         };
 
-        debugMesh = std::make_unique<MeshCore>(boxVertices);
+        debugMesh = std::make_unique<MeshCore>(boxVertices, std::vector<unsigned int>{}, "AABB");
         debugMaterial = std::make_shared<Material>(std::make_unique<Shader>(
             "Resources/Shaders/AABBDebuggerVert.glsl",
             "Resources/Shaders/AABBDebuggerFrag.glsl"
