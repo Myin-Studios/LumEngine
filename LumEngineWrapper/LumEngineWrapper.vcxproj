@@ -92,7 +92,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\Output\$(Configuration)\LumScripting</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(Qt6_DIR)/lib;$(OutDir);../LumEngine/Output/$(Configuration)/;../$(OutDir);$(LibraryPath)</LibraryPath>
     <IncludePath>../LumEngine;../LumTypes;$(NETHOST);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,14 +160,6 @@
   <ItemGroup>
     <ClCompile Include="Core\NativeInterface.cpp" />
     <ClCompile Include="mainCLR.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LumEngine\LumEngine.vcxproj">
-      <Project>{934275d7-046b-41bd-b720-62231f376331}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\LumTypes\LumTypes.vcxproj">
-      <Project>{c27820ec-17d0-4f35-a8fd-bab582861d3e}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(QtMsBuild)\qt.targets" Condition="Exists('$(QtMsBuild)\qt.targets')" />

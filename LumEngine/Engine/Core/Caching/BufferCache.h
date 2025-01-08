@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef BUFFER_CACHE
+#define BUFFER_CACHE
+
 #include "Engine/GUI/Rendering/Vertices/Vertices.h"
 
 #include <GL/glew.h>
@@ -82,26 +85,27 @@ public:
 
     void Clear()
     {
-		for (auto& pair : _bufferCache)
-		{
-			for (auto& lodBuffers : pair.second.lodBuffers)
-			{
-				glDeleteVertexArrays(1, &lodBuffers.VAO);
-				glDeleteBuffers(1, &lodBuffers.VBO);
-				glDeleteBuffers(1, &lodBuffers.EBO);
-			}
-		}
-		_bufferCache.clear();
+        for (auto& pair : _bufferCache)
+        {
+            for (auto& lodBuffers : pair.second.lodBuffers)
+            {
+                glDeleteVertexArrays(1, &lodBuffers.VAO);
+                glDeleteBuffers(1, &lodBuffers.VBO);
+                glDeleteBuffers(1, &lodBuffers.EBO);
+            }
+        }
+        _bufferCache.clear();
     }
 
-	static GLBufferCache* GetInstance()
-	{
-		if (!s_instance)
-		{
-			s_instance = new GLBufferCache();
-		}
-		return s_instance;
-	}
+    static GLBufferCache* GetInstance()
+    {
+        if (!s_instance)
+        {
+            s_instance = new GLBufferCache();
+        }
+        return s_instance;
+    }
 };
+#endif // BUFFER_CACHE
 
 inline GLBufferCache* GLBufferCache::s_instance = nullptr;

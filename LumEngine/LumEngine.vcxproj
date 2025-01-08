@@ -95,6 +95,7 @@
     <ClInclude Include="Engine\Core\Rendering\RenderQueue\RenderQueue.h" />
     <ClInclude Include="Engine\Core\scriptingThreading.h" />
     <ClInclude Include="Engine\Core\ScriptThreading\IScriptRunner.h" />
+    <ClInclude Include="Engine\GUI\Rendering\Vertices\Vertices.h" />
     <QtMoc Include="Engine\GUI\AssetsManager\IAssetManager.h" />
     <ClInclude Include="Engine\GUI\Buttons\basebutton.h" />
     <ClInclude Include="Engine\GUI\Buttons\tabsbutton.h" />
@@ -105,6 +106,7 @@
     <QtMoc Include="Engine\GUI\Text Fields\TextField.h" />
     <QtMoc Include="Engine\GUI\Panels\BaseProperties\baseProperties.h" />
     <QtMoc Include="Engine\GUI\Home\IHomeBuilder.h" />
+    <QtMoc Include="Engine\GUI\Home\ProjectButton\ProjectButton.h" />
     <ClInclude Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.h" />
     <ClInclude Include="Engine\GUI\Rendering\Meshes\Mesh.h" />
     <ClInclude Include="Engine\GUI\Rendering\Shaders\Shaders.h" />
@@ -130,13 +132,13 @@
     <ClCompile Include="Engine\GUI\Elements\Elements.cpp" />
     <ClCompile Include="Engine\GUI\guibuilder.cpp" />
     <ClCompile Include="Engine\GUI\Home\IHomeBuilder.cpp" />
+    <ClCompile Include="Engine\GUI\Home\ProjectButton\ProjectButton.cpp" />
     <ClCompile Include="Engine\GUI\Panels\BaseProperties\baseProperties.cpp" />
     <ClCompile Include="Engine\GUI\Panels\panel.cpp" />
     <ClCompile Include="Engine\GUI\Panels\properties.cpp" />
     <ClCompile Include="Engine\GUI\PropertyGroupManager\PropertyGroupManagerCore.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp" />
     <ClCompile Include="Engine\GUI\Rendering\renderer.cpp" />
-    <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp" />
     <ClCompile Include="Engine\GUI\Text Fields\TextField.cpp" />
     <ClCompile Include="Engine\GUI\Windows\mainwindow.cpp" />
     <ClCompile Include="main.cpp" />

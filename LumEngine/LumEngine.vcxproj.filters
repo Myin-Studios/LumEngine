@@ -145,6 +145,9 @@
     <ClInclude Include="Engine\Core\Caching\BufferCache.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\GUI\Rendering\Vertices\Vertices.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Engine\GUI\Loading\loadingWindow.h">
@@ -183,6 +186,9 @@
     <QtMoc Include="Engine\GUI\AssetsManager\IAssetManager.h">
       <Filter>File di intestazione</Filter>
     </QtMoc>
+    <QtMoc Include="Engine\GUI\Home\ProjectButton\ProjectButton.h">
+      <Filter>File di intestazione</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\GUI\Buttons\basebutton.cpp">
@@ -215,9 +221,6 @@
     <ClCompile Include="Engine\GUI\Rendering\Camera\camera.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\GUI\Rendering\Shaders\Shaders.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\GUI\Elements\Elements.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
@@ -240,6 +243,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\GUI\AssetsManager\IAssetManager.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\GUI\Home\ProjectButton\ProjectButton.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

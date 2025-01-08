@@ -28,6 +28,8 @@ public:
     bool createNewProject();
     bool loadProject();
 
+	void LoadProjectFromPath(const std::string& path);
+
     const std::string& GetProjectPath() const;
 
 private:

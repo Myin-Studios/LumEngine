@@ -116,6 +116,15 @@ bool MainWindow::loadProject()
     return false;
 }
 
+void MainWindow::LoadProjectFromPath(const std::string& path)
+{
+	assemblyPath = QString::fromStdString(path);
+	splc->build(path);
+	emit assemblyPathProvided(assemblyPath);
+
+	std::cout << "Assembly path: " << assemblyPath.toStdString() << std::endl;
+}
+
 const std::string& MainWindow::GetProjectPath() const
 {
     static std::string path;

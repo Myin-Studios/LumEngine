@@ -30,6 +30,8 @@
 
 #pragma once
 
+#ifndef MESH
+#define MESH
 #include "../LumEngine/Engine/GUI/Rendering/Shaders/Shaders.h"
 #include "../LumTypes/Rendering/Materials/Materials.h"
 #include "../LumEngine/Engine/GUI/Rendering/rendererDebugger.h"
@@ -435,3 +437,5 @@ private:
         RendererDebugger::checkOpenGLError("mesh setup");
     }
 };
+
+#endif // MESH
